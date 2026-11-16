@@ -1,6 +1,5 @@
 import { lazy } from 'react';
 import {
-  FlaskConical,
   Grid3x3,
   PackageCheck,
   Ruler,
@@ -52,14 +51,6 @@ export const planned: ModuleDefinition[] = [
     'Bảng so sánh',
     'Mỗi bài một hàng: task, dataset, baseline, metric, thiết kế, kết quả; mỗi ô dẫn về câu gốc.',
     Table2,
-  ),
-  soon(
-    'design',
-    'design',
-    2,
-    'Thiết kế nghiên cứu',
-    'Chọn thiết kế, xem nó cho phép kết luận gì, ghi mối đe doạ và cách giảm.',
-    FlaskConical,
   ),
   soon(
     'measurement',
