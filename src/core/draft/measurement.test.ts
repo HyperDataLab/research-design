@@ -202,20 +202,81 @@ describe('measurement', () => {
     expect(checkDesign(d, bank)).toEqual([]);
     expect(repin(d, bank)).toEqual({ ok: true, doc: d });
   });
-  it('CH-01 through CH-09 detect incomplete chains', () => {
+  it('CH-01 flags a hypothesis without a dependent variable until linked', () => {
     let d = result(
       addHypothesis(emptyDraft(), { statement: 'Test', kind: 'exploratory', question: null, claim: null }),
     );
-    d = result(addVariable(d, { ...variable, role: 'independent', metric: null }));
-    d = result(addMetric(d, { ...metric, key: 'plan.id', unit: '' }));
-    d = result(addMetric(d, { ...metric, key: 'plan.id' }));
-    d = result(addDataset(d, { ...dataset, source: '' }));
-    d = result(addCondition(d, { ...condition, baseline: false }));
-    d = result(addCondition(d, { ...condition, baseline: false }));
-    d.variables.push({ ...variable, id: 'v-2', metric: null }, { ...variable, id: 'v-3', metric: 'm-99' });
-    d.hypotheses.push({ ...d.hypotheses[0]!, id: 'h-2', dependent: ['v-2', 'v-99'], independent: ['v-2'] });
-    expect(new Set(checkChain(d).map((f) => f.rule))).toEqual(
-      new Set(['CH-01', 'CH-02', 'CH-03', 'CH-04', 'CH-05', 'CH-06', 'CH-07', 'CH-08', 'CH-09']),
+    expect(checkChain(d).some((f) => f.rule === 'CH-01')).toBe(true);
+    d = result(addVariable(d, variable));
+    d = result(setHypothesisVariables(d, 'h-1', { independent: [], dependent: ['v-1'] }));
+    expect(checkChain(d).some((f) => f.rule === 'CH-01')).toBe(false);
+  });
+  it('CH-02 flags a dependent variable without a metric until linked', () => {
+    let d = result(
+      addHypothesis(emptyDraft(), { statement: 'Test', kind: 'exploratory', question: null, claim: null }),
     );
+    d = result(addVariable(d, variable));
+    d = result(setHypothesisVariables(d, 'h-1', { independent: [], dependent: ['v-1'] }));
+    expect(checkChain(d).some((f) => f.rule === 'CH-02')).toBe(true);
+    d = result(addMetric(d, metric));
+    d = result(editVariable(d, 'v-1', { ...variable, metric: 'm-1' }));
+    expect(checkChain(d).some((f) => f.rule === 'CH-02')).toBe(false);
+  });
+  it('CH-03 flags missing and wrong-role variables until corrected', () => {
+    let d = result(
+      addHypothesis(emptyDraft(), { statement: 'Test', kind: 'exploratory', question: null, claim: null }),
+    );
+    d = result(addVariable(d, variable));
+    d.hypotheses[0]!.independent = ['v-1', 'v-99'];
+    expect(checkChain(d).filter((f) => f.rule === 'CH-03')).toHaveLength(2);
+    d.hypotheses[0]!.independent = [];
+    expect(checkChain(d).some((f) => f.rule === 'CH-03')).toBe(false);
+  });
+  it('CH-04 flags missing metric fields until filled', () => {
+    let d = result(
+      addMetric(emptyDraft(), { ...metric, key: '', unit: '', goal: null, aggregation: null, protocol: '' }),
+    );
+    expect(checkChain(d).find((f) => f.rule === 'CH-04')).toMatchObject({
+      missing: ['key', 'unit', 'goal', 'aggregation', 'protocol'],
+    });
+    d = result(editMetric(d, 'm-1', metric));
+    expect(checkChain(d).some((f) => f.rule === 'CH-04')).toBe(false);
+  });
+  it('CH-05 ignores empty keys and flags duplicates and reserved keys until corrected', () => {
+    let d = result(addMetric(emptyDraft(), { ...metric, key: '' }));
+    d = result(addMetric(d, { ...metric, key: '' }));
+    expect(checkChain(d).some((f) => f.rule === 'CH-05')).toBe(false);
+    d = result(editMetric(d, 'm-1', { ...metric, key: 'plan.id' }));
+    d = result(editMetric(d, 'm-2', { ...metric, key: 'plan.id' }));
+    expect(checkChain(d).filter((f) => f.rule === 'CH-05')).toHaveLength(4);
+    d = result(editMetric(d, 'm-1', { ...metric, key: 'test/one' }));
+    d = result(editMetric(d, 'm-2', { ...metric, key: 'test/two' }));
+    expect(checkChain(d).some((f) => f.rule === 'CH-05')).toBe(false);
+  });
+  it('CH-06 flags an independent variable with too few levels until filled', () => {
+    let d = result(addVariable(emptyDraft(), { ...variable, role: 'independent' }));
+    expect(checkChain(d).some((f) => f.rule === 'CH-06')).toBe(true);
+    d = result(editVariable(d, 'v-1', { ...variable, role: 'independent', levels: ['one', 'two'] }));
+    expect(checkChain(d).some((f) => f.rule === 'CH-06')).toBe(false);
+  });
+  it('CH-07 flags a dataset without a source until filled', () => {
+    let d = result(addDataset(emptyDraft(), { ...dataset, source: '' }));
+    expect(checkChain(d).some((f) => f.rule === 'CH-07')).toBe(true);
+    d = result(editDataset(d, 'd-1', dataset));
+    expect(checkChain(d).some((f) => f.rule === 'CH-07')).toBe(false);
+  });
+  it('CH-08 flags a missing metric reference until removed', () => {
+    const d = result(addVariable(emptyDraft(), variable));
+    d.variables[0]!.metric = 'm-99';
+    expect(checkChain(d).some((f) => f.rule === 'CH-08')).toBe(true);
+    d.variables[0]!.metric = null;
+    expect(checkChain(d).some((f) => f.rule === 'CH-08')).toBe(false);
+  });
+  it('CH-09 flags multiple conditions without a baseline until selected', () => {
+    let d = result(addCondition(emptyDraft(), { ...condition, baseline: false }));
+    d = result(addCondition(d, { ...condition, baseline: false }));
+    expect(checkChain(d).some((f) => f.rule === 'CH-09')).toBe(true);
+    d = result(editCondition(d, 'c-1', condition));
+    expect(checkChain(d).some((f) => f.rule === 'CH-09')).toBe(false);
   });
 });

@@ -17,7 +17,9 @@ export function ChainLine({
   if (!chain.hypothesis) return null;
   const target = `/p/${encodeURIComponent(projectId)}/measurement`;
   const link = (id: string, name?: string) => (
-    <Link to={target}>
+    <Link
+      to={`${target}?tab=${id.startsWith('v-') ? 'variables' : id.startsWith('m-') ? 'metrics' : 'chain'}`}
+    >
       <span className={styles.id}>{id}</span>
       {name ? ` ${name}` : ''}
     </Link>

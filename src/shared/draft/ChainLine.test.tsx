@@ -59,5 +59,10 @@ it('CH-UI renders a complete chain and each missing link', () => {
   draft.metrics[0]!.key = 'test/score';
   show();
   expect(screen.getByText('test/score')).toBeTruthy();
-  expect(screen.getByText('v-1').closest('a')?.getAttribute('href')).toBe('/p/project/measurement');
+  expect(screen.getByText('v-1').closest('a')?.getAttribute('href')).toBe(
+    '/p/project/measurement?tab=variables',
+  );
+  expect(screen.getByText('m-1').closest('a')?.getAttribute('href')).toBe(
+    '/p/project/measurement?tab=metrics',
+  );
 });

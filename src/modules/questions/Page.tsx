@@ -15,6 +15,7 @@ import type { Draft, DraftHypothesis, DraftQuestion } from '@/core/draft/schema'
 import { emptyPapersDoc, papersDocSchema, type Paper } from '@/core/papers/papers';
 import { useApi } from '@/shared/api/apiContext';
 import { useBank } from '@/shared/bank/useBank';
+import { ChainLine } from '@/shared/draft/ChainLine';
 import { flagText } from '@/shared/draft/flagText';
 import { useDraft } from '@/shared/draft/useDraft';
 import { useProject } from '@/shared/project/projectContext';
@@ -95,6 +96,7 @@ export default function Page() {
         <span className={styles.mono}>{h.id}</span> <span className={styles.reading}>{h.statement}</span>{' '}
         <Badge>{kinds[h.kind]}</Badge>
         <p className={styles.quiet}>{claimLabel(h.claim, bank.bank?.collections['claim-types'] ?? [])}</p>
+        <ChainLine draft={draft.draft} hypothesisId={h.id} projectId={project.id} />
         {flags
           .filter((f) => f.subject === h.id)
           .map((f, i) => (

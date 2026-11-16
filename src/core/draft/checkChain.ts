@@ -26,7 +26,7 @@ export function checkChain(draft: Draft): ChainFlag[] {
       (field) => !m[field],
     );
     if (missing.length) flags.push({ rule: 'CH-04', subject: m.id, missing });
-    if (draft.metrics.filter((other) => other.key === m.key).length > 1)
+    if (m.key && draft.metrics.filter((other) => other.key === m.key).length > 1)
       flags.push({ rule: 'CH-05', subject: m.id, reason: 'duplicate' });
     if ((Object.values(RUN_TAGS) as string[]).includes(m.key))
       flags.push({ rule: 'CH-05', subject: m.id, reason: 'reserved' });
