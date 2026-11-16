@@ -28,6 +28,24 @@ describe('ExperimentPlanPackage v1', () => {
     expect(rules(plan, 'blocking')).toContain('PP-01');
   });
 
+  it('PP-02: a dangling reference inside the context block blocks too', () => {
+    const edits: ((plan: ReturnType<typeof examplePlan>) => void)[] = [
+      (plan) => plan.context!.claims.push({ hypothesis: 'h-gone', claimType: 'ct.causal' }),
+      (plan) => plan.context!.constructs.push({ variable: 'v-gone', construct: 'Something' }),
+      (plan) =>
+        plan.context!.metricProtocols.push({
+          metric: 'm-gone',
+          protocol: { id: 'mp.test-procedure', release: 'sha256:0000000000000000' },
+        }),
+    ];
+    for (const edit of edits) {
+      const plan = examplePlan();
+      edit(plan);
+      expect(planSchema.safeParse(plan).success).toBe(true);
+      expect(rules(plan, 'blocking')).toContain('PP-02');
+    }
+  });
+
   it('PP-02: a dangling reference blocks, wherever it is', () => {
     const cases: ((plan: ReturnType<typeof examplePlan>) => void)[] = [
       (plan) => plan.hypotheses[0]!.dependent.push('v-missing'),

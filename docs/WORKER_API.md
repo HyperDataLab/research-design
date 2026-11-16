@@ -130,6 +130,8 @@ Details that are easy to get wrong:
 - `WK-09` freeze refusals: schema failure 422, blocking gate issue 422 (with the rule id in `issues`), version
   mismatch 400, existing version 409, skipped version 409, different `planId` 409.
 - `WK-10` a plan with only warnings (PP-07, PP-08) freezes.
+- `WF-01` a draft built by the app's own operations and mapped by `draftToPlan` freezes (`201`, with the Worker's
+  `frozenBy` and `frozenAt`); a repeat is `409`; a blocked draft is `422`; version 2 needs a deviation.
 - `WK-12` an unexpected error is a 500 with CORS headers.
 - `WK-11` ids, kinds, collections and item keys from the URL that do not match their pattern never reach the bucket.
 
