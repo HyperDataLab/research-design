@@ -11,3 +11,5 @@ export const authMode: 'firebase' | 'dev' | 'unconfigured' = firebaseConfigured
     ? 'dev'
     : 'unconfigured';
 export const workerUrl: string = import.meta.env.VITE_WORKER_URL || '/api';
+
+export const allowedDomain = 'hyperdatalab.org';

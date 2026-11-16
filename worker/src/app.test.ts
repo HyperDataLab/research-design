@@ -117,6 +117,7 @@ describe('Worker API', () => {
     );
     expect((await s.call('PATCH', path, { extra: true })).status).toBe(400);
     await s.call('PATCH', path, { members: ['a@hyperdatalab.org'] });
+    expect((await s.call('GET', path, undefined, 'b')).status).toBe(404);
     expect(await (await s.call('GET', '/v1/projects', undefined, 'b')).json()).toEqual({ projects: [] });
     expect(s.bucket.values.has(`${PREFIX}members/b@hyperdatalab.org/${id}`)).toBe(false);
   });

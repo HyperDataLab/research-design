@@ -111,7 +111,7 @@ export function createApiClient(options: {
       projectSchema.parse(await call('/v1/projects', 'POST', { title })),
     getProject: async (id: string) =>
       projectSchema.parse(await call('/v1/projects/' + encodeURIComponent(id))),
-    patchProject: async (id: string, patch: { title?: string; archived?: boolean }) =>
+    patchProject: async (id: string, patch: { title?: string; archived?: boolean; members?: string[] }) =>
       projectSchema.parse(await call('/v1/projects/' + encodeURIComponent(id), 'PATCH', patch)),
   };
 }
