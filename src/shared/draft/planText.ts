@@ -19,6 +19,7 @@ const methods: Record<string, [string, string]> = {
   reliability: ['độ tin cậy', 'Đánh giá độ tin cậy của thang đo.'],
 };
 export const methodWords = (method: string) => methods[method]?.[0] ?? method;
+export const capitaliseFirst = (value: string) => value.charAt(0).toLocaleUpperCase('vi') + value.slice(1);
 export const methodHint = (method: string) => methods[method]?.[1] ?? method;
 const missing: Record<string, string> = {
   listwise: 'loại theo danh sách',

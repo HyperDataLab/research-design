@@ -65,6 +65,7 @@ it('DL-UI refuses deleting a hypothesis used by an analysis', async () => {
   expect(
     within(dialog).getByText('h-1 đang được dùng bởi a-1. Gỡ liên kết trước khi xoá.'),
   ).toBeInTheDocument();
+  expect(within(dialog).queryByText('Xác nhận thao tác xoá.')).not.toBeInTheDocument();
   expect(within(dialog).queryByRole('button', { name: 'Xoá' })).not.toBeInTheDocument();
 });
 async function addQuestion() {
@@ -93,6 +94,9 @@ it('QH-03 adds a hypothesis and QH-05 refuses deletion of its question', async (
   expect(
     screen.getByText('Câu hỏi này còn 1 giả thuyết. Chuyển hoặc xoá các giả thuyết trước.'),
   ).toBeInTheDocument();
+  expect(
+    within(screen.getByRole('alertdialog')).queryByText('Xác nhận thao tác xoá.'),
+  ).not.toBeInTheDocument();
   expect(
     within(screen.getByRole('alertdialog')).queryByRole('button', { name: 'Xoá' }),
   ).not.toBeInTheDocument();
@@ -186,4 +190,32 @@ it('QH-11 shows a hypothesis chain with links to measurement tabs', async () => 
     'href',
     `/p/${context.project.id}/measurement?tab=metrics`,
   );
+});
+
+it('QH-12 names unused objects in danger confirmations and shows chain warnings once', async () => {
+  const draft = emptyDraft();
+  draft.questions.push({ id: 'q-1', text: 'Invented question', gap: '', papers: [] });
+  draft.hypotheses.push({
+    id: 'h-1',
+    statement: 'Invented statement',
+    kind: 'directional',
+    question: null,
+    claim: null,
+    independent: [],
+    dependent: [],
+  });
+  setup({ draft });
+  await screen.findByText('Invented statement');
+  expect(screen.getAllByText('chưa có phân tích')).toHaveLength(1);
+  expect(screen.getAllByText('chưa gắn biến phụ thuộc')).toHaveLength(1);
+  for (const [index, id] of [
+    [0, 'q-1'],
+    [1, 'h-1'],
+  ] as const) {
+    fireEvent.click(screen.getAllByRole('button', { name: 'Xoá' })[index]!);
+    const dialog = screen.getByRole('alertdialog');
+    expect(within(dialog).getByText(`Xoá ${id}?`)).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Xoá' }).className).toMatch(/danger/);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Hủy' }));
+  }
 });

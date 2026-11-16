@@ -18,3 +18,9 @@
 .quiet {
   color: var(--text-muted);
 }
+
+.reading {
+  font-family: var(--font-reading);
+  font-size: var(--text-reading);
+  font-weight: normal;
+}

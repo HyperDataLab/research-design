@@ -87,6 +87,11 @@ it('RN-05 previews the first 20 cells and their tags', async () => {
   expect(within(table).getByText('plan.dataset_id')).toBeInTheDocument();
   expect(within(table).getByText('plan.seed')).toBeInTheDocument();
   expect(within(table).getAllByRole('row')).toHaveLength(21);
+  const cells = within(within(table).getAllByRole('row')[1]!).getAllByRole('cell');
+  expect(cells[0]).toHaveTextContent('c-1 Control');
+  expect(cells[1]).toHaveTextContent('d-1 Sample');
+  expect(cells[0]!.firstElementChild?.className).toMatch(/mono/);
+  expect(cells[1]!.firstElementChild?.className).toMatch(/mono/);
   expect(screen.getByText('… và 3 ô nữa')).toBeInTheDocument();
 });
 it('RN-06 warns when the selected conditions lack a baseline', async () => {

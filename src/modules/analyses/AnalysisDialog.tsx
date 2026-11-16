@@ -4,7 +4,13 @@ import { SRD_P0_METHODS, SRD_P1_METHODS } from '@/core/plan/schema';
 import { TWO_SAMPLE } from '@/core/plan/validatePlan';
 import type { Draft, DraftAnalysis } from '@/core/draft/schema';
 import { ParamsEditor } from '@/shared/draft/ParamsEditor';
-import { correctionWords, methodHint, methodWords, missingPolicyWords } from '@/shared/draft/planText';
+import {
+  capitaliseFirst,
+  correctionWords,
+  methodHint,
+  methodWords,
+  missingPolicyWords,
+} from '@/shared/draft/planText';
 import { Button } from '@/shared/ui/Button';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { Dialog } from '@/shared/ui/Dialog';
@@ -87,14 +93,14 @@ export function AnalysisDialog({
           <optgroup label="SRD hỗ trợ ngay">
             {SRD_P0_METHODS.map((m) => (
               <option key={m} value={m}>
-                {methodWords(m)}
+                {capitaliseFirst(methodWords(m))}
               </option>
             ))}
           </optgroup>
           <optgroup label="SRD chưa hỗ trợ">
             {SRD_P1_METHODS.map((m) => (
               <option key={m} value={m}>
-                {methodWords(m)}
+                {capitaliseFirst(methodWords(m))}
               </option>
             ))}
           </optgroup>

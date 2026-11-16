@@ -276,6 +276,8 @@ it('ME-11 shows a missing chain link once', async () => {
   setup({ draft: measurementDraft() });
   expect(await screen.findByText('chưa gắn biến phụ thuộc')).toBeInTheDocument();
   expect(screen.queryByText('h-1 chưa gắn biến phụ thuộc.')).not.toBeInTheDocument();
+  expect(screen.getAllByText('chưa có phân tích')).toHaveLength(1);
+  expect(screen.queryByText('h-1 chưa có phân tích nào.')).not.toBeInTheDocument();
 });
 it('ME-12 explains empty metric and dataset fields', async () => {
   setup({ draft: measurementDraft(), url: '/?tab=metrics' });

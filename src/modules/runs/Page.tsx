@@ -100,8 +100,14 @@ export default function Page() {
                   <tbody>
                     {preview.cells.map((cell) => (
                       <tr key={`${cell.condition}/${cell.dataset}/${cell.seed}`}>
-                        <td className={styles.mono}>{cell.tags['plan.condition_id']}</td>
-                        <td className={styles.mono}>{cell.tags['plan.dataset_id']}</td>
+                        <td>
+                          <span className={styles.mono}>{cell.tags['plan.condition_id']}</span>{' '}
+                          {draft.conditions.find((c) => c.id === cell.condition)?.name}
+                        </td>
+                        <td>
+                          <span className={styles.mono}>{cell.tags['plan.dataset_id']}</span>{' '}
+                          {draft.datasets.find((d) => d.id === cell.dataset)?.name}
+                        </td>
                         <td className={styles.mono}>{cell.tags['plan.seed']}</td>
                       </tr>
                     ))}

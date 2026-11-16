@@ -235,21 +235,20 @@ export default function Page() {
       {deletion && (
         <Dialog
           title={deletion.type === 'question' ? 'Xoá câu hỏi' : 'Xoá giả thuyết'}
-          description="Xác nhận thao tác xoá."
-          onClose={() => setDeletion(null)}
-        >
-          <p>
-            {references.length
+          description={
+            references.length
               ? `${deletion.id} đang được dùng bởi ${references.join(', ')}. Gỡ liên kết trước khi xoá.`
               : count
                 ? `Câu hỏi này còn ${count} giả thuyết. Chuyển hoặc xoá các giả thuyết trước.`
-                : 'Bạn có chắc muốn xoá?'}
-          </p>
+                : `Xoá ${deletion.id}?`
+          }
+          onClose={() => setDeletion(null)}
+        >
           <div className={styles.actions}>
             <Button onClick={() => setDeletion(null)}>Hủy</Button>
             {!count && !references.length && (
               <Button
-                variant="primary"
+                variant="danger"
                 disabled={busy}
                 onClick={() => {
                   setBusy(true);

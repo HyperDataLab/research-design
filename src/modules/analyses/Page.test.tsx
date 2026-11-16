@@ -85,11 +85,12 @@ it('AS-02 shows AN-04 and the P1 note', async () => {
   ).toBeInTheDocument();
   expect(screen.getByText('SRD chưa hỗ trợ')).toBeInTheDocument();
 });
-it('AS-03 shows AN-01 only for a non-exploratory hypothesis', async () => {
+it('AS-03 shows the missing analysis warning once and only for a non-exploratory hypothesis', async () => {
   const draft = fixture();
   draft.hypotheses.push({ ...draft.hypotheses[0]!, id: 'h-2', kind: 'exploratory' });
   setup(draft);
-  expect(await screen.findByText('h-1 chưa có phân tích nào.')).toBeInTheDocument();
+  expect(await screen.findAllByText('chưa có phân tích')).toHaveLength(1);
+  expect(screen.queryByText('h-1 chưa có phân tích nào.')).not.toBeInTheDocument();
   expect(screen.queryByText('h-2 chưa có phân tích nào.')).not.toBeInTheDocument();
 });
 it('AS-04 refuses invalid alpha', async () => {
@@ -151,4 +152,18 @@ it('AS-08 links to measurement when no variables exist', async () => {
     'href',
     expect.stringContaining('/measurement?tab=variables'),
   );
+});
+
+it('AS-09 capitalises method rows and options while keeping chain and flag text lowercase', async () => {
+  const draft = fixture();
+  draft.analyses.push(analysis());
+  setup(draft);
+  const statement = await screen.findByText('Invented hypothesis');
+  expect(statement.className).toMatch(/reading/);
+  expect(screen.getByText('Kiểm định t Welch')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'a-1 kiểm định t Welch' })).toBeInTheDocument();
+  expect(screen.getByText(/a-1 dùng kiểm định t Welch/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Sửa' }));
+  expect(screen.getByRole('option', { name: 'Kiểm định t Welch' })).toBeInTheDocument();
+  expect(screen.getByRole('option', { name: 'Thống kê mô tả' })).toBeInTheDocument();
 });

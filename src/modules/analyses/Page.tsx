@@ -4,7 +4,13 @@ import { checkPlan } from '@/core/draft/checkPlan';
 import { addAnalysis, editAnalysis, removeAnalysis } from '@/core/draft/planOps';
 import type { DraftAnalysis, DraftHypothesis } from '@/core/draft/schema';
 import { ChainLine } from '@/shared/draft/ChainLine';
-import { correctionWords, methodWords, missingPolicyWords, planFlagText } from '@/shared/draft/planText';
+import {
+  capitaliseFirst,
+  correctionWords,
+  methodWords,
+  missingPolicyWords,
+  planFlagText,
+} from '@/shared/draft/planText';
 import { useDraft } from '@/shared/draft/useDraft';
 import { useProject } from '@/shared/project/projectContext';
 import { Badge } from '@/shared/ui/Badge';
@@ -47,26 +53,19 @@ export default function Page() {
           <h2>
             {hypothesis ? (
               <>
-                <span className={styles.mono}>{hypothesis.id}</span> {hypothesis.statement}
+                <span className={styles.mono}>{hypothesis.id}</span>{' '}
+                <span className={styles.reading}>{hypothesis.statement}</span>
               </>
             ) : (
               'Không gắn giả thuyết'
             )}
           </h2>
           {hypothesis && <ChainLine draft={draft} hypothesisId={hypothesis.id} projectId={project.id} />}
-          {hypothesis &&
-            flags
-              .filter((f) => f.rule === 'AN-01' && f.subject === hypothesis.id)
-              .map((f) => (
-                <p key={f.rule}>
-                  <Badge tone="warning">Cần xem lại</Badge> {planFlagText(f, draft)}
-                </p>
-              ))}
           {entries.map((a) => (
             <div className={styles.row} key={a.id}>
               <p>
                 <span className={styles.mono}>{a.id}</span>{' '}
-                {a.method ? methodWords(a.method) : 'chưa chọn phương pháp'}{' '}
+                {a.method ? capitaliseFirst(methodWords(a.method)) : 'Chưa chọn phương pháp'}{' '}
                 {flags.some((f) => f.rule === 'AN-07' && f.subject === a.id) && (
                   <Badge tone="warning">SRD chưa hỗ trợ</Badge>
                 )}
