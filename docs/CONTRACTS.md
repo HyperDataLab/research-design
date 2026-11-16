@@ -1,6 +1,8 @@
 # Contracts
 
-Who owns what, where the files are, and what this app has asked of the other systems.
+Who owns what, where the files are, and what this app has asked of the other systems. The APIs between the
+systems (endpoints, fields, errors, who may call) are described in `docs/API_REQUESTS.md`; the requests below name
+the section of that file that spells each one out.
 
 ## Owned by this app: ExperimentPlanPackage v1 (proposed)
 
@@ -45,6 +47,8 @@ other two files with the SHA-256 of their bytes. `plan.json` is the frozen plan 
    provenance of the `PublicationPackage`.
 5. Name the keys `AnalysisSpecification.parameters` takes for each method (tails, equal variances, effect
    size…). Until then a plan carries them as free name/value pairs (PRD D40).
+6. Say whether SRD reads a plan over the network or from a file, and how it signs in
+   (`docs/API_REQUESTS.md`, section D).
 
 ## Vendored, read-only
 
@@ -70,6 +74,10 @@ datasets, baselines, metrics or design; this app extracts those itself and ancho
    the kind, a value as text, for a result also the number, unit, metric and dataset it belongs to, the sentence
    `key` it rests on, and the annotation run that produced it. Suggested home: a new annotation scheme or a
    `knowledge.experiment` block in a new schema version. Until PaperLab publishes it, Bảng so sánh has no data.
+2. **Published paper models on PaperLab's server** (not yet sent), so that a project reads them through an API
+   instead of an exported file.
+
+As an API: `docs/API_REQUESTS.md`, section B.
 
 ## Paper Fetch Hub
 
@@ -79,6 +87,8 @@ This app fetches nothing itself (PRD D23). PDFs reach PaperLab through the Hub; 
 
 1. A way for a signed-in lab member of another lab app to add a DOI to the Hub's queue and read its state.
 2. A search by topic or from seed papers, run by the Hub with the lab's sources, returning metadata with DOIs.
+
+As an API: `docs/API_REQUESTS.md`, section C.
 
 ## Writing Bank
 
@@ -108,6 +118,8 @@ document.
 2. Accept this app's Firebase ID tokens on `/bank/v1` (planned there for "the writing project").
 3. An official snapshot export of the six collections above, carrying the release identifier, to replace
    `scripts/make-bank-snapshot.mjs`.
+
+As an API: `docs/API_REQUESTS.md`, section A.
 
 ## Known limits of the stored documents
 
