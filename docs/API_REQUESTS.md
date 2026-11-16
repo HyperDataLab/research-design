@@ -170,8 +170,7 @@ opens "Thêm bài báo từ PaperLab" in a project.
 }
 ```
 
-`paperId` is `sha256:<sourceSha256>` when PaperLab knows the hash of the PDF (the key the Hub reports in C2), and
-PaperLab's own id otherwise; it is percent-encoded in a path. Publishing a paper again replaces the record and
+`paperId` is `sha256-<sourceSha256>` when PaperLab knows the hash of the PDF (the key the Hub reports in C2), and PaperLab's own id otherwise. Publishing a paper again replaces the record and
 changes its `ETag` only when the content changed. `doi` and `sourceSha256` may be null. `experimentFacts` is `none`,
 `candidate` (made by a model, not reviewed) or `reviewed`.
 
