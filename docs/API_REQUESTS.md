@@ -10,17 +10,16 @@ paper model, a plan package) stay as the fallback when an API is not reachable.
 
 ## The links
 
-| #   | From → to                         | What crosses                                   | Used by                                   | State today                                                                   |
-| --- | --------------------------------- | ---------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
-| A   | Writing Bank → Research Design    | One release of six collections                 | Writing Bank screen, S7–S9 screens        | Planned there (`/bank/v1`); here a file is imported by hand                   |
-| B   | PaperLab → Research Design        | Paper models and their experiment facts        | Bài báo (S2), Bảng so sánh (S5), S11, S12 | No API; paper models live in the browser of the person who made them          |
-| C   | Research Design → Paper Fetch Hub | A DOI to queue, its state, a literature search | Tìm bài báo (S6), Bài báo                 | No API for another app; members write the Hub's database from its own web app |
-| D   | SRD → Research Design             | A frozen plan and its package                  | SRD's project input                       | Plan list and plan read exist; the package endpoint does not                  |
-| E   | Research Design → LLM router      | Chat completions for planning help             | S4, S12                                   | Exists (`docs/WORKER_API.md`, "AI calls"); nothing is asked                   |
+| #   | From → to                      | What crosses                            | Used by                                      | State today                                                          |
+| --- | ------------------------------ | --------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------- |
+| A   | Writing Bank → Research Design | One release of six collections          | Writing Bank screen, S7–S9 screens           | Planned there (`/bank/v1`); here a file is imported by hand          |
+| B   | PaperLab → Research Design     | Paper models and their experiment facts | Bài báo (S2), Tìm bài báo, Bảng so sánh, S12 | No API; paper models live in the browser of the person who made them |
+| D   | SRD → Research Design          | A frozen plan and its package           | SRD's project input                          | Plan list and plan read exist; the package endpoint does not         |
+| E   | Research Design → LLM router   | Chat completions for planning help      | S4, S12                                      | Exists (`docs/WORKER_API.md`, "AI calls"); nothing is asked          |
 
-Research Design downloads no PDF and runs no extraction on a paper (PRD D23). A PDF goes from the Hub to PaperLab;
-that link belongs to those two systems and is not described here. What this app needs from it is one shared key:
-the SHA-256 of the PDF, reported by the Hub (C2) and carried by PaperLab's paper model (B1).
+Research Design does not call Paper Fetch Hub (PRD D50; the owner, 2026-11-17). PaperLab is the system that calls
+the Hub; that link belongs to those two and is not described here. Papers reach this app only as paper models
+published by PaperLab (B). This app downloads no PDF, runs no search and runs no extraction (PRD D23).
 
 ## Rules every API in this file follows
 
@@ -60,8 +59,7 @@ to open that, in the order this app prefers them:
    kept in two places.
 
 This app is written for option 1 and needs from the owner: the id of its Firebase project (not created yet) and
-the hosting origins, to give to the other three systems. A provider whose database rules need a token of its own
-project (the Hub today) writes on the caller's behalf inside its API and records the caller's email.
+the hosting origins, to give to the other systems.
 
 SRD is a desktop app. It signs in with Google and sends the ID token like any other caller; which Firebase project
 it signs in to is part of the same decision.
@@ -170,7 +168,7 @@ opens "Thêm bài báo từ PaperLab" in a project.
 }
 ```
 
-`paperId` is `sha256-<sourceSha256>` when PaperLab knows the hash of the PDF (the key the Hub reports in C2), and PaperLab's own id otherwise. Publishing a paper again replaces the record and
+`paperId` is `sha256-<sourceSha256>` when PaperLab knows the hash of the PDF, and PaperLab's own id otherwise. Publishing a paper again replaces the record and
 changes its `ETag` only when the content changed. `doi` and `sourceSha256` may be null. `experimentFacts` is `none`,
 `candidate` (made by a model, not reviewed) or `reviewed`.
 
@@ -231,84 +229,11 @@ new extraction. Field names are PaperLab's; the shape below is what this app nee
 `{ "requestId", "state" }`. PaperLab builds it once the owner has named who approves such runs there. Until then a
 paper whose `experimentFacts` is `none` is shown as having no facts, with no button to ask.
 
-## C. Research Design → Paper Fetch Hub
+## C. Paper Fetch Hub (withdrawn)
 
-The Hub's web app writes its database directly; its Worker has three routes, all about files. Another app needs
-these.
-
-### C1. `POST /v1/requests`
-
-Adds a DOI to the queue in the caller's name. Body `{ "doi": "10.1234/example", "note": "…" }`. The Hub normalises
-the DOI by its own rule. Answer `201` (new paper) or `200` (already known; the caller is added as a requester) with
-the object of C2. `400 bad_request` for a string that is not a DOI. One DOI a call; this app sends at most 20 in a
-row on a person's action.
-
-### C2. `GET /v1/papers/:doiKey` and `POST /v1/papers/status`
-
-The state of one paper, or of up to 50 (`{ "doiKeys": [] }` → `{ "items": [] }`, unknown keys left out).
-
-```json
-{
-  "doiKey": "…",
-  "doi": "10.1234/example",
-  "title": null,
-  "status": "queued",
-  "needsHumanReason": null,
-  "failureCode": null,
-  "sha256": null,
-  "requestCount": 1,
-  "updatedAt": "2026-11-16T09:00:00Z",
-  "doneAt": null
-}
-```
-
-`status`, `needsHumanReason` and `failureCode` are the Hub's own values. `sha256` is the hash of the stored PDF once
-`status` is `done`; this app uses it to find the paper in PaperLab (B1, `sourceSha256`). This app never asks the Hub
-for the PDF.
-
-### C3. `POST /v1/search`
-
-A literature search run by the Hub with the lab's sources. Body:
-
-```json
-{
-  "query": "…",
-  "seedDois": ["10.1234/example"],
-  "direction": "both",
-  "yearFrom": 2020,
-  "yearTo": null,
-  "limit": 25,
-  "cursor": null
-}
-```
-
-At least one of `query` and `seedDois`. `direction` (`references`, `citations`, `both`) applies to seeds. `limit` up
-to 50. Answer:
-
-```json
-{
-  "items": [
-    {
-      "doi": "10.1234/example",
-      "title": "…",
-      "authors": ["…"],
-      "year": 2024,
-      "venue": "…",
-      "abstract": null,
-      "citedByCount": 12,
-      "openAccess": true,
-      "source": "…",
-      "hub": { "doiKey": "…", "status": "done" }
-    }
-  ],
-  "nextCursor": null
-}
-```
-
-`source` names the index the record came from. `hub` is null for a paper the Hub does not know. A result without a
-DOI may be returned with `doi: null`; this app shows it and cannot queue it. Searches are made on a person's action,
-one at a time, and the result a person keeps is stored in the project with the reason for including or excluding
-each paper.
+An earlier version of this file asked the Hub for a DOI queue, a state read and a search on behalf of this app.
+The owner withdrew that on 2026-11-17: only PaperLab calls the Hub. A paper this app's user wants and PaperLab does
+not have is obtained and analysed in PaperLab, by its person in charge, and then appears in B1.
 
 ## D. SRD → Research Design
 
@@ -332,10 +257,9 @@ new section here.
 ## What each owner would do
 
 - **Owner of the lab:** choose how callers are identified (above); create this app's Firebase project so its id and
-  origins can be given to the other systems; send sections A, B, C and D to the people in charge.
+  origins can be given to the other systems; send sections A, B and D to the people in charge.
 - **Writing Bank:** A1, A2, and this app's project id on the list of accepted callers.
 - **PaperLab:** a server-side home for published paper models; B1, B2; then B3 and B4.
-- **Paper Fetch Hub:** C1, C2; then C3.
 - **SRD:** say whether it reads plans over the network or from a file, and how it signs in.
-- **Research Design:** clients for A, B and C behind the screens that exist, each added when its API answers; the
+- **Research Design:** clients for A and B behind the screens that exist, each added when its API answers; the
   package endpoint of D.
