@@ -88,6 +88,23 @@ describe('measurement', () => {
     if (!e.ok) throw Error(e.error);
     d = e.doc;
     expect(d.variables[0]?.metric).toBeNull();
+    // Still listed as dependent by nothing here; a wrong-role variable is CH-03's business, not CH-02's.
+    expect(
+      checkChain({
+        ...d,
+        hypotheses: [
+          {
+            id: 'h-1',
+            statement: 'H',
+            kind: 'directional',
+            question: null,
+            claim: null,
+            independent: [],
+            dependent: ['v-1'],
+          },
+        ],
+      }).map((f) => f.rule),
+    ).toEqual(['CH-03', 'CH-04']);
     expect(removeMetric(d, 'm-1').ok).toBe(true);
   });
   it('MO-03 edits preserve identity on no-op and reject missing objects and empty names', () => {

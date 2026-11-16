@@ -17,7 +17,7 @@ export function checkChain(draft: Draft): ChainFlag[] {
         const v = draft.variables.find((item) => item.id === id);
         if (!v || v.role !== role)
           flags.push({ rule: 'CH-03', subject: h.id, variable: id, which: v ? 'wrong_role' : 'missing' });
-        if (role === 'dependent' && v && !v.metric)
+        if (role === 'dependent' && v && v.role === 'dependent' && !v.metric)
           flags.push({ rule: 'CH-02', subject: id, hypothesis: h.id });
       }
   }
