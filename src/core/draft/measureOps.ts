@@ -45,7 +45,8 @@ function variable(doc: Draft, input: Variable): DraftError | Variable {
   if (input.metric && !doc.metrics.some((m) => m.id === input.metric)) return 'unknown_metric';
   const { id: _id, ...value } = parsed.data;
   void _id;
-  return value;
+  // Only what is measured has a metric (the plan: a dependent variable or a covariate).
+  return value.role === 'dependent' || value.role === 'covariate' ? value : { ...value, metric: null };
 }
 function metric(input: Metric): DraftError | Metric {
   if (input.key.trim() && !/^[A-Za-z0-9_\-. /]{1,250}$/.test(input.key.trim())) return 'invalid_key';

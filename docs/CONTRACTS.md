@@ -74,7 +74,8 @@ document.
 
 - **The file.** `node scripts/make-bank-snapshot.mjs <writing-bank checkout> [out]` writes
   `{ format: "writing-bank-snapshot", formatVersion: 1, source, collections }`, the entries copied unchanged from
-  the bank's seed. A member imports it on the project's Writing Bank screen. This app never fetches the bank.
+  the bank's seed. A member imports it on the project's Writing Bank screen. Today this app does not fetch the bank
+  (see "Online use" below).
 - **The release** is `sha256:` plus the first 16 hex digits of the hash of the file's bytes. Every bank reference
   in a draft or a plan names it. `source` (the bank's commit and date) is for people and is not trusted.
 - **Online use.** The snapshot is the only way bank content reaches a screen (PRD D31). Once `/bank/v1` is live

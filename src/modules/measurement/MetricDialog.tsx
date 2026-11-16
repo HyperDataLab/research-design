@@ -49,7 +49,12 @@ export function MetricDialog({
             onChange={(e) => set({ ...v, key: e.target.value })}
           />
         </div>
-        <TextField label="Đơn vị" value={v.unit} onChange={(e) => set({ ...v, unit: e.target.value })} />
+        <TextField
+          label="Đơn vị"
+          hint="Metric không có đơn vị thì ghi thang đo, ví dụ: tỉ lệ 0–1"
+          value={v.unit}
+          onChange={(e) => set({ ...v, unit: e.target.value })}
+        />
         <Select
           label="Hướng tốt"
           value={v.goal ?? ''}

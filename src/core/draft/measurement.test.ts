@@ -56,6 +56,40 @@ if (!bankFile.ok) throw new Error('fixture');
 const bank = toBankDoc(bankFile.file, 'sha256:1111111111111111', 'test', '2026-01-01T00:00:00Z');
 
 describe('measurement', () => {
+  it('MO-04 a variable that is no longer measured drops its metric', () => {
+    const metric = {
+      name: 'Score',
+      key: '',
+      unit: '',
+      goal: null,
+      aggregation: null,
+      protocol: '',
+      bank: null,
+      protocolBank: null,
+    };
+    let d = emptyDraft();
+    const m = addMetric(d, metric);
+    if (!m.ok) throw Error(m.error);
+    const v = addVariable(m.doc, {
+      name: 'Outcome',
+      role: 'dependent',
+      construct: '',
+      metric: 'm-1',
+      levels: [],
+    });
+    if (!v.ok) throw Error(v.error);
+    const e = editVariable(v.doc, 'v-1', {
+      name: 'Outcome',
+      role: 'independent',
+      construct: '',
+      metric: 'm-1',
+      levels: ['a', 'b'],
+    });
+    if (!e.ok) throw Error(e.error);
+    d = e.doc;
+    expect(d.variables[0]?.metric).toBeNull();
+    expect(removeMetric(d, 'm-1').ok).toBe(true);
+  });
   it('MO-03 edits preserve identity on no-op and reject missing objects and empty names', () => {
     let d = emptyDraft();
     expect(editVariable(d, 'v-1', variable)).toEqual({ ok: false, error: 'unknown_variable' });

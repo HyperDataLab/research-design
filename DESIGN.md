@@ -124,7 +124,11 @@ navigation and no icon rail: the labels are short and distinct.
   describe one by hand. Choosing a bank entry opens the same Dialog as editing, pre-filled with what the bank
   gives; the MLflow key, aggregation and protocol are always empty for the person to write. A bank protocol is
   shown beside the protocol field as a hint ("Gợi ý từ bank") and can be marked as followed; its text is never
-  copied in. A benchmark shows its lifecycle in words and its known flaws. Deleting something that is still
+  copied in. A benchmark shows its lifecycle in words and its known flaws. A field that is still empty is said in
+  words in the row's quiet line ("chưa có key", "chưa có đơn vị", "chưa chọn hướng tốt", "chưa chọn cách gộp",
+  "Chưa ghi nguồn", "chưa có metric", "chưa có mức"), never as a bare separator. A picker entry states the
+  bank's limit as "Nhận định mạnh nhất mà metric tự nó hỗ trợ: …". A delete Dialog names the kind and the object
+  ("Xoá metric", "Xoá m-1 «Name»?") and confirms with the Danger button. Deleting something that is still
   referred to is refused in the Dialog with a sentence naming what refers to it.
 - **Chain line** (shared component, used on Đo lường and on each hypothesis row of Câu hỏi và giả thuyết): one
   line per dependent variable, "h-1 → v-2 Accuracy → m-1 `test/accuracy`", ids in the mono face, each object a
