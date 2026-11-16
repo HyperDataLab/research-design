@@ -48,6 +48,7 @@ export default function Page() {
   );
   const [deviation, setDeviation] = useState('');
   const [dialogError, setDialogError] = useState('');
+  const [deviationError, setDeviationError] = useState(false);
   const [busy, setBusy] = useState(false);
   const [cache, setCache] = useState<Record<number, ExperimentPlan>>({});
   const [drawer, setDrawer] = useState<{ kind: 'plan' | 'runner'; plan: ExperimentPlan } | null>(null);
@@ -69,8 +70,8 @@ export default function Page() {
   useEffect(() => {
     let active = true;
     const missing = plans.versions.filter((v) => !cache[v.version]);
-    if (!missing.length || !api.getPlan) return;
-    void Promise.all(missing.map((v) => api.getPlan!(project.id, v.version)))
+    if (!missing.length) return;
+    void Promise.all(missing.map((v) => api.getPlan(project.id, v.version)))
       .then((items) => {
         if (active)
           setCache((old) => ({ ...old, ...Object.fromEntries(items.map((p) => [p.planVersion, p])) }));
@@ -120,6 +121,10 @@ export default function Page() {
   ] as const;
   const base = `/p/${encodeURIComponent(project.id)}/`;
   const submit = async () => {
+    if (dialog && dialog.version > 1 && !deviation.trim()) {
+      setDeviationError(true);
+      return;
+    }
     setBusy(true);
     setDialogError('');
     const result = await plans.freeze({ deviation: dialog?.version === 1 ? null : deviation.trim() });
@@ -191,37 +196,32 @@ export default function Page() {
                 </>
               ) : (
                 <>
-                  <ul>
+                  <div className={styles.checklist}>
                     {Array.from({ length: 10 }, (_, i) => `PP-${String(i + 1).padStart(2, '0')}`).map(
                       (rule) => {
                         const issues = gate.issues.filter((issue) => issue.rule === rule);
                         const blocked = issues.some((issue) => issue.level === 'blocking');
                         return (
-                          <li key={rule}>
-                            {rule}: {ruleText(rule)}{' '}
-                            {issues.length ? (
-                              <Badge tone={blocked ? 'danger' : 'warning'}>
-                                {blocked ? 'Chặn' : 'Cảnh báo'}
+                          <div key={rule} className={styles.rule}>
+                            <div className={styles.row}>
+                              <span className={styles.mono}>{rule}</span>
+                              <span>{ruleText(rule)}</span>
+                              <Badge tone={issues.length ? (blocked ? 'danger' : 'warning') : 'success'}>
+                                {issues.length ? (blocked ? 'Chặn' : 'Cảnh báo') : 'Đạt'}
                               </Badge>
-                            ) : (
-                              'Đạt'
-                            )}
-                            {issues.length > 0 && (
-                              <ul>
-                                {issues.map((issue, i) => (
-                                  <li key={i}>
-                                    <Link to={base + destination(issue.subject, rule)}>
-                                      {issueText(issue, gate.plan)}
-                                    </Link>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </li>
+                            </div>
+                            {issues.map((issue, i) => (
+                              <div key={i}>
+                                <Link to={base + destination(issue.subject, rule)}>
+                                  {issueText(issue, gate.plan)}
+                                </Link>
+                              </div>
+                            ))}
+                          </div>
                         );
                       },
                     )}
-                  </ul>
+                  </div>
                 </>
               )}
               <div className={styles.row}>
@@ -230,6 +230,7 @@ export default function Page() {
                   disabled={!!reason}
                   onClick={() => {
                     setDialogError('');
+                    setDeviationError(false);
                     if (gate.state === 'plan') setDialog({ version, plan: gate.plan, issues: gate.issues });
                   }}
                 >
@@ -327,7 +328,11 @@ export default function Page() {
               label="Thay đổi so với phiên bản trước và lý do"
               required
               value={deviation}
-              onChange={(e) => setDeviation(e.target.value)}
+              error={deviationError ? 'Cần ghi thay đổi so với phiên bản trước.' : undefined}
+              onChange={(e) => {
+                setDeviation(e.target.value);
+                setDeviationError(false);
+              }}
             />
           )}
           {dialogError && <p role="alert">{dialogError}</p>}
@@ -335,11 +340,7 @@ export default function Page() {
             <Button onClick={() => setDialog(null)}>Hủy</Button>
             <Button
               variant="primary"
-              disabled={
-                busy ||
-                (!!dialogError && !dialogError.startsWith('Không đóng băng được.')) ||
-                (dialog.version > 1 && !deviation.trim())
-              }
+              disabled={busy || (!!dialogError && !dialogError.startsWith('Không đóng băng được.'))}
               onClick={() => void submit()}
             >
               Đóng băng

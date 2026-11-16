@@ -26,3 +26,26 @@ it('GT-01 gives every rule and missing code Vietnamese text and a link', () => {
     expect(missingLink({ code }, 'project')).toMatch(/^\/p\/project\//);
   }
 });
+
+it('GT-02 uses shared field words and names missing objects', () => {
+  const draft = emptyDraft();
+  draft.metrics.push({
+    id: 'm-1',
+    name: 'Invented',
+    key: '',
+    unit: '',
+    goal: null,
+    aggregation: null,
+    protocol: '',
+    bank: null,
+    protocolBank: null,
+  });
+  expect(missingText({ code: 'no_metrics' }, draft)).toBe('Chưa có metric nào.');
+  expect(missingText({ code: 'metric_incomplete', subject: 'm-1', fields: ['key', 'unit'] }, draft)).toBe(
+    'm-1 «Invented» còn thiếu: key, đơn vị.',
+  );
+  expect(missingText({ code: 'grid_incomplete', fields: ['mlflowExperiment', 'seeds'] }, draft)).toBe(
+    'Lưới chạy còn thiếu: tên experiment, seed.',
+  );
+  expect(ruleText('PP-04')).toContain('metric');
+});

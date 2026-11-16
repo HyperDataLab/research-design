@@ -26,7 +26,6 @@ export function usePlans() {
     setLoading(true);
     setError(false);
     try {
-      if (!api.listPlans || !api.getPlan) throw new Error('Plans API unavailable');
       const list = await api.listPlans(project.id);
       const number = Math.max(0, ...list.map((v) => v.version));
       const plan = number ? await api.getPlan(project.id, number) : null;
@@ -72,7 +71,6 @@ export function usePlans() {
       if (gate.state === 'not_a_plan') return { ok: false, reason: 'not_a_plan', gate };
       if (gate.unchanged) return { ok: false, reason: 'unchanged', gate };
       if (gate.blocked) return { ok: false, reason: 'blocked', gate };
-      if (!api.freezePlan) throw new Error('Plans API unavailable');
       const plan = await api.freezePlan(project.id, gate.plan);
       setLatest(plan);
       setVersions((old) => [

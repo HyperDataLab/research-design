@@ -1,6 +1,13 @@
 import type { ChainFlag } from '@/core/draft/checkChain';
 import type { Draft } from '@/core/draft/schema';
 
+export const metricFieldWords: Record<string, string> = {
+  key: 'key',
+  unit: 'đơn vị',
+  goal: 'hướng tốt',
+  aggregation: 'cách gộp',
+  protocol: 'quy trình đo',
+};
 export function chainFlagText(flag: ChainFlag, draft: Draft): string {
   const named = (items: { id: string; name: string }[]) =>
     `${flag.subject} «${items.find((item) => item.id === flag.subject)?.name ?? ''}»`;
@@ -12,14 +19,7 @@ export function chainFlagText(flag: ChainFlag, draft: Draft): string {
     case 'CH-03':
       return `${flag.subject} tham chiếu biến ${flag.variable} ${flag.which === 'missing' ? 'không tồn tại' : 'không đúng vai trò'}.`;
     case 'CH-04': {
-      const fields: Record<string, string> = {
-        key: 'key',
-        unit: 'đơn vị',
-        goal: 'hướng tốt',
-        aggregation: 'cách gộp',
-        protocol: 'quy trình đo',
-      };
-      return `${named(draft.metrics)} còn thiếu: ${flag.missing.map((field) => fields[field] ?? field).join(', ')}.`;
+      return `${named(draft.metrics)} còn thiếu: ${flag.missing.map((field) => metricFieldWords[field] ?? field).join(', ')}.`;
     }
     case 'CH-05':
       return `${named(draft.metrics)} có key ${flag.reason === 'duplicate' ? 'trùng với metric khác' : 'dành riêng cho run tag'}.`;

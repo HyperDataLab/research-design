@@ -40,6 +40,13 @@ const corrections: Record<string, string> = {
 };
 export const missingPolicyWords = (value: string) => missing[value] ?? value;
 export const correctionWords = (value: string) => corrections[value] ?? value;
+export const runFieldWords: Record<string, string> = {
+  mlflowExperiment: 'tên experiment',
+  conditions: 'điều kiện',
+  datasets: 'dataset',
+  seeds: 'seed',
+  sampleSizeJustification: 'lý do số lần chạy',
+};
 export function planFlagText(flag: PlanFlag, draft: Draft): string {
   switch (flag.rule) {
     case 'AN-01':
@@ -59,14 +66,7 @@ export function planFlagText(flag: PlanFlag, draft: Draft): string {
     case 'AN-07':
       return `${flag.subject} dùng ${methodWords(flag.method)}, SRD chưa hỗ trợ ở bản đầu.`;
     case 'RM-01': {
-      const words: Record<string, string> = {
-        mlflowExperiment: 'tên experiment',
-        conditions: 'điều kiện',
-        datasets: 'dataset',
-        seeds: 'seed',
-        sampleSizeJustification: 'lý do số lần chạy',
-      };
-      return `Lưới chạy còn thiếu: ${flag.missing.map((key) => words[key] ?? key).join(', ')}.`;
+      return `Lưới chạy còn thiếu: ${flag.missing.map((key) => runFieldWords[key] ?? key).join(', ')}.`;
     }
     case 'RM-02':
       return `Lưới chạy tham chiếu ${flag.id} không còn tồn tại.`;

@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { MemoryRouter } from 'react-router-dom';
 import { expect, it, vi } from 'vitest';
 import { emptyDraft, type Draft } from '@/core/draft/schema';
+import { examplePlan } from '@/core/plan/examplePlan';
 import { checkPackage } from '@/core/plan/exportPackage';
 import type { ExperimentPlan } from '@/core/plan/schema';
 import { ApiError } from '@/shared/api/client';
@@ -62,7 +63,11 @@ function complete() {
   };
   return d;
 }
-function setup(draft: Draft = complete(), readOnly = false) {
+function setup(
+  draft: Draft = complete(),
+  readOnly = false,
+  configure?: (context: ReturnType<typeof setupClient>, stored: ExperimentPlan[]) => void,
+) {
   const context = setupClient();
   const stored: ExperimentPlan[] = [];
   context.docs.set(`${context.project.id}/draft`, { etag: 'draft', data: draft });
@@ -74,7 +79,8 @@ function setup(draft: Draft = complete(), readOnly = false) {
     stored.push(p);
     return p;
   });
-  render(
+  configure?.(context, stored);
+  const view = render(
     <context.wrapper>
       <ProjectContext.Provider value={{ project: context.project, readOnly }}>
         <ToastProvider>
@@ -85,11 +91,11 @@ function setup(draft: Draft = complete(), readOnly = false) {
       </ProjectContext.Provider>
     </context.wrapper>,
   );
-  return { ...context, stored };
+  return { ...context, stored, ...view };
 }
 it('PK-01 shows missing items as links', async () => {
   setup(emptyDraft());
-  expect(await screen.findByRole('link', { name: 'Chưa có giả thuyết.' })).toHaveAttribute(
+  expect(await screen.findByRole('link', { name: 'Chưa có giả thuyết nào.' })).toHaveAttribute(
     'href',
     expect.stringContaining('/questions'),
   );
@@ -99,7 +105,9 @@ it('PK-02 displays ten passing rules and freezes version one', async () => {
   const context = setup();
   const button = await screen.findByRole('button', { name: 'Đóng băng phiên bản 1' });
   expect(button).toBeEnabled();
-  expect(screen.getAllByText(/PP-\d\d:/)).toHaveLength(10);
+  expect(screen.getAllByText(/^PP-\d\d$/)).toHaveLength(10);
+  expect(screen.getAllByText('Đạt')).toHaveLength(10);
+  expect(screen.getByText('PP-01').closest('li')).toBeNull();
   fireEvent.click(button);
   fireEvent.click(screen.getByRole('button', { name: 'Đóng băng' }));
   expect(await screen.findByText(/Phiên bản 1 · a@hyperdatalab.org/)).toBeInTheDocument();
@@ -133,7 +141,13 @@ it('PK-06 requires a deviation on the next changed version', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Lưu tên' }));
   await waitFor(() => expect(screen.getByRole('button', { name: 'Đóng băng phiên bản 2' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: 'Đóng băng phiên bản 2' }));
-  expect(screen.getByRole('button', { name: 'Đóng băng' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Đóng băng' }));
+  expect(screen.getByText('Cần ghi thay đổi so với phiên bản trước.')).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Thay đổi so với phiên bản trước và lý do'), {
+    target: { value: '   ' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Đóng băng' }));
+  expect(screen.getByText('Cần ghi thay đổi so với phiên bản trước.')).toBeInTheDocument();
   fireEvent.change(screen.getByLabelText('Thay đổi so với phiên bản trước và lý do'), {
     target: { value: 'New title' },
   });
@@ -212,3 +226,59 @@ it('PK-10 counts flags and links to their screens', async () => {
     expect.stringContaining('/measurement'),
   );
 });
+
+it('PK-11 shows loading and error states', async () => {
+  const { unmount } = setup(complete(), false, (context) => {
+    context.api.listPlans = vi.fn(
+      () => new Promise<Awaited<ReturnType<typeof context.api.listPlans>>>(() => {}),
+    );
+  });
+  expect(screen.getByRole('status')).toBeInTheDocument();
+  unmount();
+  setup(complete(), false, (context) => {
+    context.api.listPlans = vi.fn().mockRejectedValue(new Error('offline'));
+  });
+  expect(await screen.findByText('Không tải được gói kế hoạch.')).toBeInTheDocument();
+});
+it('PK-12 archived project offers frozen version actions', async () => {
+  setup(complete(), true, (_context, stored) => stored.push(examplePlan()));
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Xem' })).toBeEnabled());
+  expect(screen.getByRole('button', { name: 'Tải gói (.zip)' })).toBeEnabled();
+  expect(screen.getByRole('button', { name: 'Mã mẫu cho runner' })).toBeEnabled();
+  expect(screen.queryByLabelText('Tên kế hoạch')).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /Đóng băng/ })).not.toBeInTheDocument();
+});
+it.each(['not_a_plan', 'blocked', 'unchanged'] as const)(
+  'PK-13 reloads after fresh-read %s refusal',
+  async (reason) => {
+    const context = setup();
+    if (reason === 'unchanged') {
+      fireEvent.click(await screen.findByRole('button', { name: 'Đóng băng phiên bản 1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Đóng băng' }));
+      await screen.findByText('Đã đóng băng phiên bản 1.');
+      fireEvent.change(screen.getByLabelText('Tên kế hoạch'), { target: { value: 'Changed' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Lưu tên' }));
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Đóng băng phiên bản 2' })).toBeEnabled(),
+      );
+    }
+    fireEvent.click(
+      await screen.findByRole('button', {
+        name: reason === 'unchanged' ? 'Đóng băng phiên bản 2' : 'Đóng băng phiên bản 1',
+      }),
+    );
+    if (reason === 'unchanged')
+      fireEvent.change(screen.getByLabelText('Thay đổi so với phiên bản trước và lý do'), {
+        target: { value: 'Change' },
+      });
+    const fresh = reason === 'not_a_plan' ? emptyDraft() : complete();
+    if (reason === 'blocked') fresh.hypotheses[0]!.kind = 'directional';
+    context.docs.set(context.project.id + '/draft', { etag: 'fresh', data: fresh });
+    const before = vi.mocked(context.api.getDoc).mock.calls.length;
+    fireEvent.click(screen.getByRole('button', { name: 'Đóng băng' }));
+    expect(await screen.findByText('Bản nháp đã thay đổi. Xem lại danh sách kiểm tra.')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(vi.mocked(context.api.getDoc).mock.calls.length).toBeGreaterThanOrEqual(before + 3),
+    );
+  },
+);

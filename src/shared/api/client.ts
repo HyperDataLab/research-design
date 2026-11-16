@@ -132,6 +132,4 @@ export function createApiClient(options: {
       projectSchema.parse(await call('/v1/projects/' + encodeURIComponent(id), 'PATCH', patch)),
   };
 }
-type CompleteApiClient = ReturnType<typeof createApiClient>;
-export type ApiClient = Omit<CompleteApiClient, 'listPlans' | 'getPlan' | 'freezePlan'> &
-  Partial<Pick<CompleteApiClient, 'listPlans' | 'getPlan' | 'freezePlan'>>;
+export type ApiClient = ReturnType<typeof createApiClient>;
