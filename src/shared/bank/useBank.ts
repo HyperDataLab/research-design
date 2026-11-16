@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { readSnapshot, toBankDoc } from '@/core/bank/readSnapshot';
+import { toBankDoc } from '@/core/bank/readSnapshot';
+import { snapshotRelease } from '@/core/bank/release';
 import { bankDocSchema, type BankDoc } from '@/core/bank/snapshot';
 import { useApi } from '@/shared/api/apiContext';
 import { ApiError } from '@/shared/api/client';
@@ -40,17 +41,11 @@ export function useBank() {
     } catch {
       return { ok: false as const, error: 'not_json' as const };
     }
-    const parsed = readSnapshot(data);
-    if (!parsed.ok) return { ok: false as const, error: parsed.reason, issues: parsed.issues };
-    if (beforeWrite && !(await beforeWrite())) return { ok: false as const, error: 'cancelled' as const };
     try {
-      const hash = await crypto.subtle.digest('SHA-256', bytes);
-      const release =
-        'sha256:' +
-        Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, '0'))
-          .join('')
-          .slice(0, 16);
-      const doc = toBankDoc(parsed.file, release, user?.email ?? '', new Date().toISOString());
+      const parsed = await snapshotRelease(data, bytes);
+      if (!parsed.ok) return { ok: false as const, error: parsed.reason, issues: parsed.issues };
+      if (beforeWrite && !(await beforeWrite())) return { ok: false as const, error: 'cancelled' as const };
+      const doc = toBankDoc(parsed.file, parsed.release, user?.email ?? '', new Date().toISOString());
       const next = await client.putDoc(project.id, 'bank', doc, etag);
       setBank(doc);
       setEtag(next);

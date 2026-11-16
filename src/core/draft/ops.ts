@@ -137,18 +137,35 @@ export function repin(doc: Draft, bank: BankDoc): DraftResult {
     protocol: findProtocol,
     benchmark: findBenchmark,
   };
-  const eligible = bankRefs(doc).filter((r) => r.release !== bank.release && find[r.reference](bank, r.id));
-  if (!eligible.length) return ok(doc);
+  const resolve = (id: string, exists: (id: string) => boolean) => {
+    const seen = new Set([id]);
+    let current = id;
+    for (let step = 0; step < 10 && !exists(current); step++) {
+      const next = bank.aliases[current];
+      if (!next || seen.has(next)) return null;
+      seen.add(next);
+      current = next;
+    }
+    return exists(current) ? current : null;
+  };
+  const eligible = bankRefs(doc);
   const update = (
     subject: string,
     reference: (typeof eligible)[number]['reference'],
     ref: { id: string; release: string } | null,
-  ) =>
-    ref && eligible.some((r) => r.subject === subject && r.reference === reference)
-      ? { ...ref, release: bank.release }
-      : ref;
-  return ok({
+  ) => {
+    if (!ref || !eligible.some((r) => r.subject === subject && r.reference === reference)) return ref;
+    const id = resolve(ref.id, (candidate) => Boolean(find[reference](bank, candidate)));
+    return id ? { id, release: bank.release } : ref;
+  };
+  const result = {
     ...doc,
+    hypotheses: doc.hypotheses.map((h) => ({
+      ...h,
+      claim: h.claim
+        ? (resolve(h.claim, (id) => bank.collections['claim-types'].some((c) => c.id === id)) ?? h.claim)
+        : null,
+    })),
     design: doc.design && { ...doc.design, bank: update('design', 'design', doc.design.bank) },
     threats: doc.threats.map((t) => ({ ...t, bank: update(t.id, 'threat', t.bank) })),
     metrics: doc.metrics.map((m) => ({
@@ -157,5 +174,6 @@ export function repin(doc: Draft, bank: BankDoc): DraftResult {
       protocolBank: update(m.id, 'protocol', m.protocolBank),
     })),
     datasets: doc.datasets.map((d) => ({ ...d, benchmark: update(d.id, 'benchmark', d.benchmark) })),
-  });
+  };
+  return ok(same(doc, result) ? doc : result);
 }

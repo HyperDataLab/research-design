@@ -25,6 +25,10 @@ export function toBankDoc(file: SnapshotFile, release: string, who: string, at: 
   return {
     schemaVersion: 1,
     release,
+    releaseDate: file.date ?? null,
+    contentHash: typeof file.contentHash === 'string' ? file.contentHash : null,
+    includesDrafts: file.includesDrafts ?? false,
+    aliases: file.aliases ?? {},
     source: file.source,
     importedBy: who,
     importedAt: at,
