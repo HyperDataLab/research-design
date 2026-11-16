@@ -15,6 +15,7 @@ import type { Draft, DraftHypothesis, DraftQuestion } from '@/core/draft/schema'
 import { emptyPapersDoc, papersDocSchema, type Paper } from '@/core/papers/papers';
 import { useApi } from '@/shared/api/apiContext';
 import { useBank } from '@/shared/bank/useBank';
+import { ChainLine } from '@/shared/draft/ChainLine';
 import { flagText } from '@/shared/draft/flagText';
 import { useDraft } from '@/shared/draft/useDraft';
 import { useProject } from '@/shared/project/projectContext';
@@ -37,6 +38,14 @@ const errors: Record<DraftError | 'network', string> = {
   has_hypotheses: 'Câu hỏi vẫn còn giả thuyết.',
   duplicate_threat: 'Mối đe doạ đã tồn tại.',
   no_design: 'Chưa chọn thiết kế.',
+  unknown_variable: 'Biến không còn tồn tại.',
+  unknown_metric: 'Metric không còn tồn tại.',
+  unknown_dataset: 'Dataset không còn tồn tại.',
+  unknown_condition: 'Điều kiện không còn tồn tại.',
+  in_use: 'Mục này vẫn đang được sử dụng.',
+  wrong_role: 'Biến không đúng vai trò.',
+  invalid_key: 'Key không hợp lệ.',
+  invalid_hash: 'Mã SHA-256 không hợp lệ.',
   network: 'Không lưu được. Kiểm tra kết nối rồi thử lại.',
 };
 type Editor =
@@ -87,6 +96,7 @@ export default function Page() {
         <span className={styles.mono}>{h.id}</span> <span className={styles.reading}>{h.statement}</span>{' '}
         <Badge>{kinds[h.kind]}</Badge>
         <p className={styles.quiet}>{claimLabel(h.claim, bank.bank?.collections['claim-types'] ?? [])}</p>
+        <ChainLine draft={draft.draft} hypothesisId={h.id} projectId={project.id} />
         {flags
           .filter((f) => f.subject === h.id)
           .map((f, i) => (

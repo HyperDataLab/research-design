@@ -1,5 +1,17 @@
 import { z } from 'zod';
-import { bankRef, hypothesisId, hypothesisSchema, variableId } from '../plan/schema';
+import {
+  bankRef,
+  conditionId,
+  conditionSchema,
+  datasetId,
+  datasetSchema,
+  hypothesisId,
+  hypothesisSchema,
+  metricId,
+  metricSchema,
+  variableId,
+  variableSchema,
+} from '../plan/schema';
 
 /**
  * The editable plan of a project, stored as the `draft` document. It is looser than the frozen plan
@@ -63,30 +75,100 @@ export const draftThreatSchema = z.strictObject({
   bank: bankRef,
 });
 
+/**
+ * Đo lường (S8). Roles, goals, aggregations and the shapes of ids are the plan's own (`../plan/schema.ts`); what
+ * is looser here is that a field may still be empty. `checkChain` says what is missing.
+ */
+const numbered = (prefix: string) => localId(prefix);
+
+export const draftVariableSchema = z.strictObject({
+  id: variableId.and(numbered('v')),
+  name: text,
+  role: variableSchema.shape.role,
+  /** The concept the variable stands for, in the person's words. Draft only: the plan has no field for it yet. */
+  construct: z.string().trim(),
+  metric: metricId.nullable(),
+  levels: z.array(text),
+});
+
+export const draftMetricSchema = z.strictObject({
+  id: metricId.and(numbered('m')),
+  name: text,
+  /** The key the runner logs to MLflow. Empty until written; the bank never supplies it. */
+  key: z.string().trim(),
+  /** Empty until written. The bank's unit is offered when it has one. */
+  unit: z.string().trim(),
+  /** Null until chosen. The bank's `descriptive` direction leaves it to the person. */
+  goal: metricSchema.shape.goal.nullable(),
+  aggregation: metricSchema.shape.aggregation.nullable(),
+  /** How the value is obtained in this study. A bank protocol is a hint beside it and is not copied in. */
+  protocol: z.string().trim(),
+  bank: bankRef,
+  /** The bank protocol the person follows, if any. Draft only: the plan's metric has no field for it yet. */
+  protocolBank: bankRef,
+});
+
+export const draftDatasetSchema = z.strictObject({
+  id: datasetId.and(numbered('d')),
+  name: text,
+  /** Where the data comes from. Empty until written. */
+  source: z.string().trim(),
+  version: datasetSchema.shape.version,
+  split: datasetSchema.shape.split,
+  sha256: datasetSchema.shape.sha256,
+  benchmark: bankRef,
+});
+
+export const draftConditionSchema = z.strictObject({
+  id: conditionId.and(numbered('c')),
+  name: text,
+  baseline: z.boolean(),
+  params: conditionSchema.shape.params,
+});
+
+const counter = z.number().int().positive();
+
 export const draftSchema = z.strictObject({
   schemaVersion: z.literal(DRAFT_SCHEMA_VERSION),
   /** The next number for each id prefix. A number is used once, so a deleted object's id never comes back. */
   next: z.strictObject({
-    q: z.number().int().positive(),
-    h: z.number().int().positive(),
-    t: z.number().int().positive(),
+    q: counter,
+    h: counter,
+    t: counter,
+    // Added with Đo lường (S8); a draft written before it has none of these.
+    v: counter.default(1),
+    m: counter.default(1),
+    d: counter.default(1),
+    c: counter.default(1),
   }),
   questions: z.array(draftQuestionSchema),
   hypotheses: z.array(draftHypothesisSchema),
   design: draftDesignSchema.nullable(),
   threats: z.array(draftThreatSchema),
+  variables: z.array(draftVariableSchema).default([]),
+  metrics: z.array(draftMetricSchema).default([]),
+  datasets: z.array(draftDatasetSchema).default([]),
+  conditions: z.array(draftConditionSchema).default([]),
 });
 export type Draft = z.infer<typeof draftSchema>;
 export type DraftQuestion = Draft['questions'][number];
 export type DraftHypothesis = Draft['hypotheses'][number];
 export type DraftDesign = NonNullable<Draft['design']>;
 export type DraftThreat = Draft['threats'][number];
+export type DraftVariable = Draft['variables'][number];
+export type DraftMetric = Draft['metrics'][number];
+export type DraftDataset = Draft['datasets'][number];
+export type DraftCondition = Draft['conditions'][number];
 
 export const emptyDraft = (): Draft => ({
   schemaVersion: DRAFT_SCHEMA_VERSION,
-  next: { q: 1, h: 1, t: 1 },
+  next: { q: 1, h: 1, t: 1, v: 1, m: 1, d: 1, c: 1 },
   questions: [],
   hypotheses: [],
   design: null,
   threats: [],
+  variables: [],
+  metrics: [],
+  datasets: [],
+  conditions: [],
 });

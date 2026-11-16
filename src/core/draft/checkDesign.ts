@@ -1,4 +1,12 @@
-import { findClaimType, findDesign, findThreat } from '../bank/readSnapshot';
+import {
+  findClaimType,
+  findDesign,
+  findThreat,
+  findMetric,
+  findProtocol,
+  findBenchmark,
+} from '../bank/readSnapshot';
+import { bankRefs } from './bankRefs';
 import type { BankDoc } from '../bank/snapshot';
 import type { Draft } from './schema';
 
@@ -8,7 +16,7 @@ export type DesignFlag =
   | {
       rule: 'DS-05';
       subject: string;
-      reference: 'design' | 'threat' | 'claim';
+      reference: 'design' | 'threat' | 'claim' | 'metric' | 'protocol' | 'benchmark';
       id: string;
       reason: 'no_snapshot' | 'missing' | 'other_release';
     };
@@ -31,28 +39,26 @@ export function checkDesign(draft: Draft, bank: BankDoc | null): DesignFlag[] {
       });
   }
   if (draft.design && draft.design.assignment === null) flags.push({ rule: 'DS-03', subject: 'design' });
-  if (ref) {
-    const reason = !bank
-      ? 'no_snapshot'
-      : !design
-        ? 'missing'
-        : ref.release !== bank.release
-          ? 'other_release'
-          : null;
-    if (reason) flags.push({ rule: 'DS-05', subject: 'design', reference: 'design', id: ref.id, reason });
-  }
   for (const t of draft.threats) {
     if (!t.mitigation.trim()) flags.push({ rule: 'DS-04', subject: t.id });
-    if (t.bank) {
-      const reason = !bank
-        ? 'no_snapshot'
-        : !findThreat(bank, t.bank.id)
-          ? 'missing'
-          : t.bank.release !== bank.release
-            ? 'other_release'
-            : null;
-      if (reason) flags.push({ rule: 'DS-05', subject: t.id, reference: 'threat', id: t.bank.id, reason });
-    }
+  }
+  const find = {
+    design: findDesign,
+    threat: findThreat,
+    metric: findMetric,
+    protocol: findProtocol,
+    benchmark: findBenchmark,
+  };
+  for (const item of bankRefs(draft)) {
+    const reason = !bank
+      ? 'no_snapshot'
+      : !find[item.reference](bank, item.id)
+        ? 'missing'
+        : item.release !== bank.release
+          ? 'other_release'
+          : null;
+    if (reason)
+      flags.push({ rule: 'DS-05', subject: item.subject, reference: item.reference, id: item.id, reason });
   }
   return flags.sort(
     (a, b) =>

@@ -115,3 +115,44 @@ it('QH-10 shows load errors', async () => {
   setup({ fail: true });
   expect(await screen.findByText('Không tải được câu hỏi và giả thuyết.')).toBeInTheDocument();
 });
+it('QH-11 shows a hypothesis chain with links to measurement tabs', async () => {
+  const draft = emptyDraft();
+  draft.hypotheses.push({
+    id: 'h-1',
+    statement: 'Synthetic hypothesis',
+    kind: 'exploratory',
+    question: null,
+    claim: null,
+    independent: [],
+    dependent: ['v-1'],
+  });
+  draft.variables.push({
+    id: 'v-1',
+    name: 'Synthetic variable',
+    role: 'dependent',
+    construct: '',
+    metric: 'm-1',
+    levels: [],
+  });
+  draft.metrics.push({
+    id: 'm-1',
+    name: 'Synthetic metric',
+    key: 'test/score',
+    unit: '',
+    goal: null,
+    aggregation: null,
+    protocol: '',
+    bank: null,
+    protocolBank: null,
+  });
+  const context = setup({ draft });
+  await screen.findByText('Synthetic hypothesis');
+  expect(screen.getByRole('link', { name: 'v-1 Synthetic variable' })).toHaveAttribute(
+    'href',
+    `/p/${context.project.id}/measurement?tab=variables`,
+  );
+  expect(screen.getByRole('link', { name: 'm-1' })).toHaveAttribute(
+    'href',
+    `/p/${context.project.id}/measurement?tab=metrics`,
+  );
+});

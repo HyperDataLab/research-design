@@ -1,0 +1,42 @@
+export const words: Record<string, string> = {
+  independent: 'Độc lập',
+  dependent: 'Phụ thuộc',
+  control: 'Kiểm soát',
+  covariate: 'Hiệp biến',
+  maximize: 'Càng cao càng tốt',
+  minimize: 'Càng thấp càng tốt',
+  target: 'Giá trị mục tiêu',
+  last: 'Giá trị cuối',
+  max: 'Lớn nhất',
+  min: 'Nhỏ nhất',
+  mean: 'Trung bình',
+  higher_better: 'Càng cao càng tốt',
+  lower_better: 'Càng thấp càng tốt',
+  target_value: 'Giá trị mục tiêu',
+  descriptive: 'Mô tả',
+  classification: 'Phân loại',
+  regression: 'Hồi quy',
+  ranking_retrieval: 'Xếp hạng và truy xuất',
+  nlp_generation: 'Sinh ngôn ngữ',
+  vision: 'Thị giác',
+  clustering: 'Phân cụm',
+  calibration_uncertainty: 'Hiệu chuẩn và bất định',
+  efficiency_systems: 'Hiệu năng hệ thống',
+  agreement_reliability: 'Đồng thuận và độ tin cậy',
+  statistics_effect_size: 'Thống kê và cỡ hiệu ứng',
+  active: 'Đang hoạt động',
+  saturated: 'Bão hoà',
+  superseded: 'Đã thay thế',
+  deprecated: 'Ngừng sử dụng',
+  maintenance: 'Bảo trì',
+  unknown: 'Chưa biết',
+};
+export const word = (value: string | null) => (value ? (words[value] ?? value) : 'Chưa chọn');
+
+export const claimWord = (value: string) =>
+  (
+    ({ descriptive: 'mô tả', comparative: 'so sánh', inferential: 'suy luận thống kê' }) as Record<
+      string,
+      string
+    >
+  )[value] ?? value;

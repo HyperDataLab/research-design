@@ -14,6 +14,7 @@ import {
 import type { Draft, DraftThreat } from '@/core/draft/schema';
 import { useBank } from '@/shared/bank/useBank';
 import { flagText } from '@/shared/draft/flagText';
+import { RepinNotice } from '@/shared/draft/RepinNotice';
 import { useDraft } from '@/shared/draft/useDraft';
 import { useProject } from '@/shared/project/projectContext';
 import { Badge } from '@/shared/ui/Badge';
@@ -50,7 +51,6 @@ export default function Page() {
     design?.threats
       .map((id) => findThreat(bank, id))
       .filter((t) => t && !draft.threats.some((x) => x.bank?.id === t.id)) ?? [];
-  const oldReferences = flags.some((f) => f.rule === 'DS-05' && f.reason === 'other_release');
   const warning = (flag: DesignFlag) => (
     <p className={styles.warning} key={`${flag.rule}-${flag.subject}`}>
       <Badge tone="warning">Cần xem lại</Badge> {flagText(flag, draft, bank)}
@@ -78,21 +78,12 @@ export default function Page() {
         </Empty>
       ) : (
         <div className={styles.stack}>
-          {oldReferences && (
-            <Card>
-              <p>Một số tham chiếu thuộc bản chụp cũ nhưng vẫn có trong bản chụp hiện tại.</p>
-              {!readOnly && bank && (
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    void change((d) => repin(d, bank));
-                  }}
-                >
-                  Ghim lại theo bản chụp hiện tại
-                </Button>
-              )}
-            </Card>
-          )}
+          <RepinNotice
+            flags={flags}
+            bank={bank}
+            readOnly={readOnly}
+            onRepin={(value) => void change((d) => repin(d, value))}
+          />
           <Card>
             <h2>Thiết kế</h2>
             {!draft.design ? (
