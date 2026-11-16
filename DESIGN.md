@@ -68,6 +68,21 @@ navigation and no icon rail: the labels are short and distinct.
   sentence with account and time ("a@… đã loại «Title»: lý do").
 - **Someone else changed it.** When a save meets a newer version, the app re-reads and re-applies the change
   without asking. Only when the change no longer applies does it say so in a toast and show the current state.
+- **Cài đặt** (top-level screen, in the sidebar footer): three Cards in one column.
+  "Tài khoản": name, email, and the mode (Google or "Chế độ phát triển").
+  "Gửi dữ liệu cho AI": the consent text in the reading face — what is sent (text of the papers and the plan you
+  work on), to whom (the provider's name from the Worker), what is not kept (the ledger stores counts, never
+  text) — then the state in words ("Đã đồng ý ngày …" or "Chưa đồng ý") and one button: "Đồng ý" (primary) when
+  not accepted. When the Worker has no router: a warning Badge "AI chưa được cấu hình" and no button.
+  "Hạn mức token": today's use against the daily budget as "12.300 / 300.000 token" with a meter (a bar on
+  `--bg-sunken` filled with `--accent`, turning `--warning` from 80 % and `--danger` at 100 %, always with the
+  numbers in words beside it), the note "Hạn mức tính theo ngày UTC, đặt lại lúc 07:00 giờ Việt Nam", the
+  month's total, a small table of today's use per feature (Tính năng, Số lần gọi, Token vào, Token ra), a line
+  "Có n lần gọi được ước lượng" when the router reported no usage, and a secondary button "Kiểm tra kết nối"
+  that makes one tiny call and reports the result in a toast. The button is disabled without consent.
+- **Consent gate.** A screen that needs AI and finds no current consent shows, in place of its AI action, the
+  sentence "Cần đồng ý gửi dữ liệu cho AI trước khi dùng tính năng này." with a text link to Cài đặt. Over
+  budget: "Đã hết hạn mức token hôm nay." with the same link.
 - **Signed-out screens** that need the account show an Empty state that says what signing in gives and holds the
   "Đăng nhập" button; they never render an empty list.
 - **Dev sign-in.** On the dev server without Firebase config, the account button reads "Đăng nhập (dev)" and a

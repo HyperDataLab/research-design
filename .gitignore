@@ -13,3 +13,5 @@ firebase-debug.log*
 .vscode/*
 !.vscode/extensions.json
 *.pdf
+.dev.vars
+.dev.vars.*
