@@ -13,4 +13,5 @@ export interface ModuleDefinition {
   page: LazyExoticComponent<ComponentType>;
   /** A screen reached from another module: it has its route but no sidebar entry of its own. */
   partOf?: string;
+  scope?: 'project';
 }

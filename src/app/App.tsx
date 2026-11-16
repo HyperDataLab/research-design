@@ -2,6 +2,7 @@ import { AuthProvider } from '@/shared/auth/AuthProvider';
 import { ApiProvider } from '@/shared/api/ApiProvider';
 import { AccountButton } from './AccountButton';
 import ProjectHome from '@/modules/projects/ProjectHome';
+import ProjectLayout from '@/modules/projects/ProjectLayout';
 import { Menu, Monitor, Moon, Sun } from 'lucide-react';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
@@ -30,8 +31,10 @@ export function App() {
   const [theme, setTheme] = useState<Theme>(readTheme);
   const closeDrawer = useCallback(() => setDrawer(false), []);
   const location = useLocation();
-  const current = modules.find(
-    (item) => location.pathname === item.path || location.pathname.startsWith(`${item.path}/`),
+  const current = modules.find((item) =>
+    item.scope === 'project'
+      ? location.pathname.endsWith(`/${item.id}`)
+      : location.pathname === item.path || location.pathname.startsWith(`${item.path}/`),
   );
   useEffect(() => {
     if (theme === 'system') delete document.documentElement.dataset.theme;
@@ -83,10 +86,19 @@ export function App() {
               <main className={styles.content}>
                 <Suspense fallback={<Skeleton />}>
                   <Routes>
-                    <Route path="/p/:projectId" element={<ProjectHome />} />
-                    {modules.map((item) => (
-                      <Route key={item.id} path={item.path} element={<item.page />} />
-                    ))}
+                    <Route path="/p/:projectId" element={<ProjectLayout />}>
+                      <Route index element={<ProjectHome />} />
+                      {modules
+                        .filter((item) => item.scope === 'project')
+                        .map((item) => (
+                          <Route key={item.id} path={item.path} element={<item.page />} />
+                        ))}
+                    </Route>
+                    {modules
+                      .filter((item) => item.scope !== 'project')
+                      .map((item) => (
+                        <Route key={item.id} path={item.path} element={<item.page />} />
+                      ))}
                     <Route
                       path="*"
                       element={

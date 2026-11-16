@@ -7,6 +7,10 @@ it('has unique ids, labels and paths and is sorted by group and order', () => {
   expect(new Set(modules.map((m) => m.id)).size).toBe(modules.length);
   expect(new Set(modules.map((m) => m.label)).size).toBe(modules.length);
   expect(new Set(modules.map((m) => m.path)).size).toBe(modules.length);
+  expect(new Set(modules.map((m) => (m.scope === 'project' ? m.id : m.path.replace(/^\//, '')))).size).toBe(
+    modules.length,
+  );
+  for (const item of modules.filter((m) => m.scope === 'project')) expect(item.path).toBe(item.id);
   for (let i = 0; i < modules.length; i++) {
     const item = modules[i];
     expect(item).toBeDefined();

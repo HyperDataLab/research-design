@@ -27,7 +27,18 @@ const soon = (
   label: string,
   summary: string,
   icon: LucideIcon,
-): ModuleDefinition => ({ id, group, order, label, summary, icon, path: `/${id}`, status: 'soon', page });
+): ModuleDefinition => ({
+  id,
+  group,
+  order,
+  label,
+  summary,
+  icon,
+  path: group === 'system' ? `/${id}` : id,
+  ...(group === 'system' ? {} : { scope: 'project' }),
+  status: 'soon',
+  page,
+});
 
 export const planned: ModuleDefinition[] = [
   soon(

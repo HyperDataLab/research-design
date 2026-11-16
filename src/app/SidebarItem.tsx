@@ -14,6 +14,7 @@ export function SidebarItem({
   quiet?: boolean;
 }) {
   const { pathname } = useLocation();
+  const projectId = /^\/p\/([^/]+)(?:\/|$)/.exec(pathname)?.[1];
   const childActive = modules.some((other) => other.partOf === item.id && pathname.startsWith(other.path));
   const className = `${styles.navItem} ${quiet ? styles.quietItem : ''}`;
   const content = (
@@ -29,9 +30,15 @@ export function SidebarItem({
         {content}
       </span>
     );
+  if (item.scope === 'project' && !projectId)
+    return (
+      <span className={`${className} ${styles.disabled}`} title="Mở một dự án trước">
+        {content}
+      </span>
+    );
   return (
     <NavLink
-      to={item.path}
+      to={item.scope === 'project' ? `/p/${projectId}/${item.id}` : item.path}
       end={item.path === '/'}
       onClick={onNavigate}
       className={({ isActive }) => `${className} ${isActive || childActive ? styles.active : ''}`}

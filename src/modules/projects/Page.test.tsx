@@ -17,6 +17,11 @@ const project = {
 };
 function setup(signedIn = true, projects = [project]) {
   const api: ApiClient = {
+    getDoc: vi.fn(),
+    putDoc: vi.fn(),
+    listItems: vi.fn(),
+    getItem: vi.fn(),
+    putItem: vi.fn(),
     me: vi.fn(),
     listProjects: vi.fn().mockResolvedValue(projects),
     createProject: vi.fn().mockResolvedValue(project),

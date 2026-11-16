@@ -5,6 +5,7 @@ import { AuthContext, type AuthValue } from '@/shared/auth/authContext';
 import { ApiProvider } from '@/shared/api/ApiProvider';
 import { ApiError, type ApiClient } from '@/shared/api/client';
 import ProjectHome from './ProjectHome';
+import ProjectLayout from './ProjectLayout';
 const auth: AuthValue = {
   mode: 'firebase',
   user: { uid: 'a', email: 'a@hyperdatalab.org', name: 'a' },
@@ -16,6 +17,11 @@ const auth: AuthValue = {
 };
 function setup(getProject: ApiClient['getProject']) {
   const api: ApiClient = {
+    getDoc: vi.fn(),
+    putDoc: vi.fn(),
+    listItems: vi.fn(),
+    getItem: vi.fn(),
+    putItem: vi.fn(),
     getProject,
     me: vi.fn(),
     listProjects: vi.fn(),
@@ -27,7 +33,9 @@ function setup(getProject: ApiClient['getProject']) {
       <AuthContext.Provider value={auth}>
         <ApiProvider client={api}>
           <Routes>
-            <Route path="/p/:projectId" element={<ProjectHome />} />
+            <Route path="/p/:projectId" element={<ProjectLayout />}>
+              <Route index element={<ProjectHome />} />
+            </Route>
           </Routes>
         </ApiProvider>
       </AuthContext.Provider>
