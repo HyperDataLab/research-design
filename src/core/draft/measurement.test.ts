@@ -323,11 +323,4 @@ describe('measurement', () => {
     d.variables[0]!.metric = null;
     expect(checkChain(d).some((f) => f.rule === 'CH-08')).toBe(false);
   });
-  it('CH-09 flags multiple conditions without a baseline until selected', () => {
-    let d = result(addCondition(emptyDraft(), { ...condition, baseline: false }));
-    d = result(addCondition(d, { ...condition, baseline: false }));
-    expect(checkChain(d).some((f) => f.rule === 'CH-09')).toBe(true);
-    d = result(editCondition(d, 'c-1', condition));
-    expect(checkChain(d).some((f) => f.rule === 'CH-09')).toBe(false);
-  });
 });

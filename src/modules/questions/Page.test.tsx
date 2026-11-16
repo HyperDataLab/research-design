@@ -36,6 +36,37 @@ function setup(
   );
   return context;
 }
+it('DL-UI refuses deleting a hypothesis used by an analysis', async () => {
+  const draft = emptyDraft();
+  draft.hypotheses.push({
+    id: 'h-1',
+    statement: 'Invented',
+    kind: 'directional',
+    question: null,
+    claim: null,
+    independent: [],
+    dependent: [],
+  });
+  draft.analyses.push({
+    id: 'a-1',
+    hypothesis: 'h-1',
+    method: null,
+    variables: [],
+    conditions: [],
+    parameters: {},
+    assumptions: [],
+    missingPolicy: 'listwise',
+    alpha: 0.05,
+    correction: 'none',
+  });
+  setup({ draft });
+  fireEvent.click(await screen.findByRole('button', { name: 'Xoá' }));
+  const dialog = screen.getByRole('alertdialog');
+  expect(
+    within(dialog).getByText('h-1 đang được dùng bởi a-1. Gỡ liên kết trước khi xoá.'),
+  ).toBeInTheDocument();
+  expect(within(dialog).queryByRole('button', { name: 'Xoá' })).not.toBeInTheDocument();
+});
 async function addQuestion() {
   fireEvent.click(await screen.findByRole('button', { name: 'Thêm câu hỏi' }));
   fireEvent.change(screen.getByLabelText('Câu hỏi'), { target: { value: 'Invented question' } });

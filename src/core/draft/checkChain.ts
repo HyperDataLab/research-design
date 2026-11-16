@@ -2,7 +2,7 @@ import { RUN_TAGS } from '../plan/schema';
 import type { Draft } from './schema';
 
 export type ChainFlag =
-  | { rule: 'CH-01' | 'CH-06' | 'CH-07' | 'CH-08' | 'CH-09'; subject: string }
+  | { rule: 'CH-01' | 'CH-06' | 'CH-07' | 'CH-08'; subject: string }
   | { rule: 'CH-02'; subject: string; hypothesis: string }
   | { rule: 'CH-03'; subject: string; variable: string; which: 'missing' | 'wrong_role' }
   | { rule: 'CH-04'; subject: string; missing: string[] }
@@ -37,8 +37,6 @@ export function checkChain(draft: Draft): ChainFlag[] {
       flags.push({ rule: 'CH-08', subject: v.id });
   }
   for (const d of draft.datasets) if (!d.source) flags.push({ rule: 'CH-07', subject: d.id });
-  if (draft.conditions.length > 1 && !draft.conditions.some((c) => c.baseline))
-    flags.push({ rule: 'CH-09', subject: 'conditions' });
   return flags.sort(
     (a, b) => a.rule.localeCompare(b.rule) || a.subject.localeCompare(b.subject, 'en', { numeric: true }),
   );

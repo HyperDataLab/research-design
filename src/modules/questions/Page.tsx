@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { checkDesign } from '@/core/draft/checkDesign';
+import { users } from '@/core/draft/measureOps';
 import {
   addHypothesis,
   addQuestion,
@@ -46,6 +47,9 @@ const errors: Record<DraftError | 'network', string> = {
   wrong_role: 'Biến không đúng vai trò.',
   invalid_key: 'Key không hợp lệ.',
   invalid_hash: 'Mã SHA-256 không hợp lệ.',
+  unknown_analysis: 'Phân tích không còn tồn tại.',
+  invalid_alpha: 'Alpha không hợp lệ.',
+  too_many_seeds: 'Có quá nhiều seed.',
   network: 'Không lưu được. Kiểm tra kết nối rồi thử lại.',
 };
 type Editor =
@@ -90,6 +94,7 @@ export default function Page() {
     deletion?.type === 'question'
       ? draft.draft.hypotheses.filter((h) => h.question === deletion.id).length
       : 0;
+  const references = deletion?.type === 'hypothesis' ? users(draft.draft, deletion.id) : [];
   const rows = (hypotheses: DraftHypothesis[]) =>
     hypotheses.map((h) => (
       <div className={styles.row} key={h.id}>
@@ -234,13 +239,15 @@ export default function Page() {
           onClose={() => setDeletion(null)}
         >
           <p>
-            {count
-              ? `Câu hỏi này còn ${count} giả thuyết. Chuyển hoặc xoá các giả thuyết trước.`
-              : 'Bạn có chắc muốn xoá?'}
+            {references.length
+              ? `${deletion.id} đang được dùng bởi ${references.join(', ')}. Gỡ liên kết trước khi xoá.`
+              : count
+                ? `Câu hỏi này còn ${count} giả thuyết. Chuyển hoặc xoá các giả thuyết trước.`
+                : 'Bạn có chắc muốn xoá?'}
           </p>
           <div className={styles.actions}>
             <Button onClick={() => setDeletion(null)}>Hủy</Button>
-            {!count && (
+            {!count && !references.length && (
               <Button
                 variant="primary"
                 disabled={busy}

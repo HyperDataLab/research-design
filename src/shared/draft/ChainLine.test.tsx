@@ -66,3 +66,39 @@ it('CH-UI renders a complete chain and each missing link', () => {
     '/p/project/measurement?tab=metrics',
   );
 });
+it('AN-UI links an analysis and warns when a confirmatory hypothesis has none', () => {
+  const draft = emptyDraft();
+  draft.hypotheses.push({
+    id: 'h-1',
+    statement: 'Test',
+    kind: 'directional',
+    question: null,
+    claim: null,
+    independent: [],
+    dependent: [],
+  });
+  const show = () =>
+    render(
+      <MemoryRouter>
+        <ChainLine draft={draft} hypothesisId="h-1" projectId="project" />
+      </MemoryRouter>,
+    );
+  const view = show();
+  expect(screen.getByText('chưa có phân tích')).toBeInTheDocument();
+  view.unmount();
+  draft.analyses.push({
+    id: 'a-1',
+    hypothesis: 'h-1',
+    method: 'ttest_welch',
+    variables: [],
+    conditions: [],
+    parameters: {},
+    assumptions: [],
+    missingPolicy: 'listwise',
+    alpha: 0.05,
+    correction: 'none',
+  });
+  show();
+  expect(screen.getByText('a-1').closest('a')).toHaveAttribute('href', '/p/project/analyses');
+  expect(screen.getByText(/kiểm định t Welch/)).toBeInTheDocument();
+});

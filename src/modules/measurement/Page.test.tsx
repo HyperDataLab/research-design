@@ -34,6 +34,42 @@ function setup({ draft = emptyDraft(), bank = true, readOnly = false, url = '/' 
   );
   return context;
 }
+it.each([
+  ['conditions', 'Điều kiện', 'c-1 đang được dùng bởi a-1, lưới chạy. Gỡ liên kết trước khi xoá.'],
+  ['datasets', 'Dataset', 'd-1 đang được dùng bởi lưới chạy. Gỡ liên kết trước khi xoá.'],
+])('DL-UI refuses deleting a referenced %s', async (tab, label, message) => {
+  const draft = emptyDraft();
+  draft.conditions.push({ id: 'c-1', name: 'Condition', baseline: true, params: {} });
+  draft.datasets.push({
+    id: 'd-1',
+    name: 'Data',
+    source: 'source',
+    version: null,
+    split: null,
+    sha256: null,
+    benchmark: null,
+  });
+  draft.analyses.push({
+    id: 'a-1',
+    hypothesis: null,
+    method: null,
+    variables: [],
+    conditions: ['c-1'],
+    parameters: {},
+    assumptions: [],
+    missingPolicy: 'listwise',
+    alpha: 0.05,
+    correction: 'none',
+  });
+  draft.runMatrix.conditions = ['c-1'];
+  draft.runMatrix.datasets = ['d-1'];
+  setup({ draft, url: `/?tab=${tab}` });
+  await screen.findByRole('tab', { name: new RegExp(label) });
+  fireEvent.click(screen.getByRole('button', { name: 'Xoá' }));
+  const dialog = screen.getByRole('alertdialog');
+  expect(within(dialog).getByText(message)).toBeInTheDocument();
+  expect(within(dialog).queryByRole('button', { name: 'Xoá' })).not.toBeInTheDocument();
+});
 it('ME-01 shows tab counts and adds a variable', async () => {
   const context = setup();
   fireEvent.click(await screen.findByRole('tab', { name: 'Biến (0)' }));

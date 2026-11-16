@@ -274,7 +274,9 @@ export default function Page() {
           title={`Xoá ${labels[tab].toLocaleLowerCase()}`}
           description={
             users(draft, deleting.id).length
-              ? `${deleting.id} đang được dùng bởi ${users(draft, deleting.id).join(', ')}. Gỡ liên kết trước khi xoá.`
+              ? `${deleting.id} đang được dùng bởi ${users(draft, deleting.id)
+                  .map((id) => (id === 'runMatrix' ? 'lưới chạy' : id))
+                  .join(', ')}. Gỡ liên kết trước khi xoá.`
               : `Xoá ${deleting.id} «${deleting.name}»?`
           }
           onClose={() => setDeleting(null)}
