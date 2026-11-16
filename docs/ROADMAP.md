@@ -34,8 +34,9 @@ One slice per PR. A slice is done when its acceptance line holds in CI and, for 
    `.firebaserc`.
 2. On the lab's Cloudflare account: decide the Worker name (suggested `researchdesign-worker`), bind the shared
    bucket `paper-fetch` with the prefix `researchdesign/`, set the LLM key with `wrangler secret put`.
-3. Send the requests in `docs/CONTRACTS.md` to whoever owns SRD, PaperLab and Paper Fetch Hub. S5, S6 and S11
-   wait for PaperLab and the Hub.
+3. Send the requests in `docs/CONTRACTS.md` and the API descriptions in `docs/API_REQUESTS.md` to whoever owns
+   SRD, PaperLab, Paper Fetch Hub and Writing Bank, and choose how callers are identified between the systems
+   (`docs/API_REQUESTS.md`, "Who is calling"). S5, S6 and S11 wait for PaperLab and the Hub.
 4. Say "Deploy now" when a version should go live.
 
 The Firebase project id and the Worker hostname in `firebase.json` (CSP) and `worker/wrangler.toml` are the suggested

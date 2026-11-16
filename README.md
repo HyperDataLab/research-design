@@ -4,7 +4,7 @@ From a set of papers to a frozen experiment plan that Scientific Research Deskto
 HyperDataLab internal. UI in Vietnamese.
 
 - What it is and the rules: [AGENTS.md](AGENTS.md)
-- Spec: [docs/PRD.md](docs/PRD.md) · contracts: [docs/CONTRACTS.md](docs/CONTRACTS.md) · progress: [docs/ROADMAP.md](docs/ROADMAP.md)
+- Spec: [docs/PRD.md](docs/PRD.md) · contracts: [docs/CONTRACTS.md](docs/CONTRACTS.md) · APIs between systems: [docs/API_REQUESTS.md](docs/API_REQUESTS.md) · progress: [docs/ROADMAP.md](docs/ROADMAP.md)
 - UI contract: [DESIGN.md](DESIGN.md) · product intent: [PRODUCT.md](PRODUCT.md)
 
 ```bash
