@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { PackageCheck, Search, Table2, type LucideIcon } from 'lucide-react';
+import { Search, Table2, type LucideIcon } from 'lucide-react';
 import type { ModuleDefinition } from '@/app/moduleTypes';
 
 /**
@@ -43,13 +43,5 @@ export const planned: ModuleDefinition[] = [
     'Bảng so sánh',
     'Mỗi bài một hàng: task, dataset, baseline, metric, thiết kế, kết quả; mỗi ô dẫn về câu gốc.',
     Table2,
-  ),
-  soon(
-    'package',
-    'plan',
-    3,
-    'Gói kế hoạch',
-    'Kiểm tra, đóng băng và xuất gói cho Scientific Research Desktop.',
-    PackageCheck,
   ),
 ];
