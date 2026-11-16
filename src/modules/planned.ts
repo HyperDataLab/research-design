@@ -1,6 +1,5 @@
 import { lazy } from 'react';
 import {
-  Boxes,
   FlaskConical,
   Grid3x3,
   HelpCircle,
@@ -102,13 +101,5 @@ export const planned: ModuleDefinition[] = [
     'Gói kế hoạch',
     'Kiểm tra, đóng băng và xuất gói cho Scientific Research Desktop.',
     PackageCheck,
-  ),
-  soon(
-    'bank',
-    'system',
-    1,
-    'Writing Bank',
-    'Phiên bản bank đang ghim: thiết kế, metric, benchmark, mối đe doạ.',
-    Boxes,
   ),
 ];
