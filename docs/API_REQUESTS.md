@@ -68,7 +68,9 @@ it signs in to is part of the same decision.
 
 ## A. Writing Bank → Research Design
 
-The bank plans `/bank/v1` (its backlog items Q6, Q7, C5, N4). This app needs two reads from it.
+The bank plans `/bank/v1` (its backlog items Q6, Q7, C5, N4). This app needs two reads from it. Writing Bank
+accepted this shape on 2026-11-17 with the changes written in below; it is not built yet, and going live waits for
+the owner.
 
 ### A1. `GET /bank/v1/release`
 
@@ -79,13 +81,15 @@ mới".
 { "release": "2026.11.2", "date": "2026-11-16T00:00:00Z", "notes": "…" }
 ```
 
-`release` is the bank's own identifier (C5), any string up to 64 characters that never names two contents.
+`release` is the bank's own identifier (C5), `YYYY.MM.N`, made when the bank is built; the same content never gets
+two identifiers. `date` is the build time.
 
 ### A2. `GET /bank/v1/snapshot`
 
 One release of the collections this app reads, in one answer. Query: `collections` (comma-separated; this app asks
 for `designs,threats,claim-types,metrics,protocols,benchmarks`) and optional `release` (default: the newest; a
-release that is no longer served answers `404`).
+release that is no longer served answers `404 not_found` naming it; the bank serves the newest three). An unknown
+name in `collections` answers `400 bad_request` naming it.
 
 ```json
 {
@@ -93,6 +97,8 @@ release that is no longer served answers `404`).
   "formatVersion": 1,
   "release": "2026.11.2",
   "date": "2026-11-16T00:00:00Z",
+  "includesDrafts": true,
+  "aliases": { "rd.old-id": "rd.new-id" },
   "collections": {
     "designs": [],
     "threats": [],
@@ -104,8 +110,13 @@ release that is no longer served answers `404`).
 }
 ```
 
-- The `ETag` is the release. The entries are the bank's own records, unchanged; this app reads the fields below and
+- The `ETag` is `"<release>"`. The entries are the bank's own records, unchanged; this app reads the fields below and
   ignores the rest, so the bank can add fields freely.
+- `aliases` maps an id that was renamed to its new id. Re-pinning a reference follows it; an id that is neither in
+  the release nor in `aliases` stays flagged for a person to resolve.
+- `includesDrafts` is true while the release contains entries the bank has not published. Today every entry of the
+  bank is a draft, and whether the API serves drafts at all is the owner's decision. This app shows the mark on
+  the Writing Bank screen and keeps showing each entry's `status`.
 - A person triggers the read ("Lấy bản mới"); the answer is stored as the project's `bank` document and every screen
   reads that copy. Nothing calls the bank per field or per keystroke.
 - Size today is well under 2 MiB. If a release grows past that, one request per collection with the same `release`
