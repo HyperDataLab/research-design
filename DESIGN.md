@@ -120,6 +120,11 @@ navigation and no icon rail: the labels are short and distinct.
   whether a newer release exists) and "Lấy bản mới" (fetches and stores it, with the same confirmation as
   replacing). A refused file states the one reason in a sentence, as for a paper model. Replacing a snapshot asks for
   confirmation in a Dialog when the draft holds references to the current one.
+- **Từ PaperLab** (Tập bài báo, only when PaperLab's address is configured): a secondary button "Thêm từ PaperLab"
+  opens a Dialog listing the papers PaperLab has published: title in the reading face, DOI in the mono face, who
+  published, and the state of its facts in words ("Chưa có dữ kiện", "Dữ kiện chưa duyệt", "Dữ kiện đã duyệt"). The
+  list is loaded when the Dialog opens. On the row of a paper whose model came from PaperLab, a text button "Lấy dữ
+  kiện", or "Cập nhật dữ kiện" once facts are stored. Results and refusals are one sentence in a toast.
 - **Câu hỏi và giả thuyết**: questions as Cards in one column, in id order. A question shows its id in the mono
   face, its text in the reading face, "Khoảng trống" (the gap, or the quiet line "Chưa ghi khoảng trống") and its
   papers as text links to Tập bài báo. Under it, its hypotheses as rows: id, statement in the reading face, a
