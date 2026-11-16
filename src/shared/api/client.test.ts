@@ -1,5 +1,33 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError, createApiClient } from './client';
+import { examplePlan } from '../../core/plan/examplePlan';
+
+it('CL-01 lists, reads and freezes plans and preserves validation issues', async () => {
+  const plan = examplePlan();
+  const fetcher = vi
+    .fn<typeof fetch>()
+    .mockResolvedValueOnce(
+      Response.json({ versions: [{ version: 1, frozenAt: plan.frozenAt, frozenBy: plan.frozenBy }] }),
+    )
+    .mockResolvedValueOnce(Response.json(plan))
+    .mockResolvedValueOnce(Response.json(plan, { status: 201 }))
+    .mockResolvedValueOnce(
+      Response.json(
+        { error: 'plan_invalid', message: 'Invalid', issues: [{ rule: 'PP-03' }] },
+        { status: 422 },
+      ),
+    );
+  const api = createApiClient({ baseUrl: '', getToken: async () => 'token', fetch: fetcher });
+  expect(await api.listPlans('project')).toHaveLength(1);
+  expect(await api.getPlan('project', 1)).toEqual(plan);
+  expect(await api.freezePlan('project', plan)).toEqual(plan);
+  await expect(api.freezePlan('project', plan)).rejects.toMatchObject({
+    status: 422,
+    code: 'plan_invalid',
+    issues: [{ rule: 'PP-03' }],
+  });
+  expect(fetcher.mock.calls[2]?.[1]).toMatchObject({ method: 'PUT', body: JSON.stringify(plan) });
+});
 describe('project client', () => {
   it('PJ-02 sends bearer token and parses the response', async () => {
     const fetcher = vi

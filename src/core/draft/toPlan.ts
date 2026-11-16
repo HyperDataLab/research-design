@@ -1,5 +1,6 @@
 import { PLAN_FORMAT, PLAN_SCHEMA_VERSION, planSchema, type ExperimentPlan } from '../plan/schema';
 import { runCount, type Draft } from './schema';
+import type { PapersDoc } from '../papers/papers';
 
 export function draftToPlan(
   draft: Draft,
@@ -12,6 +13,7 @@ export function draftToPlan(
     deviation: string | null;
     appVersion: string;
   },
+  papers?: PapersDoc,
 ): { ok: true; plan: ExperimentPlan } | { ok: false; issues: string[] } {
   const { appVersion, ...metadata } = meta;
   const candidate = {
@@ -36,13 +38,32 @@ export function draftToPlan(
     conditions: draft.conditions,
     runMatrix: { ...draft.runMatrix, expectedRuns: runCount(draft.runMatrix) },
     analyses: draft.analyses,
-    context: null,
+    context: {
+      questions: draft.questions.map((q) => ({
+        id: q.id,
+        text: q.text,
+        gap: q.gap || null,
+        hypotheses: draft.hypotheses.filter((h) => h.question === q.id).map((h) => h.id),
+      })),
+      design: draft.design,
+      threats: draft.threats.map(({ name, mitigation, bank }) => ({ name, mitigation, bank })),
+      sources: (papers?.papers ?? [])
+        .filter((p) => p.decision === 'included')
+        .map((p) => ({ title: p.title, doi: p.doi, sourceHash: p.model?.sourceHash ?? null })),
+      claims: draft.hypotheses.flatMap((h) => (h.claim ? [{ hypothesis: h.id, claimType: h.claim }] : [])),
+      constructs: draft.variables.flatMap((v) =>
+        v.construct ? [{ variable: v.id, construct: v.construct }] : [],
+      ),
+      metricProtocols: draft.metrics.flatMap((m) =>
+        m.protocolBank ? [{ metric: m.id, protocol: m.protocolBank }] : [],
+      ),
+    },
   };
   const parsed = planSchema.safeParse(candidate);
   return parsed.success
     ? { ok: true, plan: parsed.data }
     : {
         ok: false,
-        issues: parsed.error.issues.slice(0, 10).map((issue) => `${issue.path.join('.')}: ${issue.message}`),
+        issues: parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
       };
 }
