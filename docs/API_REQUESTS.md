@@ -143,6 +143,10 @@ file. PaperLab's Worker keeps PDFs and GROBID output, not paper models. So this 
 **PaperLab would keep a finished paper model on its server**, published by the person in charge of that paper.
 Until then this app keeps importing the file.
 
+PaperLab accepted B1 and B2 on 2026-11-17 and is building them in its existing Worker, with a "publish" action in
+its own app; B3 is agreed in shape and comes second; B4 is deferred. Reading from this app waits for the owner's
+decision on callers and for PaperLab's deploy.
+
 ### B1. `GET /v1/papers`
 
 Paper models that have been published. Query: `doi`, `sourceSha256`, `updatedSince`, `cursor`. Read when a person
@@ -166,7 +170,9 @@ opens "Thêm bài báo từ PaperLab" in a project.
 }
 ```
 
-`paperId` is PaperLab's stable id for the paper. `doi` and `sourceSha256` may be null. `experimentFacts` is `none`,
+`paperId` is `sha256:<sourceSha256>` when PaperLab knows the hash of the PDF (the key the Hub reports in C2), and
+PaperLab's own id otherwise; it is percent-encoded in a path. Publishing a paper again replaces the record and
+changes its `ETag` only when the content changed. `doi` and `sourceSha256` may be null. `experimentFacts` is `none`,
 `candidate` (made by a model, not reviewed) or `reviewed`.
 
 ### B2. `GET /v1/papers/:paperId/model`
@@ -175,17 +181,17 @@ The paper model exactly as PaperLab's published schema describes it (`schemas/ve
 here is a copy), with an `ETag`. This app validates it with that schema and stores it in the project; a newer
 `ETag` is shown as "PaperLab có bản mới" and replaced only when a person agrees.
 
-### B3. Experiment facts
+### B3. `GET /v1/papers/:paperId/experiment-facts`
 
-The facts Bảng so sánh shows, one row per paper. This app does not extract them (PRD D23). Either inside the paper
-model in a new schema version (preferred: one read, one schema) or as `GET /v1/papers/:paperId/experiment-facts`:
+The facts Bảng so sánh shows, one row per paper. This app does not extract them (PRD D23). They are a contract of
+their own, `paperlab-experiment-facts` v1, published by PaperLab with a JSON Schema and an invented example and
+vendored here like the paper model. They are a view of the measurement profile a person reviewed in PaperLab, not a
+new extraction. Field names are PaperLab's; the shape below is what this app needs them to say.
 
 ```json
 {
   "paperId": "…",
   "modelEtag": "…",
-  "run": { "id": "…", "promptVersion": "…", "model": "…", "at": "2026-11-16T09:00:00Z" },
-  "reviewedBy": null,
   "facts": [
     {
       "id": "f-1",
@@ -193,29 +199,38 @@ model in a new schema version (preferred: one read, one schema) or as `GET /v1/p
       "value": "92.4",
       "number": 92.4,
       "unit": "%",
+      "uncertainty": "± 0.3",
+      "condition": "…",
       "metric": "f-3",
       "dataset": "f-2",
-      "condition": "f-4",
-      "sentenceKeys": ["s-0042"],
+      "system": "f-4",
+      "sentenceKeys": [],
+      "tableCell": { "blockId": "…", "row": 3, "column": 2, "rowHeader": "…", "columnHeader": "…" },
       "status": "candidate"
     }
   ]
 }
 ```
 
-- `kind`: `task`, `dataset`, `baseline`, `method`, `metric`, `design`, `sample`, `result`.
-- `value` is the text as the paper states it. A `result` also has `number` and `unit`, and points to the facts of
-  kind `metric`, `dataset` and `baseline` or `method` it belongs to (`metric`, `dataset`, `condition`).
-- `sentenceKeys` are `sentences[].key` of the paper model at `modelEtag`. A fact with no sentence is not sent.
-- `status`: `candidate` or `accepted` (a person in PaperLab confirmed it). This app shows which is which and never
-  turns a candidate into an accepted fact.
+- `kind`: version 1 sends `dataset`, `baseline`, `method`, `metric` and `result`. `task`, `design` and `sample`
+  are reserved in the contract and not sent yet; the table shows those columns as not provided by PaperLab, and
+  this app does not fill them itself.
+- `value` is the text as the paper states it. A `result` also has `number` (null when the text is not a number),
+  `unit`, `uncertainty` and `condition` as text, and points by fact id to its `metric`, its `dataset` and the
+  `baseline` or `method` it belongs to (`system`), null where unknown.
+- **Anchors.** Every fact has `sentenceKeys` (keys of `sentences[]` in the model at `modelEtag`), or `tableCell`
+  (a block of that model, a row and a column, with the header texts when known), or both. A fact with neither is
+  not sent. Most results come from tables.
+- `status`: `candidate`, or `accepted` when a person in PaperLab accepted or edited it. This app shows which is
+  which and never turns a candidate into an accepted fact.
+- When the model has been published again and the facts have not, this app shows the facts as belonging to an older
+  model.
 
-### B4. `POST /v1/papers/:paperId/experiment-facts/requests`
+### B4. Asking for the facts of a paper (deferred)
 
-Asks PaperLab to produce the facts of a paper that has none. Body `{ "note": "…" }`. Answer `202` with
-`{ "requestId", "state" }`, where `state` is `requested`, `running`, `done` or `declined`; a second request for the
-same paper returns the first. PaperLab's person in charge decides when and whether it runs. The state is also
-readable through `experimentFacts` in B1.
+`POST /v1/papers/:paperId/experiment-facts/requests`, body `{ "note": "…" }`, answer `202` with
+`{ "requestId", "state" }`. PaperLab builds it once the owner has named who approves such runs there. Until then a
+paper whose `experimentFacts` is `none` is shown as having no facts, with no button to ask.
 
 ## C. Research Design → Paper Fetch Hub
 
