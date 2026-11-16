@@ -5,6 +5,8 @@ import { emailAllowed } from '../worker/src/auth';
 import { MemoryBucket } from '../worker/src/memoryBucket';
 export function devApi(): Plugin {
   const deps: Deps = {
+    llm: null,
+    llmProvider: 'dev',
     bucket: new MemoryBucket(),
     allowedOrigins: [],
     allowedDomain: 'hyperdatalab.org',

@@ -166,12 +166,12 @@ A usage entry is `{ id, at, projectId, feature, promptVersion, model, inputToken
 
 ### Endpoints
 
-| Method | Path            | Does                                                                                       |
-| ------ | --------------- | ------------------------------------------------------------------------------------------ |
-| GET    | `/v1/consent`   | `ConsentState`: what is required now, what this account accepted, whether a router is set. |
-| PUT    | `/v1/consent`   | Body `{ version, provider }`. Accepts only the current pair (`409 conflict` otherwise).    |
-| GET    | `/v1/llm/usage` | `UsageSummary` for the caller: today, this month, per feature today, the budget.           |
-| POST   | `/v1/llm/chat`  | Body `ChatRequest`. Returns `ChatResponse`.                                                |
+| Method | Path            | Does                                                                                                                    |
+| ------ | --------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/consent`   | `ConsentState`: what is required now, what this account accepted, whether a router is set.                              |
+| PUT    | `/v1/consent`   | Body `{ version, provider }`. Accepts only the current pair (`409 conflict` otherwise); returns the new `ConsentState`. |
+| GET    | `/v1/llm/usage` | `UsageSummary` for the caller: today, this month, per feature today, the budget.                                        |
+| POST   | `/v1/llm/chat`  | Body `ChatRequest`. Returns `ChatResponse`.                                                                             |
 
 New error codes: `consent_required` (403), `budget_exceeded` (429), `llm_not_configured` (503),
 `upstream_error` (502), `upstream_timeout` (504).

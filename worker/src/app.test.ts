@@ -9,6 +9,8 @@ function setup() {
   let time = '2026-11-16T09:00:00.000Z';
   const deps: Deps = {
     bucket,
+    llm: null,
+    llmProvider: 'test',
     allowedOrigins: ['https://app.test'],
     allowedDomain: 'hyperdatalab.org',
     now: () => new Date(time),

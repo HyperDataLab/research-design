@@ -6,6 +6,8 @@ import { addPaper, emptyPapersDoc, papersDocSchema } from '../../src/core/papers
 import { updateDoc } from '../../src/shared/api/updateDoc';
 it('PJ-05 client and Worker agree on project operations', async () => {
   const deps: Deps = {
+    llm: null,
+    llmProvider: 'test',
     bucket: new MemoryBucket(),
     allowedOrigins: [],
     allowedDomain: 'hyperdatalab.org',
@@ -26,6 +28,8 @@ it('PJ-05 client and Worker agree on project operations', async () => {
 });
 it('PA-12 retries a real conflict and preserves both papers', async () => {
   const deps: Deps = {
+    llm: null,
+    llmProvider: 'test',
     bucket: new MemoryBucket(),
     allowedOrigins: [],
     allowedDomain: 'hyperdatalab.org',
@@ -85,6 +89,8 @@ it('PA-12 retries a real conflict and preserves both papers', async () => {
 });
 it('PA-13 item operations use etags', async () => {
   const deps: Deps = {
+    llm: null,
+    llmProvider: 'test',
     bucket: new MemoryBucket(),
     allowedOrigins: [],
     allowedDomain: 'hyperdatalab.org',
