@@ -1,0 +1,12 @@
+{
+  "name": "researchdesign-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "jose": "^6.2.16"
+  }
+}

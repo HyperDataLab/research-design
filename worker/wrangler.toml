@@ -1,0 +1,16 @@
+name = "researchdesign-worker"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+# HyperDataLab's Cloudflare account (phuong@hyperdatalab.org). Never deploy lab workers to another account.
+account_id = "124949a79dc6c5894bc492942593cb51"
+
+[vars]
+# The Firebase project does not exist yet (docs/ROADMAP.md, "Owner steps"); this is the suggested id.
+FIREBASE_PROJECT_ID = "hyperdatalab-research-design"
+ALLOWED_DOMAIN = "hyperdatalab.org"
+ALLOWED_ORIGINS = "https://hyperdatalab-research-design.web.app,https://hyperdatalab-research-design.firebaseapp.com,http://localhost:5173,http://localhost:5195"
+
+# The lab's shared bucket; Research Design writes only under researchdesign/.
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "paper-fetch"
