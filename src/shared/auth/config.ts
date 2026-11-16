@@ -11,5 +11,8 @@ export const authMode: 'firebase' | 'dev' | 'unconfigured' = firebaseConfigured
     ? 'dev'
     : 'unconfigured';
 export const workerUrl: string = import.meta.env.VITE_WORKER_URL || '/api';
+/** Other lab systems (PRD D53). Empty means not configured: the screen offers the file import only. */
+export const bankUrl: string = (import.meta.env.VITE_BANK_API_URL ?? '').replace(/\/$/, '');
+export const paperlabUrl: string = (import.meta.env.VITE_PAPERLAB_API_URL ?? '').replace(/\/$/, '');
 
 export const allowedDomain = 'hyperdatalab.org';
