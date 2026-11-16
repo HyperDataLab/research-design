@@ -19,6 +19,17 @@ describe('draft edits', () => {
     d = doc(ops.addQuestion(d, q));
     expect(d.questions[0]?.id).toBe('q-2');
   });
+  it('DR-07 a deleted hypothesis or threat id never comes back', () => {
+    let d = doc(ops.addQuestion(emptyDraft(), q));
+    d = doc(ops.addHypothesis(d, h));
+    d = doc(ops.removeHypothesis(d, 'h-1'));
+    d = doc(ops.addHypothesis(d, h));
+    expect(d.hypotheses.map((x) => x.id)).toEqual(['h-2']);
+    d = doc(ops.addThreat(d, { name: 'One', mitigation: '', bank: null }));
+    d = doc(ops.removeThreat(d, 't-1'));
+    d = doc(ops.addThreat(d, { name: 'Two', mitigation: '', bank: null }));
+    expect(d.threats.map((x) => x.id)).toEqual(['t-2']);
+  });
   it('DR-02 validates references and keeps hypothesis fields', () => {
     expect(ops.addHypothesis(emptyDraft(), h)).toMatchObject({ error: 'unknown_question' });
     let d = doc(ops.addQuestion(emptyDraft(), q));

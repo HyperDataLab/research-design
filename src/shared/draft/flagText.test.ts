@@ -3,28 +3,28 @@ import { emptyDraft } from '@/core/draft/schema';
 import { flagText } from './flagText';
 it('DS-05 describes design, threat and claim references in words', () => {
   const d = emptyDraft();
-  d.design = { name: 'Benchmark evaluation', assignment: null, bank: null };
-  d.threats = [{ id: 't-1', name: 'Data leakage', mitigation: '', bank: null }];
+  d.design = { name: 'Test benchmark', assignment: null, bank: null };
+  d.threats = [{ id: 't-1', name: 'Test confound', mitigation: '', bank: null }];
   expect(
     flagText(
       {
         rule: 'DS-05',
         subject: 'design',
         reference: 'design',
-        id: 'rd.benchmark-evaluation',
+        id: 'rd.test-benchmark',
         reason: 'missing',
       },
       d,
       null,
     ),
-  ).toBe('Thiết kế «Benchmark evaluation» (rd.benchmark-evaluation) không còn trong bản chụp hiện tại.');
+  ).toBe('Thiết kế «Test benchmark» (rd.test-benchmark) không còn trong bản chụp hiện tại.');
   expect(
     flagText(
-      { rule: 'DS-05', subject: 't-1', reference: 'threat', id: 'vt.data-leakage', reason: 'missing' },
+      { rule: 'DS-05', subject: 't-1', reference: 'threat', id: 'vt.test-confound', reason: 'missing' },
       d,
       null,
     ),
-  ).toBe('t-1 «Data leakage»: mục vt.data-leakage không còn trong bản chụp hiện tại.');
+  ).toBe('t-1 «Test confound»: mục vt.test-confound không còn trong bản chụp hiện tại.');
   expect(
     flagText(
       { rule: 'DS-05', subject: 'h-1', reference: 'claim', id: 'ct.causal', reason: 'no_snapshot' },

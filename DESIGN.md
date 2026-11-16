@@ -113,8 +113,13 @@ navigation and no icon rail: the labels are short and distinct.
   "Thêm mối đe doạ" (secondary) adds one written by the person.
 - **Design flag.** A check of the draft against the snapshot (DS-01..DS-05) is shown on the object it is about
   as a warning Badge "Cần xem lại" followed by one sentence that names both sides, for example "H2 là nhận định
-  nhân quả; thiết kế «Benchmark evaluation» không hỗ trợ loại nhận định này." A flag never blocks saving. A
-  reference to an entry that the current snapshot no longer has says "Không còn trong bản chụp hiện tại".
+  nhân quả; thiết kế «Test benchmark» không hỗ trợ loại nhận định này." A flag never blocks saving. A
+  reference to an entry that the current snapshot no longer has says "… không còn trong bản chụp hiện tại";
+  this is said even when the reference also names an older snapshot. References that name an older snapshot
+  but still exist in the current one are not flagged row by row: Thiết kế nghiên cứu shows one line "Một số
+  tham chiếu thuộc bản chụp cũ nhưng vẫn có trong bản chụp hiện tại." with a ghost button "Ghim lại theo bản
+  chụp hiện tại". When every threat the design suggests is in the register, the suggestions are replaced by the
+  quiet line "Đã thêm mọi mối đe doạ mà thiết kế này gợi ý."
 - **Signed-out screens** that need the account show an Empty state that says what signing in gives and holds the
   "Đăng nhập" button; they never render an empty list.
 - **Dev sign-in.** On the dev server without Firebase config, the account button reads "Đăng nhập (dev)" and a

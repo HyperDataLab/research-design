@@ -35,8 +35,8 @@ export const draftHypothesisSchema = z.strictObject({
   question: questionId.nullable(),
   /**
    * What kind of claim confirming the hypothesis would make, chosen by the person from the bank's claim types.
-   * A design is checked against it (DS-01). It stays in the draft and the plan's `context`; the normative plan
-   * does not carry it.
+   * A design is checked against it (DS-01). It lives in the draft only: the frozen plan has no field for it
+   * yet (see PRD D26).
    */
   claim: claimTypeId.nullable(),
   /** Filled on Đo lường (S8). */
