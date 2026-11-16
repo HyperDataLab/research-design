@@ -52,11 +52,13 @@ other two files with the SHA-256 of their bytes. `plan.json` is the frozen plan 
 
 ## Vendored, read-only
 
-| File                                        | Owner    | Used for                                            |
-| ------------------------------------------- | -------- | --------------------------------------------------- |
-| `schemas/vendor/paper-model-v1.schema.json` | PaperLab | Validating imported papers; sentence `key` anchors. |
+| File                                             | Owner    | Used for                                                                                                |
+| ------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------- |
+| `schemas/vendor/paper-model-v1.schema.json`      | PaperLab | Validating imported papers; sentence `key` anchors.                                                     |
+| `schemas/vendor/experiment-facts-v1.schema.json` | PaperLab | Experiment facts of a paper (`paperlab-experiment-facts` v1), for Bảng so sánh. No reader is built yet. |
 
-Copied from `HyperDataLab/paper-lab` at commit `1a70680` (`main`) on 2026-11-16.
+Copied from `HyperDataLab/paper-lab` at commit `1a70680` (`main`) on 2026-11-16. The experiment-facts schema and its synthetic
+example (`schemas/vendor/experiment-facts-v1.example.json`) were copied at commit `5de309d` on 2026-11-17.
 `schemas/vendor/paper-model-v1.example.json` is PaperLab's own synthetic example (`examples/paper-model.example.json`,
 same commit); it is the test fixture. This repo is public: no real paper model and no paper text is committed.
 
