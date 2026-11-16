@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { chainOf } from '@/core/draft/checkChain';
 import type { Draft } from '@/core/draft/schema';
 import { Badge } from '@/shared/ui/Badge';
+import { methodWords } from './planText';
 import styles from './ChainLine.module.css';
 
 export function ChainLine({
@@ -15,6 +16,7 @@ export function ChainLine({
 }) {
   const chain = chainOf(draft, hypothesisId);
   if (!chain.hypothesis) return null;
+  const analyses = draft.analyses.filter((a) => a.hypothesis === hypothesisId);
   const target = `/p/${encodeURIComponent(projectId)}/measurement`;
   const link = (id: string, name?: string) => (
     <Link
@@ -29,11 +31,27 @@ export function ChainLine({
       <Badge tone="warning">Cần xem lại</Badge> {text}
     </span>
   );
+  const analysisLinks = () =>
+    analyses.length ? (
+      analyses.map((a) => (
+        <span key={a.id}>
+          {' '}
+          →{' '}
+          <Link to={`/p/${encodeURIComponent(projectId)}/analyses`}>
+            <span className={styles.id}>{a.id}</span>{' '}
+            {a.method ? methodWords(a.method) : 'chưa chọn phương pháp'}
+          </Link>
+        </span>
+      ))
+    ) : chain.hypothesis?.kind !== 'exploratory' ? (
+      <> → {warning('chưa có phân tích')}</>
+    ) : null;
   return (
     <div>
       {chain.dependent.length === 0 ? (
         <div>
           {link(hypothesisId)} → {warning('chưa gắn biến phụ thuộc')}
+          {analysisLinks()}
         </div>
       ) : (
         chain.dependent.map(({ variable, metric }, index) => (
@@ -53,6 +71,7 @@ export function ChainLine({
               ) : (
                 warning(variable.metric ? 'metric không tồn tại' : 'chưa có metric')
               ))}
+            {analysisLinks()}
           </div>
         ))
       )}

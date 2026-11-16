@@ -137,11 +137,38 @@ navigation and no icon rail: the labels are short and distinct.
   bank's limit as "Nhận định mạnh nhất mà metric tự nó hỗ trợ: …". A delete Dialog names the kind and the object
   ("Xoá metric", "Xoá m-1 «Name»?") and confirms with the Danger button. Deleting something that is still
   referred to is refused in the Dialog with a sentence naming what refers to it.
-- **Chain line** (shared component, used on Đo lường and on each hypothesis row of Câu hỏi và giả thuyết): one
-  line per dependent variable, "h-1 → v-2 Accuracy → m-1 `test/accuracy`", ids in the mono face, each object a
+- **Chain line** (shared component, used on Đo lường, Phân tích thống kê and each hypothesis row of Câu hỏi và
+  giả thuyết): one line per dependent variable, "h-1 → v-2 Accuracy → m-1 `test/accuracy`", followed on the
+  same line by the analyses of the hypothesis ("→ a-1 Welch t-test") or, for a hypothesis that is not
+  exploratory and has none, the warning "chưa có phân tích"; ids in the mono face, each object a
   text link to its tab. A missing link is said in place of the object, in `--warning` text with the Badge "Cần
   xem lại": "chưa gắn biến phụ thuộc", "chưa có metric", "metric chưa có key". Independent variables follow on a
   quiet second line with their levels ("Biến độc lập: v-1 Reranker (A, B)").
+- **Phân tích thống kê**: one Card per hypothesis, in id order, then a last Card "Không gắn giả thuyết". A Card
+  shows the hypothesis id and statement, its Chain line, and its analyses as rows: id in the mono face, the
+  method in words, a Badge "SRD chưa hỗ trợ" (warning) for a method SRD plans for later, then quiet lines
+  "Biến: v-1 Name, …", "So sánh: c-1 Name → c-2 Name" (in the stored order), "α = 0.05 · hiệu chỉnh: Holm ·
+  thiếu dữ liệu: loại theo danh sách", parameters as `name = value` in the mono face and the assumptions as a
+  list. Row actions Sửa and Xoá are ghost buttons; "Thêm phân tích" is a ghost button on each Card and the
+  page has no primary button. The Dialog: Phương pháp (Select grouped "SRD hỗ trợ ngay" / "SRD chưa hỗ trợ",
+  with one quiet sentence under it saying what the chosen method compares), Biến (Checkboxes; the hypothesis's
+  dependent variables are ticked for a new analysis), Điều kiện so sánh (an ordered list: a Select "Thêm điều
+  kiện" appends, each row has ghost buttons Lên, Xuống, Gỡ; a method that compares two conditions says so),
+  α, Hiệu chỉnh đa so sánh, Dữ liệu thiếu, Giả định (one per line), Tham số (name/value rows).
+- **Ma trận chạy**: three Cards. "Lưới chạy": Tên experiment MLflow (mono), Checkboxes for the conditions and
+  for the datasets of the draft (each with its id; a Badge "Baseline"), Seed as one TextField that takes
+  numbers and ranges ("0-4, 7") with the parsed list shown under it, and "Vì sao số lần chạy này là đủ"
+  (multiline); one primary button "Lưu lưới". "Số lần chạy": the count as a sentence in the reading face
+  ("3 điều kiện × 2 dataset × 5 seed = 30 lần chạy") and the checks of the grid. "Các ô đầu tiên": a table of
+  the first 20 cells (Điều kiện, Dataset, Seed, and the tags `plan.condition_id`, `plan.dataset_id`,
+  `plan.seed` in the mono face), the first column staying in view when the table scrolls sideways, with the
+  quiet line "plan.id và plan.version được gán khi đóng băng." and, past 20, "… và n ô nữa".
+- **What the screens add to the two patterns above.** A method's name starts with a capital where it opens a row
+  or an option ("Kiểm định t Welch") and is lower-case inside a sentence. In "Các ô đầu tiên" a cell shows the
+  id and the name ("c-1 Base") under a header that names the tag carrying the id. A read-only project shows the
+  saved grid as text. The top bar shows the project's title on the project page.
+- **In-use refusal.** Deleting anything that an analysis or the run grid refers to is refused like any other
+  object in use, with the sentence that names what refers to it.
 - **Design flag.** A check of the draft against the snapshot (DS-01..DS-05) is shown on the object it is about
   as a warning Badge "Cần xem lại" followed by one sentence that names both sides, for example "H2 là nhận định
   nhân quả; thiết kế «Test benchmark» không hỗ trợ loại nhận định này." A flag never blocks saving. A
@@ -168,7 +195,7 @@ navigation and no icon rail: the labels are short and distinct.
 - **Contrast is measured, not judged by eye.** All text, including `--text-faint` labels and placeholders, is at
   least 4.5:1 on every surface it sits on, in both themes. The border of anything operated (inputs, buttons,
   radios, checkboxes) uses `--control-border`, at least 3:1; `--border` and `--border-strong` are for dividers.
-- **Links to other entries are text links**, underlined, never pills. A list of them reads as a sentence
+- **Links to other entries are text links** in the accent colour, underlined on hover and focus, never pills. A list of them reads as a sentence
   ("H1, H2, H3"). Status words
   (Bắt buộc, Tuỳ chọn) are a quiet second line, not grey tags.
 - Semantic colours include `--danger`, `--success`, `--warning` with `--danger-soft` and `--warning-soft` surfaces,

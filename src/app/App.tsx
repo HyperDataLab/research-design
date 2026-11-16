@@ -28,6 +28,7 @@ function readTheme(): Theme {
 }
 export function App() {
   const [drawer, setDrawer] = useState(false);
+  const [projectTitle, setProjectTitle] = useState<{ id: string; title: string } | null>(null);
   const [theme, setTheme] = useState<Theme>(readTheme);
   const closeDrawer = useCallback(() => setDrawer(false), []);
   const location = useLocation();
@@ -36,6 +37,12 @@ export function App() {
       ? location.pathname.endsWith(`/${item.id}`)
       : location.pathname === item.path || location.pathname.startsWith(`${item.path}/`),
   );
+  const projectHome = location.pathname.match(/^\/p\/([^/]+)\/?$/);
+  const title = projectHome
+    ? projectTitle?.id === decodeURIComponent(projectHome[1]!)
+      ? projectTitle.title
+      : 'Dự án'
+    : (current?.label ?? 'Không tìm thấy');
   useEffect(() => {
     if (theme === 'system') delete document.documentElement.dataset.theme;
     else document.documentElement.dataset.theme = theme;
@@ -64,7 +71,7 @@ export function App() {
                   </IconButton>
                 </div>
                 <span className={styles.mobileTitle} aria-hidden="true">
-                  {current?.label ?? 'Không tìm thấy'}
+                  {title}
                 </span>
                 <div className={styles.topActions}>
                   <AccountButton />
@@ -86,7 +93,7 @@ export function App() {
               <main className={styles.content}>
                 <Suspense fallback={<Skeleton />}>
                   <Routes>
-                    <Route path="/p/:projectId" element={<ProjectLayout />}>
+                    <Route path="/p/:projectId" element={<ProjectLayout onProject={setProjectTitle} />}>
                       <Route index element={<ProjectHome />} />
                       {modules
                         .filter((item) => item.scope === 'project')

@@ -31,6 +31,8 @@ Run tags, set by the runner on every MLflow run of the plan: `plan.id`, `plan.ve
 3. Pre-fill `AnalysisSpecification` from `analyses[]`, and mark an analysis that differs from the plan.
 4. Keep `plan_id`, `plan_version`, `hypothesis_id` and `metric_id` in `StatisticalResult` and in the public
    provenance of the `PublicationPackage`.
+5. Name the keys `AnalysisSpecification.parameters` takes for each method (tails, equal variances, effect
+   size…). Until then a plan carries them as free name/value pairs (PRD D40).
 
 ## Vendored, read-only
 

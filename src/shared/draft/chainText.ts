@@ -29,7 +29,5 @@ export function chainFlagText(flag: ChainFlag, draft: Draft): string {
       return `${named(draft.datasets)} chưa có nguồn.`;
     case 'CH-08':
       return `${named(draft.variables)} tham chiếu metric không tồn tại.`;
-    case 'CH-09':
-      return 'Có nhiều điều kiện nhưng chưa chọn baseline.';
   }
 }

@@ -7,7 +7,7 @@ import { useAuth } from '@/shared/auth/authContext';
 import { Button } from '@/shared/ui/Button';
 import { Empty, Loading } from '@/shared/ui/StateNote';
 import { ProjectContext } from '@/shared/project/projectContext';
-export default function ProjectLayout() {
+export default function ProjectLayout({ onProject }: { onProject?: (project: Project) => void }) {
   const location = useLocation();
   const { projectId = '' } = useParams();
   const api = useApi();
@@ -21,6 +21,7 @@ export default function ProjectLayout() {
       (p) => {
         if (!active) return;
         setProject(p);
+        onProject?.(p);
         setError('');
         try {
           localStorage.setItem('last-project', p.id);
@@ -38,7 +39,7 @@ export default function ProjectLayout() {
     return () => {
       active = false;
     };
-  }, [api, projectId, user]);
+  }, [api, projectId, user, onProject]);
   if (!ready) return <Loading />;
   if (!user)
     return (
@@ -54,7 +55,16 @@ export default function ProjectLayout() {
     );
   if (!project || project.id !== projectId) return <Loading />;
   return (
-    <ProjectContext.Provider value={{ project, readOnly: project.archived, setProject }}>
+    <ProjectContext.Provider
+      value={{
+        project,
+        readOnly: project.archived,
+        setProject: (p) => {
+          setProject(p);
+          onProject?.(p);
+        },
+      }}
+    >
       {location.pathname.replace(/\/$/, '') !== `/p/${projectId}` && (
         <Link to={`/p/${projectId}`}>‹ {project.title}</Link>
       )}

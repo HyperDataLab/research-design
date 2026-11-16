@@ -36,6 +36,10 @@ export function users(doc: Draft, id: string): string[] {
   return [
     ...doc.hypotheses.filter((h) => h.independent.includes(id) || h.dependent.includes(id)).map((h) => h.id),
     ...doc.variables.filter((v) => v.metric === id).map((v) => v.id),
+    ...doc.analyses
+      .filter((a) => a.hypothesis === id || a.variables.includes(id) || a.conditions.includes(id))
+      .map((a) => a.id),
+    ...(doc.runMatrix.conditions.includes(id) || doc.runMatrix.datasets.includes(id) ? ['runMatrix'] : []),
   ];
 }
 
@@ -141,6 +145,7 @@ export function editDataset(doc: Draft, id: string, input: Dataset): DraftResult
 }
 export function removeDataset(doc: Draft, id: string): DraftResult {
   if (!doc.datasets.some((x) => x.id === id)) return fail('unknown_dataset');
+  if (users(doc, id).length) return fail('in_use');
   return ok({ ...doc, datasets: doc.datasets.filter((x) => x.id !== id) });
 }
 export function addCondition(doc: Draft, input: Condition): DraftResult {
@@ -164,6 +169,7 @@ export function editCondition(doc: Draft, id: string, input: Condition): DraftRe
 }
 export function removeCondition(doc: Draft, id: string): DraftResult {
   if (!doc.conditions.some((x) => x.id === id)) return fail('unknown_condition');
+  if (users(doc, id).length) return fail('in_use');
   return ok({ ...doc, conditions: doc.conditions.filter((x) => x.id !== id) });
 }
 export function setHypothesisVariables(

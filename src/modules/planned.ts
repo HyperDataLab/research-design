@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Grid3x3, PackageCheck, Search, Sigma, Table2, type LucideIcon } from 'lucide-react';
+import { PackageCheck, Search, Table2, type LucideIcon } from 'lucide-react';
 import type { ModuleDefinition } from '@/app/moduleTypes';
 
 /**
@@ -43,22 +43,6 @@ export const planned: ModuleDefinition[] = [
     'Bảng so sánh',
     'Mỗi bài một hàng: task, dataset, baseline, metric, thiết kế, kết quả; mỗi ô dẫn về câu gốc.',
     Table2,
-  ),
-  soon(
-    'analyses',
-    'plan',
-    1,
-    'Phân tích thống kê',
-    'Khai báo trước phép kiểm định cho từng giả thuyết.',
-    Sigma,
-  ),
-  soon(
-    'runs',
-    'plan',
-    2,
-    'Ma trận chạy',
-    'Điều kiện × dataset × seed, tên experiment và tag MLflow.',
-    Grid3x3,
   ),
   soon(
     'package',

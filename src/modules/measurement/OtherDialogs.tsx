@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { DraftCondition, DraftDataset } from '@/core/draft/schema';
+import { ParamsEditor } from '@/shared/draft/ParamsEditor';
 import { Button } from '@/shared/ui/Button';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { Dialog } from '@/shared/ui/Dialog';
@@ -63,11 +64,7 @@ export function ConditionDialog({
 }) {
   const [name, setName] = useState(initial?.name ?? '');
   const [baseline, setBaseline] = useState(initial?.baseline ?? false);
-  const [params, setParams] = useState<[string, string][]>(
-    Object.entries(initial?.params ?? {}).map(([k, v]) => [k, String(v)]),
-  );
-  const convert = (s: string): string | number | boolean =>
-    s === 'true' ? true : s === 'false' ? false : s.trim() && Number.isFinite(Number(s)) ? Number(s) : s;
+  const [params, setParams] = useState(initial?.params ?? {});
   return (
     <Dialog title="Điều kiện" description="Mô tả điều kiện chạy." onClose={close}>
       <form
@@ -77,7 +74,7 @@ export function ConditionDialog({
           void save({
             name,
             baseline,
-            params: Object.fromEntries(params.filter(([k]) => k.trim()).map(([k, v]) => [k, convert(v)])),
+            params,
           }).then((ok) => {
             if (ok) close();
           });
@@ -87,22 +84,7 @@ export function ConditionDialog({
         <Checkbox checked={baseline} onChange={(e) => setBaseline(e.target.checked)}>
           Là baseline
         </Checkbox>
-        {params.map(([key, value], i) => (
-          <div key={i}>
-            <TextField
-              label="Tên tham số"
-              value={key}
-              onChange={(e) => setParams(params.map((p, n) => (n === i ? [e.target.value, p[1]] : p)))}
-            />
-            <TextField
-              label="Giá trị"
-              value={value}
-              onChange={(e) => setParams(params.map((p, n) => (n === i ? [p[0], e.target.value] : p)))}
-            />
-            <Button onClick={() => setParams(params.filter((_, n) => n !== i))}>Xoá tham số</Button>
-          </div>
-        ))}
-        <Button onClick={() => setParams([...params, ['', '']])}>Thêm tham số</Button>
+        <ParamsEditor value={params} onChange={setParams} />
         <div className={styles.actions}>
           <Button onClick={close}>Hủy</Button>
           <Button type="submit" variant="primary">

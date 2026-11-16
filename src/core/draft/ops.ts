@@ -18,7 +18,10 @@ export type DraftError =
   | 'in_use'
   | 'wrong_role'
   | 'invalid_key'
-  | 'invalid_hash';
+  | 'invalid_hash'
+  | 'unknown_analysis'
+  | 'invalid_alpha'
+  | 'too_many_seeds';
 export type DraftResult = { ok: true; doc: Draft } | { ok: false; error: DraftError };
 type Q = Omit<DraftQuestion, 'id'>;
 type H = Pick<DraftHypothesis, 'statement' | 'kind' | 'question' | 'claim'>;
@@ -79,6 +82,7 @@ export function editHypothesis(doc: Draft, id: string, input: H): DraftResult {
 }
 export function removeHypothesis(doc: Draft, id: string): DraftResult {
   if (!doc.hypotheses.some((x) => x.id === id)) return fail('unknown_hypothesis');
+  if (doc.analyses.some((a) => a.hypothesis === id)) return fail('in_use');
   return ok({ ...doc, hypotheses: doc.hypotheses.filter((x) => x.id !== id) });
 }
 export function setDesign(doc: Draft, design: DraftDesign | null): DraftResult {
