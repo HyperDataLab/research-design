@@ -141,9 +141,7 @@ file. PaperLab's Worker keeps PDFs and GROBID output, not paper models. So this 
 **PaperLab would keep a finished paper model on its server**, published by the person in charge of that paper.
 Until then this app keeps importing the file.
 
-PaperLab accepted B1 and B2 on 2026-11-17 and is building them in its existing Worker, with a "publish" action in
-its own app; B3 is agreed in shape and comes second; B4 is deferred. Reading from this app waits for the owner's
-decision on callers and for PaperLab's deploy.
+State on 2026-11-17: B1 and B2 are merged in PaperLab (its Worker, and a "Công bố lên máy chủ lab" button in its app) and the `paperlab-experiment-facts` v1 contract is published and vendored here (`schemas/vendor/experiment-facts-v1.schema.json`). The B3 route is PaperLab's next step; B4 is deferred. Nothing is deployed. Reading from this app waits for the owner's decision on callers and for PaperLab's deploy.
 
 ### B1. `GET /v1/papers`
 

@@ -1,0 +1,72 @@
+{
+  "format": "paperlab-experiment-facts",
+  "schemaVersion": 1,
+  "paperId": "00000000-0000-4000-8000-000000000001",
+  "modelEtag": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "generatedAt": "2026-11-11T00:00:00.000Z",
+  "run": {
+    "id": "00000000-0000-4000-8000-0000000000aa",
+    "promptVersion": "v1",
+    "model": "test-model",
+    "at": "2026-01-02T00:00:00.000Z"
+  },
+  "facts": [
+    {
+      "id": "fact-1",
+      "kind": "metric",
+      "value": "Accuracy",
+      "number": null,
+      "unit": null,
+      "uncertainty": null,
+      "condition": null,
+      "metric": null,
+      "dataset": null,
+      "system": null,
+      "sentenceKeys": ["f070f37a466398fb#1"],
+      "tableCell": { "blockId": "t1", "row": 0, "column": 1, "rowHeader": null, "columnHeader": null },
+      "status": "candidate"
+    },
+    {
+      "id": "fact-2",
+      "kind": "baseline",
+      "value": "Baseline",
+      "number": null,
+      "unit": null,
+      "uncertainty": null,
+      "condition": null,
+      "metric": null,
+      "dataset": null,
+      "system": null,
+      "sentenceKeys": [],
+      "tableCell": {
+        "blockId": "t1",
+        "row": 1,
+        "column": 1,
+        "rowHeader": "Baseline",
+        "columnHeader": "Accuracy (%)"
+      },
+      "status": "candidate"
+    },
+    {
+      "id": "fact-3",
+      "kind": "result",
+      "value": "0.123",
+      "number": 0.123,
+      "unit": "%",
+      "uncertainty": "0.004",
+      "condition": null,
+      "metric": "fact-1",
+      "dataset": null,
+      "system": "fact-2",
+      "sentenceKeys": [],
+      "tableCell": {
+        "blockId": "t1",
+        "row": 1,
+        "column": 1,
+        "rowHeader": "Baseline",
+        "columnHeader": "Accuracy (%)"
+      },
+      "status": "candidate"
+    }
+  ]
+}
