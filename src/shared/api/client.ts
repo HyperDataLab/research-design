@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import {
+  chatResponseSchema,
+  consentStateSchema,
+  usageSummarySchema,
+  type ChatRequest,
+} from '../../core/llm/contract';
 import { projectSchema } from '../../core/project/schema';
 import type { DocKind, ItemCollection } from '../../core/project/storage';
 
@@ -75,6 +81,12 @@ export function createApiClient(options: {
     return next;
   }
   return {
+    getConsent: async () => consentStateSchema.parse(await call('/v1/consent')),
+    acceptConsent: async (version: number, provider: string) =>
+      consentStateSchema.parse(await call('/v1/consent', 'PUT', { version, provider })),
+    getUsage: async () => usageSummarySchema.parse(await call('/v1/llm/usage')),
+    chat: async (request: ChatRequest) =>
+      chatResponseSchema.parse(await call('/v1/llm/chat', 'POST', request)),
     getDoc: (projectId: string, kind: DocKind) => get(path(projectId, 'docs', kind)),
     putDoc: (projectId: string, kind: DocKind, data: unknown, etag: string | null) =>
       put(path(projectId, 'docs', kind), data, etag),

@@ -1,0 +1,24 @@
+.cards {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.reading {
+  font-family: var(--font-reading);
+  font-size: var(--text-reading);
+  line-height: 1.6;
+  max-width: 70ch;
+}
+.tableWrap {
+  overflow-x: auto;
+}
+.tableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.tableWrap th,
+.tableWrap td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}

@@ -17,6 +17,10 @@ const auth: AuthValue = {
 };
 function setup(getProject: ApiClient['getProject']) {
   const api: ApiClient = {
+    getConsent: vi.fn(),
+    acceptConsent: vi.fn(),
+    getUsage: vi.fn(),
+    chat: vi.fn(),
     getDoc: vi.fn(),
     putDoc: vi.fn(),
     listItems: vi.fn(),

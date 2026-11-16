@@ -17,6 +17,10 @@ const project = {
 };
 function setup(signedIn = true, projects = [project]) {
   const api: ApiClient = {
+    getConsent: vi.fn(),
+    acceptConsent: vi.fn(),
+    getUsage: vi.fn(),
+    chat: vi.fn(),
     getDoc: vi.fn(),
     putDoc: vi.fn(),
     listItems: vi.fn(),

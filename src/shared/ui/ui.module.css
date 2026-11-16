@@ -885,3 +885,20 @@
   color: var(--text-faint);
   pointer-events: none;
 }
+
+.meter {
+  background: var(--bg-sunken);
+  border-radius: var(--radius-pill);
+  height: var(--space-2);
+  overflow: hidden;
+}
+.meterFill {
+  height: 100%;
+  background: var(--accent);
+}
+.meter[data-tone='warning'] .meterFill {
+  background: var(--warning);
+}
+.meter[data-tone='over'] .meterFill {
+  background: var(--danger);
+}
