@@ -1,0 +1,30 @@
+.stages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+.stageTitle {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-lg);
+}
+.steps {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.steps li {
+  display: grid;
+  gap: var(--space-1);
+}
+.stepName {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+.stepSummary {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}

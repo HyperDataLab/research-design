@@ -1,0 +1,198 @@
+{
+  "format": "experiment-plan-package",
+  "schemaVersion": 1,
+  "planId": "retrieval-reranker",
+  "planVersion": 1,
+  "title": "Does a cross-encoder reranker improve retrieval accuracy at acceptable latency?",
+  "frozenAt": "2026-11-16T09:00:00Z",
+  "frozenBy": "member@example.org",
+  "deviation": null,
+  "generator": {
+    "app": "research-design",
+    "version": "0.1.0"
+  },
+  "hypotheses": [
+    {
+      "id": "h-accuracy",
+      "statement": "The reranked pipeline has higher accuracy than the BM25 baseline.",
+      "kind": "directional",
+      "independent": [
+        "v-pipeline"
+      ],
+      "dependent": [
+        "v-accuracy"
+      ]
+    },
+    {
+      "id": "h-latency",
+      "statement": "Latency differs between the pipelines.",
+      "kind": "exploratory",
+      "independent": [
+        "v-pipeline"
+      ],
+      "dependent": [
+        "v-latency"
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "id": "v-pipeline",
+      "name": "Retrieval pipeline",
+      "role": "independent",
+      "metric": null,
+      "levels": [
+        "bm25",
+        "dense",
+        "dense+rerank"
+      ]
+    },
+    {
+      "id": "v-accuracy",
+      "name": "Answer accuracy",
+      "role": "dependent",
+      "metric": "m-accuracy",
+      "levels": []
+    },
+    {
+      "id": "v-latency",
+      "name": "Query latency",
+      "role": "dependent",
+      "metric": "m-latency",
+      "levels": []
+    }
+  ],
+  "metrics": [
+    {
+      "id": "m-accuracy",
+      "name": "Accuracy",
+      "key": "test/accuracy",
+      "unit": "proportion",
+      "goal": "maximize",
+      "aggregation": "last",
+      "protocol": "Exact match on the test split, one evaluation at the end of the run.",
+      "bank": null
+    },
+    {
+      "id": "m-latency",
+      "name": "Median latency",
+      "key": "test/latency_p50_ms",
+      "unit": "ms",
+      "goal": "minimize",
+      "aggregation": "last",
+      "protocol": "Median over all test queries, batch size 1, warm cache.",
+      "bank": null
+    }
+  ],
+  "datasets": [
+    {
+      "id": "d-main",
+      "name": "Main benchmark",
+      "source": "https://example.org/dataset",
+      "version": "1.0",
+      "split": "test",
+      "sha256": null,
+      "benchmark": null
+    }
+  ],
+  "conditions": [
+    {
+      "id": "c-bm25",
+      "name": "BM25",
+      "baseline": true,
+      "params": {
+        "retriever": "bm25"
+      }
+    },
+    {
+      "id": "c-dense",
+      "name": "Dense",
+      "baseline": false,
+      "params": {
+        "retriever": "dense"
+      }
+    },
+    {
+      "id": "c-rerank",
+      "name": "Dense + reranker",
+      "baseline": false,
+      "params": {
+        "retriever": "dense",
+        "rerank": true
+      }
+    }
+  ],
+  "runMatrix": {
+    "mlflowExperiment": "retrieval-reranker-v1",
+    "conditions": [
+      "c-bm25",
+      "c-dense",
+      "c-rerank"
+    ],
+    "datasets": [
+      "d-main"
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "expectedRuns": 30,
+    "sampleSizeJustification": "Ten seeds per condition, the number the closest prior study used."
+  },
+  "analyses": [
+    {
+      "id": "a-accuracy",
+      "hypothesis": "h-accuracy",
+      "method": "ttest_welch",
+      "variables": [
+        "v-accuracy"
+      ],
+      "conditions": [
+        "c-bm25",
+        "c-rerank"
+      ],
+      "parameters": {
+        "alternative": "greater"
+      },
+      "assumptions": [
+        "Runs are independent across seeds."
+      ],
+      "missingPolicy": "fail",
+      "alpha": 0.05,
+      "correction": "none"
+    }
+  ],
+  "context": {
+    "questions": [
+      {
+        "id": "q-main",
+        "text": "Is reranking worth its latency cost?",
+        "hypotheses": [
+          "h-accuracy",
+          "h-latency"
+        ]
+      }
+    ],
+    "design": {
+      "name": "Controlled experiment",
+      "assignment": "none",
+      "bank": null
+    },
+    "threats": [
+      {
+        "name": "Single benchmark",
+        "mitigation": "Claims are limited to this benchmark.",
+        "bank": null
+      }
+    ],
+    "sources": []
+  }
+}

@@ -1,0 +1,501 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hyperdatalab-paragraph-lab.web.app/schemas/paper-model-v1.schema.json",
+  "title": "PaperLab paper model, version 1",
+  "description": "One paper as PaperLab models it: metadata, section tree, blocks, references, the sentence index with content keys, and sentence annotations (PaperLab rhetoric and stance today; CoreSC, AZ-II and NLPContributionGraph in later slices). Generated from PaperLab code; consumers must reject any other schemaVersion.",
+  "type": "object",
+  "properties": {
+    "format": { "type": "string", "const": "paperlab-paper-model" },
+    "schemaVersion": { "type": "number", "const": 1 },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+    },
+    "generator": {
+      "type": "object",
+      "properties": {
+        "app": { "type": "string", "const": "PaperLab" },
+        "segmenterVersion": { "type": "string" },
+        "sentenceKeyVersion": { "type": "string" },
+        "parserVersion": { "type": ["string", "null"] }
+      },
+      "required": ["app", "segmenterVersion", "sentenceKeyVersion", "parserVersion"],
+      "additionalProperties": false
+    },
+    "document": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": { "type": "string", "enum": ["pdf", "latex", "markdown", "text"] },
+            "sha256": { "type": ["string", "null"] },
+            "pageCount": {
+              "anyOf": [
+                { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["kind", "sha256", "pageCount"],
+          "additionalProperties": false
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "authors": { "type": "array", "items": { "type": "string" } },
+            "affiliations": { "type": "array", "items": { "type": "string" } },
+            "doi": { "type": ["string", "null"] },
+            "year": {
+              "anyOf": [
+                { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+                { "type": "null" }
+              ]
+            },
+            "venue": { "type": ["string", "null"] },
+            "volume": { "type": ["string", "null"] },
+            "issue": { "type": ["string", "null"] },
+            "pages": { "type": ["string", "null"] },
+            "keywords": { "type": "array", "items": { "type": "string" } },
+            "abstract": { "type": ["string", "null"] },
+            "source": { "type": "string", "enum": ["manual", "openalex", "library", "parsed"] }
+          },
+          "required": [
+            "title",
+            "authors",
+            "affiliations",
+            "doi",
+            "year",
+            "venue",
+            "volume",
+            "issue",
+            "pages",
+            "keywords",
+            "abstract",
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "parentId": { "type": ["string", "null"] },
+              "title": { "type": "string" },
+              "level": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "title",
+                  "abstract",
+                  "introduction",
+                  "methods",
+                  "results",
+                  "discussion",
+                  "conclusion",
+                  "related_work",
+                  "references",
+                  "appendix",
+                  "other"
+                ]
+              },
+              "page": {
+                "anyOf": [
+                  { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["id", "parentId", "title", "level", "role", "page"],
+            "additionalProperties": false
+          }
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "sectionId": { "type": "string" },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "body",
+                  "caption",
+                  "equation",
+                  "list",
+                  "reference",
+                  "heading_like",
+                  "footnote",
+                  "table"
+                ]
+              },
+              "page": {
+                "anyOf": [
+                  { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 },
+                  { "type": "null" }
+                ]
+              },
+              "text": { "type": "string" },
+              "textHash": { "type": "string" }
+            },
+            "required": ["id", "sectionId", "kind", "page", "text", "textHash"],
+            "additionalProperties": false
+          }
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "pattern": "^ref\\d+$" },
+              "text": { "type": "string" },
+              "year": {
+                "anyOf": [
+                  { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+                  { "type": "null" }
+                ]
+              },
+              "doi": { "type": ["string", "null"] }
+            },
+            "required": ["id", "text", "year", "doi"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["source", "metadata", "sections", "blocks", "references"],
+      "additionalProperties": false
+    },
+    "sentences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string", "pattern": "^[0-9a-f]{16}#\\d+$" },
+          "displayId": { "type": "string" },
+          "paragraphId": { "type": "string" },
+          "sectionId": { "type": "string" },
+          "page": {
+            "anyOf": [
+              { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "start": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "end": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "text": { "type": "string" }
+        },
+        "required": ["key", "displayId", "paragraphId", "sectionId", "page", "start", "end", "text"],
+        "additionalProperties": false
+      }
+    },
+    "annotations": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "key": { "type": "string" },
+              "attrs": {
+                "type": "object",
+                "propertyNames": { "type": "string" },
+                "additionalProperties": { "type": ["string", "number", "boolean", "null"] }
+              },
+              "span": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "start": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                      "end": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "text": { "type": "string" },
+              "origin": { "type": "string", "enum": ["rule", "ai", "human"] },
+              "state": { "type": "string", "enum": ["machine", "confirmed", "rejected"] },
+              "source": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "runId": { "type": "string" },
+                      "model": { "type": "string" },
+                      "promptVersion": { "type": "string" }
+                    },
+                    "required": ["runId", "model", "promptVersion"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "second": { "type": ["string", "null"] },
+              "scheme": { "type": "string", "const": "paperlab-rhetoric" },
+              "label": {
+                "type": "string",
+                "enum": [
+                  "territory",
+                  "niche",
+                  "occupy",
+                  "result_statement",
+                  "comparison",
+                  "explanation",
+                  "limitation",
+                  "implication",
+                  "threat_internal",
+                  "threat_external",
+                  "threat_construct",
+                  "threat_conclusion",
+                  "data_availability",
+                  "code_availability"
+                ]
+              }
+            },
+            "required": [
+              "key",
+              "attrs",
+              "span",
+              "text",
+              "origin",
+              "state",
+              "source",
+              "second",
+              "scheme",
+              "label"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "key": { "type": "string" },
+              "attrs": {
+                "type": "object",
+                "propertyNames": { "type": "string" },
+                "additionalProperties": { "type": ["string", "number", "boolean", "null"] }
+              },
+              "span": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "start": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                      "end": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "text": { "type": "string" },
+              "origin": { "type": "string", "enum": ["rule", "ai", "human"] },
+              "state": { "type": "string", "enum": ["machine", "confirmed", "rejected"] },
+              "source": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "runId": { "type": "string" },
+                      "model": { "type": "string" },
+                      "promptVersion": { "type": "string" }
+                    },
+                    "required": ["runId", "model", "promptVersion"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "second": { "type": ["string", "null"] },
+              "scheme": { "type": "string", "const": "paperlab-stance" },
+              "label": {
+                "type": "string",
+                "enum": [
+                  "hedges",
+                  "boosters",
+                  "attitude_markers",
+                  "self_mention",
+                  "reader_pronouns",
+                  "directives",
+                  "questions",
+                  "knowledge_reference",
+                  "asides"
+                ]
+              }
+            },
+            "required": [
+              "key",
+              "attrs",
+              "span",
+              "text",
+              "origin",
+              "state",
+              "source",
+              "second",
+              "scheme",
+              "label"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "key": { "type": "string" },
+              "attrs": {
+                "type": "object",
+                "propertyNames": { "type": "string" },
+                "additionalProperties": { "type": ["string", "number", "boolean", "null"] }
+              },
+              "span": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "start": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                      "end": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "text": { "type": "string" },
+              "origin": { "type": "string", "enum": ["rule", "ai", "human"] },
+              "state": { "type": "string", "enum": ["machine", "confirmed", "rejected"] },
+              "source": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "runId": { "type": "string" },
+                      "model": { "type": "string" },
+                      "promptVersion": { "type": "string" }
+                    },
+                    "required": ["runId", "model", "promptVersion"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "second": { "type": ["string", "null"] },
+              "scheme": { "type": "string", "enum": ["coresc", "az2", "ncg-unit"] },
+              "label": { "type": "string" }
+            },
+            "required": [
+              "key",
+              "attrs",
+              "span",
+              "text",
+              "origin",
+              "state",
+              "source",
+              "second",
+              "scheme",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "annotationRuns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "enum": ["paperlab-rhetoric", "paperlab-stance", "coresc", "az2", "ncg-unit"]
+          },
+          "runId": { "type": "string" },
+          "model": { "type": "string" },
+          "promptVersion": { "type": "string" },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "items": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "skipped": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+        },
+        "required": ["scheme", "runId", "model", "promptVersion", "createdAt", "items", "skipped"],
+        "additionalProperties": false
+      }
+    },
+    "knowledge": {
+      "type": "object",
+      "properties": {
+        "phrases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "key": { "type": "string" },
+              "start": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              "end": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              "text": { "type": "string" }
+            },
+            "required": ["id", "key", "start", "end", "text"],
+            "additionalProperties": false
+          }
+        },
+        "triples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "ResearchProblem",
+                  "Approach",
+                  "Model",
+                  "Code",
+                  "Dataset",
+                  "ExperimentalSetup",
+                  "Hyperparameters",
+                  "Baselines",
+                  "Results",
+                  "Tasks",
+                  "Experiments",
+                  "AblationAnalysis"
+                ]
+              },
+              "subject": { "type": "string" },
+              "predicate": { "type": "string" },
+              "object": { "type": "string" },
+              "key": { "type": "string" }
+            },
+            "required": ["unit", "subject", "predicate", "object", "key"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["phrases", "triples"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "format",
+    "schemaVersion",
+    "generatedAt",
+    "generator",
+    "document",
+    "sentences",
+    "annotations",
+    "annotationRuns",
+    "knowledge"
+  ],
+  "additionalProperties": false
+}

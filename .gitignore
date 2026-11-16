@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+*.log
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+.firebase
+firebase-debug.log*
+.DS_Store
+.tmp
+.vscode/*
+!.vscode/extensions.json
+*.pdf
