@@ -4,16 +4,16 @@ One slice per PR. A slice is done when its acceptance line holds in CI and, for 
 
 ## Done
 
-| Slice | What                                                                                                                                                        |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| S0    | Repo, tooling, shell with the planned screens, plan contract v1 with its gate and tests, docs.                                                              |
-| S1    | Worker: auth, projects, documents, items and frozen plans on R2 (`docs/WORKER_API.md`), tests WK-01..WK-12. Not deployed; never run in the Workers runtime. |
+| Slice | What                                                                                                                                                                                                                     |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| S0    | Repo, tooling, shell with the planned screens, plan contract v1 with its gate and tests, docs.                                                                                                                           |
+| S1    | Worker: auth, projects, documents, items and frozen plans on R2 (`docs/WORKER_API.md`), tests WK-01..WK-12. Not deployed; never run in the Workers runtime.                                                              |
+| S2    | Sign-in (Google, lab domain; dev sign-in on the dev server), Dự án list with create, rename, archive, and the project page at `/p/<id>`. Tests PJ-01..PJ-15. Real Google sign-in not exercised: no Firebase project yet. |
 
 ## Next
 
 | Slice | What                                                            | Requirements           | Done when                                                       |
 | ----- | --------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------- |
-| S2    | Sign-in and project list                                        | FR-101, FR-102         | A member sees their projects after reload.                      |
 | S2b   | Members of a project: add and remove by email (owner only)      | FR-102                 | A removed member no longer sees the project.                    |
 | S3    | Tập bài báo: paper-model import, decisions log                  | FR-201, FR-202         | A v1 model imports; another version is refused with its reason. |
 | S4    | Worker LLM proxy, consent, ledger, budget                       | FR-601..604            | A call over budget is refused; the ledger shows it.             |
@@ -28,9 +28,8 @@ One slice per PR. A slice is done when its acceptance line holds in CI and, for 
 
 ## Owner steps (not done by agents)
 
-0. **GitHub Actions does not start jobs for the organisation** ("recent account payments have failed or your
-   spending limit needs to be increased", seen 2026-11-16 on this repo and on writing-bank). Until billing is
-   fixed, CI has never run here and `scripts/deploy.sh` refuses to deploy.
+0. GitHub Actions did not start jobs for the organisation's private repos (billing, seen 2026-11-16). This repo
+   was made public that day and its CI runs; the private lab repos are still affected.
 1. Create the Firebase project (suggested id `hyperdatalab-research-design`), enable Google sign-in, add
    `.firebaserc`.
 2. On the lab's Cloudflare account: decide the Worker name (suggested `researchdesign-worker`), bind the shared
