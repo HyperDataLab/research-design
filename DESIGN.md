@@ -43,6 +43,26 @@ navigation and no icon rail: the labels are short and distinct.
 - **Gate checklist** (Gói kế hoạch): the rules PP-01..PP-10 as a list; each line states the rule in words, its
   result in words (Đạt, Chặn, Cảnh báo) and links to the object at fault. Freezing is the page's one primary
   button and is disabled while a blocking issue remains, with the reason beside it.
+- **Gói kế hoạch** (the screen): three Cards.
+  "Bản nháp hiện tại": Tên kế hoạch (a TextField saved with a secondary button "Lưu tên"; the project's title is
+  the placeholder), then one of three states. Not yet a plan: the sentence "Bản nháp chưa đủ để thành kế
+  hoạch." and a list of what is missing, each line in words with a text link to the screen where it is fixed
+  ("Chưa có giả thuyết nào", "m-1 «Name» còn thiếu: key, đơn vị", "Thiết kế chưa chọn cách phân nhóm", "t-2
+  «Name» chưa ghi cách giảm"). A plan: the gate checklist (above), one line per rule PP-01..PP-10 in Vietnamese
+  with Đạt, Chặn or Cảnh báo and the objects at fault as links. No change: "Bản nháp không khác phiên bản n."
+  The page's one primary button is "Đóng băng phiên bản n"; it is disabled, with the reason beside it, while
+  the draft is not a plan, a rule blocks, or nothing changed. It opens a Dialog that states the version, the
+  number of runs and the warnings that remain, asks for "Thay đổi so với phiên bản trước và lý do" (required)
+  from version 2 on, and confirms with "Đóng băng". A refusal by the server is shown in the Dialog in one
+  sentence (someone else froze this version: the list is reloaded).
+  "Các phiên bản đã đóng băng": newest first, each row "Phiên bản n · người đóng băng · ngày giờ", its
+  deviation note in the reading face, and ghost buttons "Xem", "Tải gói (.zip)", "Mã mẫu cho runner".
+  "Xem" opens a Drawer with the plan as readable text (the same content as `plan.md`), labelled "Phiên bản n ·
+  đã đóng băng · chỉ đọc". "Mã mẫu cho runner" opens a Drawer with three blocks in the mono face (MLflow tags in
+  Python, Hydra, W&B), each with "Sao chép" and "Tải về", under the sentence "Điểm bắt đầu cho mã chạy; ứng
+  dụng này không chạy chúng."
+  "Cờ trên bản nháp": the count of open draft flags per screen as text links ("Đo lường: 2"), or "Không còn cờ
+  nào." An archived project shows versions and downloads only.
 - **Frozen content** is read-only and labelled with its version and date. "Tạo phiên bản mới" asks for the
   deviation note first.
 - **Cost before action**: a button that starts AI work on more than one paper states the estimated tokens and

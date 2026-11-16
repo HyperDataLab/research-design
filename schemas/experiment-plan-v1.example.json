@@ -175,6 +175,7 @@
       {
         "id": "q-main",
         "text": "Is reranking worth its latency cost?",
+        "gap": "Earlier comparisons report accuracy without latency.",
         "hypotheses": [
           "h-accuracy",
           "h-latency"
@@ -193,6 +194,19 @@
         "bank": null
       }
     ],
-    "sources": []
+    "sources": [],
+    "claims": [
+      {
+        "hypothesis": "h-accuracy",
+        "claimType": "ct.comparative"
+      }
+    ],
+    "constructs": [
+      {
+        "variable": "v-accuracy",
+        "construct": "How often the first result answers the query"
+      }
+    ],
+    "metricProtocols": []
   }
 }

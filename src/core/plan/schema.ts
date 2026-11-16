@@ -136,7 +136,23 @@ export const analysisSchema = z.strictObject({
 
 /** Why the plan looks the way it does. SRD may ignore this block. */
 export const contextSchema = z.strictObject({
-  questions: z.array(z.strictObject({ id: localId('q'), text, hypotheses: z.array(hypothesisId) })),
+  questions: z.array(
+    z.strictObject({
+      id: localId('q'),
+      text,
+      /** The gap in earlier work the question answers, in the person's words. */
+      gap: z.string().trim().min(1).nullable(),
+      hypotheses: z.array(hypothesisId),
+    }),
+  ),
+  /** What kind of claim confirming a hypothesis would make: a Writing Bank claim type (`ct.causal`, …). */
+  claims: z.array(z.strictObject({ hypothesis: hypothesisId, claimType: text })),
+  /** The concept a variable stands for. */
+  constructs: z.array(z.strictObject({ variable: variableId, construct: text })),
+  /** The Writing Bank protocol a metric's measurement follows. */
+  metricProtocols: z.array(
+    z.strictObject({ metric: metricId, protocol: z.strictObject({ id: text, release: text }) }),
+  ),
   design: z
     .strictObject({ name: text, assignment: z.enum(['random', 'non_random', 'none']), bank: bankRef })
     .nullable(),

@@ -545,6 +545,17 @@
                     "type": "string",
                     "minLength": 1
                   },
+                  "gap": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "hypotheses": {
                     "type": "array",
                     "items": {
@@ -556,7 +567,85 @@
                 "required": [
                   "id",
                   "text",
+                  "gap",
                   "hypotheses"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "claims": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "hypothesis": {
+                    "type": "string",
+                    "pattern": "^h-[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "claimType": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "hypothesis",
+                  "claimType"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "constructs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "variable": {
+                    "type": "string",
+                    "pattern": "^v-[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "construct": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "variable",
+                  "construct"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "metricProtocols": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "metric": {
+                    "type": "string",
+                    "pattern": "^m-[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "protocol": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "release": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "release"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "metric",
+                  "protocol"
                 ],
                 "additionalProperties": false
               }
@@ -696,6 +785,9 @@
           },
           "required": [
             "questions",
+            "claims",
+            "constructs",
+            "metricProtocols",
             "design",
             "threats",
             "sources"
