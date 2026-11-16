@@ -35,6 +35,9 @@ export function setupClient() {
     return next;
   };
   const api: ApiClient = {
+    listPlans: vi.fn(async () => []),
+    getPlan: vi.fn(),
+    freezePlan: vi.fn(),
     getConsent: vi.fn(),
     acceptConsent: vi.fn(),
     getUsage: vi.fn(),

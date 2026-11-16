@@ -24,6 +24,18 @@ How it maps onto SRD's objects:
 Run tags, set by the runner on every MLflow run of the plan: `plan.id`, `plan.version`,
 `plan.condition_id`, `plan.dataset_id`, `plan.seed`.
 
+### The `context` block (optional for SRD)
+
+`questions` (with the `gap` each answers), `design`, `threats`, `sources` (the project's included papers:
+title, DOI, the paper model's source hash), `claims` (hypothesis → Writing Bank claim type), `constructs`
+(variable → the concept it stands for), `metricProtocols` (metric → the bank protocol followed). References in
+it are checked by PP-02 like any other. A reader that only runs the plan can ignore the whole block.
+
+### The package
+
+A ZIP with `manifest.json`, `plan.json` and `plan.md`, stored without compression. `manifest.json` lists the
+other two files with the SHA-256 of their bytes. `plan.json` is the frozen plan exactly as the Worker stored it.
+
 ### Requests to SRD (not yet sent)
 
 1. Accept a plan package as an input of a project (new requirement next to FR-103).

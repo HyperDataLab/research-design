@@ -176,6 +176,8 @@ const counter = z.number().int().positive();
 
 export const draftSchema = z.strictObject({
   schemaVersion: z.literal(DRAFT_SCHEMA_VERSION),
+  /** The plan's title. Empty until written; the project's title is used then. Added with Gói kế hoạch (S10). */
+  planTitle: z.string().trim().default(''),
   /** The next number for each id prefix. A number is used once, so a deleted object's id never comes back. */
   next: z.strictObject({
     q: counter,
@@ -214,6 +216,7 @@ export type DraftRunMatrix = Draft['runMatrix'];
 
 export const emptyDraft = (): Draft => ({
   schemaVersion: DRAFT_SCHEMA_VERSION,
+  planTitle: '',
   next: { q: 1, h: 1, t: 1, v: 1, m: 1, d: 1, c: 1, a: 1 },
   questions: [],
   hypotheses: [],

@@ -67,6 +67,10 @@ export function validatePlan(plan: ExperimentPlan): PlanIssue[] {
   }
   for (const question of plan.context?.questions ?? [])
     for (const id of question.hypotheses) need('hypothesis', id, question.id);
+  for (const claim of plan.context?.claims ?? []) need('hypothesis', claim.hypothesis, 'context.claims');
+  for (const item of plan.context?.constructs ?? []) need('variable', item.variable, 'context.constructs');
+  for (const item of plan.context?.metricProtocols ?? [])
+    need('metric', item.metric, 'context.metricProtocols');
 
   // PP-03: the grid is what it says it is.
   const { conditions, datasets, seeds, expectedRuns } = plan.runMatrix;

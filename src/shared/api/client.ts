@@ -7,12 +7,14 @@ import {
 } from '../../core/llm/contract';
 import { projectSchema } from '../../core/project/schema';
 import type { DocKind, ItemCollection } from '../../core/project/storage';
+import { planSchema, type ExperimentPlan } from '../../core/plan/schema';
 
 export class ApiError extends Error {
   constructor(
     readonly status: number,
     readonly code: string,
     message: string,
+    readonly issues?: unknown,
   ) {
     super(message);
   }
@@ -47,12 +49,13 @@ export function createApiClient(options: {
     }
     if (!response.ok) {
       const error = z
-        .object({ error: z.string(), message: z.string() })
+        .object({ error: z.string(), message: z.string(), issues: z.unknown().optional() })
         .safeParse(await response.json().catch(() => null));
       throw new ApiError(
         response.status,
         error.success ? error.data.error : 'unknown',
         error.success ? error.data.message : 'Không thể hoàn tất yêu cầu.',
+        error.success ? error.data.issues : undefined,
       );
     }
     return response;
@@ -81,6 +84,20 @@ export function createApiClient(options: {
     return next;
   }
   return {
+    listPlans: async (projectId: string) =>
+      z
+        .object({
+          versions: z.array(
+            z.object({ version: z.number().int().positive(), frozenAt: z.string(), frozenBy: z.string() }),
+          ),
+        })
+        .parse(await call(`/v1/projects/${encodeURIComponent(projectId)}/plans`)).versions,
+    getPlan: async (projectId: string, version: number) =>
+      planSchema.parse(await call(`/v1/projects/${encodeURIComponent(projectId)}/plans/${version}`)),
+    freezePlan: async (projectId: string, plan: ExperimentPlan) =>
+      planSchema.parse(
+        await call(`/v1/projects/${encodeURIComponent(projectId)}/plans/${plan.planVersion}`, 'PUT', plan),
+      ),
     getConsent: async () => consentStateSchema.parse(await call('/v1/consent')),
     acceptConsent: async (version: number, provider: string) =>
       consentStateSchema.parse(await call('/v1/consent', 'PUT', { version, provider })),

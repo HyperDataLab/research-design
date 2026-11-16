@@ -3,6 +3,17 @@ import { examplePlan } from '../../src/core/plan/examplePlan';
 import { handle, PREFIX, type Deps } from './app';
 import { NotAllowedError } from './auth';
 import { MemoryBucket } from './memoryBucket';
+import { emptyDraft } from '../../src/core/draft/schema';
+import { addHypothesis, type DraftResult } from '../../src/core/draft/ops';
+import {
+  addMetric,
+  addVariable,
+  addDataset,
+  addCondition,
+  setHypothesisVariables,
+} from '../../src/core/draft/measureOps';
+import { setRunMatrix } from '../../src/core/draft/planOps';
+import { draftToPlan } from '../../src/core/draft/toPlan';
 
 function setup() {
   const bucket = new MemoryBucket();
@@ -48,6 +59,83 @@ function setup() {
   };
 }
 describe('Worker API', () => {
+  it('WF-01 freezes a mapped draft with server identity and enforces versions and gate', async () => {
+    const doc = (r: DraftResult) => {
+      if (!r.ok) throw new Error(r.error);
+      return r.doc;
+    };
+    let draft = doc(
+      addHypothesis(emptyDraft(), {
+        statement: 'Outcome improves',
+        kind: 'exploratory',
+        question: null,
+        claim: null,
+      }),
+    );
+    draft = doc(
+      addMetric(draft, {
+        name: 'Score',
+        key: 'score',
+        unit: 'points',
+        goal: 'maximize',
+        aggregation: 'mean',
+        protocol: 'Measure score',
+        bank: null,
+        protocolBank: null,
+      }),
+    );
+    draft = doc(
+      addVariable(draft, { name: 'Outcome', role: 'dependent', construct: '', metric: 'm-1', levels: [] }),
+    );
+    draft = doc(setHypothesisVariables(draft, 'h-1', { independent: [], dependent: ['v-1'] }));
+    draft = doc(
+      addDataset(draft, {
+        name: 'Data',
+        source: 'Lab',
+        version: null,
+        split: null,
+        sha256: null,
+        benchmark: null,
+      }),
+    );
+    draft = doc(addCondition(draft, { name: 'Baseline', baseline: true, params: {} }));
+    draft = doc(
+      setRunMatrix(draft, {
+        mlflowExperiment: 'Test',
+        conditions: ['c-1'],
+        datasets: ['d-1'],
+        seeds: [1],
+        sampleSizeJustification: 'Prior study',
+      }),
+    );
+    const s = setup();
+    const id = await s.create();
+    const mapped = draftToPlan(draft, {
+      planId: id,
+      planVersion: 1,
+      title: 'Plan',
+      frozenAt: '2020-01-01T00:00:00Z',
+      frozenBy: 'placeholder',
+      deviation: null,
+      appVersion: '1',
+    });
+    expect(mapped.ok).toBe(true);
+    if (!mapped.ok) return;
+    const path = `/v1/projects/${id}/plans`;
+    const blocked = { ...mapped.plan, runMatrix: { ...mapped.plan.runMatrix, expectedRuns: 2 } };
+    expect((await s.call('PUT', `${path}/1`, blocked)).status).toBe(422);
+    const response = await s.call('PUT', `${path}/1`, mapped.plan);
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({
+      frozenBy: 'a@hyperdatalab.org',
+      frozenAt: '2026-11-16T09:00:00.000Z',
+    });
+    expect((await s.call('PUT', `${path}/1`, mapped.plan)).status).toBe(409);
+    expect((await s.call('PUT', `${path}/2`, { ...mapped.plan, planVersion: 2 })).status).toBe(422);
+    expect(
+      (await s.call('PUT', `${path}/2`, { ...mapped.plan, planVersion: 2, deviation: 'Changed' })).status,
+    ).toBe(201);
+  });
   it('WK-01 authenticates and rejects foreign domains', async () => {
     const { call } = setup();
     expect((await call('GET', '/v1/me', undefined, '')).status).toBe(401);

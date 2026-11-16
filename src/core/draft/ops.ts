@@ -29,6 +29,9 @@ type T = Omit<DraftThreat, 'id'>;
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const ok = (doc: Draft): DraftResult => ({ ok: true, doc });
 const fail = (error: DraftError): DraftResult => ({ ok: false, error });
+export function setPlanTitle(doc: Draft, title: string): DraftResult {
+  return ok({ ...doc, planTitle: title.trim() });
+}
 export function addQuestion(doc: Draft, input: Q): DraftResult {
   const text = input.text.trim();
   if (!text) return fail('invalid_text');

@@ -7,6 +7,7 @@ import design from '@/modules/design';
 import measurement from '@/modules/measurement';
 import analyses from '@/modules/analyses';
 import runs from '@/modules/runs';
+import packageModule from '@/modules/package';
 import settings from '@/modules/settings';
 import { planned } from '@/modules/planned';
 import { GROUP_ORDER } from './groups';
@@ -21,6 +22,7 @@ export const modules = [
   measurement,
   analyses,
   runs,
+  packageModule,
   settings,
   ...planned,
 ].sort((a, b) => GROUP_ORDER.indexOf(a.group) - GROUP_ORDER.indexOf(b.group) || a.order - b.order);

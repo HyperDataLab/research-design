@@ -112,6 +112,7 @@ export function examplePlan(): ExperimentPlan {
         {
           id: 'q-main',
           text: 'Is reranking worth its latency cost?',
+          gap: 'Earlier comparisons report accuracy without latency.',
           hypotheses: ['h-accuracy', 'h-latency'],
         },
       ],
@@ -120,6 +121,9 @@ export function examplePlan(): ExperimentPlan {
         { name: 'Single benchmark', mitigation: 'Claims are limited to this benchmark.', bank: null },
       ],
       sources: [],
+      claims: [{ hypothesis: 'h-accuracy', claimType: 'ct.comparative' }],
+      constructs: [{ variable: 'v-accuracy', construct: 'How often the first result answers the query' }],
+      metricProtocols: [],
     },
   };
 }
