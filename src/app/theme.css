@@ -1,0 +1,237 @@
+/*
+ * Tokens shared with PaperLab: the lab green, Inter for the interface, Source Serif 4 for anything read.
+ * Light theme is a cool paper grey, not cream; dark theme is a deep green-black ink.
+ */
+:root {
+  --font-ui: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-reading: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-display: 44px;
+  --text-reading: 17px;
+  /* Slots are set a step smaller than the sentence they sit in, whatever its size. */
+  --slot-size: 0.82em;
+  --script-size: 0.72em;
+  --control-h: 36px;
+  --control-h-sm: 30px;
+  --topbar-h: 60px;
+  --sidebar-w: 248px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --danger: #b42318;
+  --success: #126b5d;
+  --warning: #a14c0b;
+  --crit-claim: #1d4ed8;
+  --crit-evidence: #7e22ce;
+  --crit-writing: #a21caf;
+  --crit-context: #475569;
+  --scrim: rgb(14 24 28 / 44%);
+  --shadow-overlay: 0 24px 64px -16px rgb(14 30 34 / 28%), 0 2px 6px rgb(14 30 34 / 8%);
+  --shadow-sm: 0 1px 2px rgb(14 30 34 / 5%);
+  --shadow-md: 0 1px 2px rgb(14 30 34 / 4%), 0 6px 18px -8px rgb(14 30 34 / 14%);
+  font-family: var(--font-ui);
+  color-scheme: light;
+  --graph-language: #286b86;
+  --graph-paper: #34538c;
+  --graph-argument: #78578c;
+  --graph-research: #806000;
+  --graph-craft: #a34c30;
+  --graph-quality: #39745b;
+  --graph-node-text: #fff;
+  --bg: #f4f6f5;
+  --bg-sunken: #eceff0;
+  --surface: #fff;
+  --border: #e1e6e6;
+  --border-strong: #c4cdce;
+  --text: #15222a;
+  --text-muted: #4b5960;
+  --text-faint: #606d74;
+  /* Borders of things you operate (inputs, buttons, radios) need 3:1 against their surface. */
+  --control-border: #828f95;
+  --accent: #11695b;
+  --accent-strong: #0b5347;
+  --accent-contrast: #fff;
+  --soft: #e7f1ee;
+  --soft-strong: #d3e7e1;
+  --danger-soft: #fbeceb;
+  --warning-soft: #fcf0e3;
+  --hl-structure: #c2410c;
+  --hl-flow: #7e22ce;
+  --hl-word: #1d4ed8;
+  --hl-org: #0f766e;
+  --hl-critical: #b91c1c;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --graph-language: #286b86;
+    --graph-paper: #34538c;
+    --graph-argument: #78578c;
+    --graph-research: #806000;
+    --graph-craft: #a34c30;
+    --graph-quality: #39745b;
+    --graph-node-text: #fff;
+    --bg: #0e171b;
+    --bg-sunken: #0a1215;
+    --surface: #142127;
+    --border: #243840;
+    --border-strong: #3a5560;
+    --text: #e9f1f0;
+    --text-muted: #a9bbbe;
+    --text-faint: #94a8ac;
+    --control-border: #5f7c86;
+    --accent: #6fd3ba;
+    --accent-strong: #93e2ce;
+    --accent-contrast: #08201b;
+    --soft: #1b3433;
+    --soft-strong: #24463f;
+    --danger: #f2877d;
+    --danger-soft: #3a1d1b;
+    --success: #6fd3ba;
+    --warning: #f4a35c;
+    --warning-soft: #36261a;
+    --scrim: rgb(0 0 0 / 60%);
+    --shadow-overlay: 0 24px 64px -16px rgb(0 0 0 / 60%), 0 2px 6px rgb(0 0 0 / 30%);
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+    --shadow-md: 0 1px 2px rgb(0 0 0 / 30%), 0 6px 18px -8px rgb(0 0 0 / 50%);
+    --crit-claim: #60a5fa;
+    --crit-evidence: #c084fc;
+    --crit-writing: #f0abfc;
+    --crit-context: #cbd5e1;
+    --hl-structure: #fb923c;
+    --hl-flow: #c084fc;
+    --hl-word: #60a5fa;
+    --hl-org: #2dd4bf;
+    --hl-critical: #f87171;
+  }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --graph-language: #286b86;
+  --graph-paper: #34538c;
+  --graph-argument: #78578c;
+  --graph-research: #806000;
+  --graph-craft: #a34c30;
+  --graph-quality: #39745b;
+  --graph-node-text: #fff;
+  --bg: #0e171b;
+  --bg-sunken: #0a1215;
+  --surface: #142127;
+  --border: #243840;
+  --border-strong: #3a5560;
+  --text: #e9f1f0;
+  --text-muted: #a9bbbe;
+  --text-faint: #94a8ac;
+  --control-border: #5f7c86;
+  --accent: #6fd3ba;
+  --accent-strong: #93e2ce;
+  --accent-contrast: #08201b;
+  --soft: #1b3433;
+  --soft-strong: #24463f;
+  --danger: #f2877d;
+  --danger-soft: #3a1d1b;
+  --success: #6fd3ba;
+  --warning: #f4a35c;
+  --warning-soft: #36261a;
+  --scrim: rgb(0 0 0 / 60%);
+  --shadow-overlay: 0 24px 64px -16px rgb(0 0 0 / 60%), 0 2px 6px rgb(0 0 0 / 30%);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-md: 0 1px 2px rgb(0 0 0 / 30%), 0 6px 18px -8px rgb(0 0 0 / 50%);
+  --crit-claim: #60a5fa;
+  --crit-evidence: #c084fc;
+  --crit-writing: #f0abfc;
+  --crit-context: #cbd5e1;
+  --hl-structure: #fb923c;
+  --hl-flow: #c084fc;
+  --hl-word: #60a5fa;
+  --hl-org: #2dd4bf;
+  --hl-critical: #f87171;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+table {
+  font-variant-numeric: tabular-nums;
+}
+::placeholder {
+  color: var(--text-faint);
+  opacity: 1;
+}
+::selection {
+  background: var(--soft-strong);
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+h1 {
+  font-family: var(--font-reading);
+  font-size: var(--text-3xl);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  margin: 0 0 12px;
+  font-variation-settings: 'opsz' 48;
+}
+h2 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+h3 {
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
