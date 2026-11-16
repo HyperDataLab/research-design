@@ -17,6 +17,12 @@ navigation and no icon rail: the labels are short and distinct.
 - A screen that is not built is listed with a "Sắp có" badge and is not a link.
 - Active item: tinted background, accent text, `aria-current="page"`.
 - Inside a module, sub-views are tabs, never a second sidebar.
+- **Account** sits at the right end of the top bar. Signed out: a secondary button "Đăng nhập". Signed in: the
+  account's name as a ghost button that opens a small menu with the email and "Đăng xuất". A sign-in error is
+  shown as text beside it, never as a dialog.
+- **The project is in the URL.** A project's screens live under `/p/<projectId>/…`, so a link opens the same
+  project for a colleague and two tabs can hold two projects. The last opened project is remembered only to
+  offer "Mở lại" on Dự án.
 
 ## 2. Screen patterns
 
@@ -41,6 +47,17 @@ navigation and no icon rail: the labels are short and distinct.
   deviation note first.
 - **Cost before action**: a button that starts AI work on more than one paper states the estimated tokens and
   the remaining daily budget before it runs.
+
+- **Dự án** (project list): one row per project with its title in the reading face as a text link, then a quiet
+  line "Chủ dự án · cập nhật <ngày>". Row actions are ghost buttons: Đổi tên, Lưu trữ (Khôi phục for an archived
+  one). The page's one primary button is "Tạo dự án", which opens a Dialog with one TextField. Archived projects
+  are hidden behind a Chip filter "Đã lưu trữ" with its count and are labelled with a Badge.
+- **Signed-out screens** that need the account show an Empty state that says what signing in gives and holds the
+  "Đăng nhập" button; they never render an empty list.
+- **Dev sign-in.** On the dev server without Firebase config, the account button reads "Đăng nhập (dev)" and a
+  warning Badge "Chế độ phát triển" stays in the top bar while signed in. It does not exist in a production build.
+- **Not configured.** A production build without Firebase config shows "Chưa cấu hình đăng nhập" in place of the
+  account button, with no action.
 
 ## 3. Visual tokens
 
