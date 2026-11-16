@@ -26,7 +26,7 @@ field or behaviour is copied from them until checked.
 | Discovery           | Litmaps, ResearchRabbit, Connected Papers | Start from seed papers and expand along citations.                                                                       | Unconfirmed |
 | Review reporting    | Covidence, Rayyan                         | A reason for every exclusion; a PRISMA flow built from the log.                                                          | Unconfirmed |
 | Structured results  | ORKG                                      | Comparing papers through reusable property templates.                                                                    | Unconfirmed |
-| Structured results  | Papers with Code                          | Shut down in July 2025 (secondary sources). No public task-benchmark source is assumed.                                  | Confirmed   |
+| Structured results  | Papers with Code                          | Shut down in July 2025 (secondary sources). No public task-benchmark source is assumed.                                  | Unconfirmed |
 | Preregistration     | OSF Registries                            | The form depends on the kind of study (14 templates, among them Preregistration, Secondary Data, Simulation / ADEMP).    | Confirmed   |
 | Preregistration     | AsPredicted                               | A short fixed form; once registered it cannot be edited.                                                                 | Confirmed   |
 | Preregistration     | OSF Preregistration fields                | Study information, design plan, sampling plan, variables, analysis plan.                                                 | Unconfirmed |
@@ -107,7 +107,7 @@ Priorities: P0 is the path to a frozen package; P1 makes it faster; P2 is later.
 | ------ | ---------------------------------------------------------------------- | ---------------------------------------------------------- | --- |
 | FR-501 | Analyses in SRD's terms; P1 methods are marked "SRD chưa hỗ trợ".      | PP-08.                                                     | P0  |
 | FR-502 | Run matrix as an explicit grid with the run count shown.               | PP-03.                                                     | P0  |
-| FR-503 | Gate checklist PP-01..PP-09 with links to the objects at fault.        | `validatePlan` output is what the screen shows.            | P0  |
+| FR-503 | Gate checklist PP-01..PP-10 with links to the objects at fault.        | `validatePlan` output is what the screen shows.            | P0  |
 | FR-504 | Freeze: a person, a version, a time; then read-only.                   | A frozen version cannot be written again (Worker refuses). | P0  |
 | FR-505 | Export a ZIP: `manifest.json`, `plan.json`, a readable `plan.md`.      | Hashes in the manifest match the files.                    | P0  |
 | FR-506 | New version from a frozen one, with a required deviation note.         | PP-09.                                                     | P0  |

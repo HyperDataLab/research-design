@@ -27,6 +27,9 @@ One slice per PR. A slice is done when its acceptance line holds in CI and, for 
 
 ## Owner steps (not done by agents)
 
+0. **GitHub Actions does not start jobs for the organisation** ("recent account payments have failed or your
+   spending limit needs to be increased", seen 2026-11-16 on this repo and on writing-bank). Until billing is
+   fixed, CI has never run here and `scripts/deploy.sh` refuses to deploy.
 1. Create the Firebase project (suggested id `hyperdatalab-research-design`), enable Google sign-in, add
    `.firebaserc`.
 2. On the lab's Cloudflare account: decide the Worker name (suggested `researchdesign-worker`), bind the shared
