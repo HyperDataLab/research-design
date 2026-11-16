@@ -19,7 +19,9 @@ export function flagText(flag: DesignFlag, draft: Draft, bank: BankDoc | null): 
           ? `Thiết kế «${draft.design?.name ?? flag.id}» (${flag.id})`
           : flag.reference === 'threat'
             ? `${flag.subject} «${draft.threats.find((t) => t.id === flag.subject)?.name ?? ''}»: mục ${flag.id}`
-            : `${flag.subject}: loại nhận định ${flag.id}`;
+            : flag.reference === 'claim'
+              ? `${flag.subject}: loại nhận định ${flag.id}`
+              : `${flag.subject} «${(flag.reference === 'benchmark' ? draft.datasets : draft.metrics).find((item) => item.id === flag.subject)?.name ?? ''}»: mục ${flag.id}`;
       const reason =
         flag.reason === 'no_snapshot'
           ? 'chưa đối chiếu được vì dự án chưa có bản chụp Writing Bank'

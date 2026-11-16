@@ -37,6 +37,14 @@ const errors: Record<DraftError | 'network', string> = {
   has_hypotheses: 'Câu hỏi vẫn còn giả thuyết.',
   duplicate_threat: 'Mối đe doạ đã tồn tại.',
   no_design: 'Chưa chọn thiết kế.',
+  unknown_variable: 'Biến không còn tồn tại.',
+  unknown_metric: 'Metric không còn tồn tại.',
+  unknown_dataset: 'Dataset không còn tồn tại.',
+  unknown_condition: 'Điều kiện không còn tồn tại.',
+  in_use: 'Mục này vẫn đang được sử dụng.',
+  wrong_role: 'Biến không đúng vai trò.',
+  invalid_key: 'Key không hợp lệ.',
+  invalid_hash: 'Mã SHA-256 không hợp lệ.',
   network: 'Không lưu được. Kiểm tra kết nối rồi thử lại.',
 };
 type Editor =

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useApi } from '@/shared/api/apiContext';
 import { draftSchema, emptyDraft } from '@/core/draft/schema';
+import { bankRefs } from '@/core/draft/bankRefs';
 import { useBank } from '@/shared/bank/useBank';
 import { useDraft } from '@/shared/draft/useDraft';
 import { useProject } from '@/shared/project/projectContext';
@@ -39,7 +40,7 @@ export default function Page() {
       try {
         const stored = await client.getDoc(project.id, 'draft');
         const current = draftSchema.parse(stored?.data ?? emptyDraft());
-        needsConfirmation = !!current.design?.bank || current.threats.some((t) => !!t.bank);
+        needsConfirmation = bankRefs(current).length > 0;
       } catch {
         // An unreadable draft may contain references, so require confirmation.
       }

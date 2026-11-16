@@ -1,0 +1,9 @@
+.id {
+  font-family: var(--font-mono);
+}
+.warning {
+  color: var(--warning);
+}
+.quiet {
+  color: var(--text-muted);
+}

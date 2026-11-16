@@ -1,4 +1,5 @@
-import { findDesign, findThreat } from '../bank/readSnapshot';
+import { findDesign, findThreat, findMetric, findProtocol, findBenchmark } from '../bank/readSnapshot';
+import { bankRefs } from './bankRefs';
 import type { BankDoc, BankDesign } from '../bank/snapshot';
 import type { Draft, DraftDesign, DraftHypothesis, DraftQuestion, DraftThreat } from './schema';
 
@@ -9,7 +10,15 @@ export type DraftError =
   | 'unknown_threat'
   | 'has_hypotheses'
   | 'duplicate_threat'
-  | 'no_design';
+  | 'no_design'
+  | 'unknown_variable'
+  | 'unknown_metric'
+  | 'unknown_dataset'
+  | 'unknown_condition'
+  | 'in_use'
+  | 'wrong_role'
+  | 'invalid_key'
+  | 'invalid_hash';
 export type DraftResult = { ok: true; doc: Draft } | { ok: false; error: DraftError };
 type Q = Omit<DraftQuestion, 'id'>;
 type H = Pick<DraftHypothesis, 'statement' | 'kind' | 'question' | 'claim'>;
@@ -114,16 +123,32 @@ export function removeThreat(doc: Draft, id: string): DraftResult {
 }
 
 export function repin(doc: Draft, bank: BankDoc): DraftResult {
-  const ref = doc.design?.bank;
-  const design =
-    ref && ref.release !== bank.release && findDesign(bank, ref.id)
-      ? { ...doc.design!, bank: { ...ref, release: bank.release } }
-      : doc.design;
-  let changed = design !== doc.design;
-  const threats = doc.threats.map((t) => {
-    if (!t.bank || t.bank.release === bank.release || !findThreat(bank, t.bank.id)) return t;
-    changed = true;
-    return { ...t, bank: { ...t.bank, release: bank.release } };
+  const find = {
+    design: findDesign,
+    threat: findThreat,
+    metric: findMetric,
+    protocol: findProtocol,
+    benchmark: findBenchmark,
+  };
+  const eligible = bankRefs(doc).filter((r) => r.release !== bank.release && find[r.reference](bank, r.id));
+  if (!eligible.length) return ok(doc);
+  const update = (
+    subject: string,
+    reference: (typeof eligible)[number]['reference'],
+    ref: { id: string; release: string } | null,
+  ) =>
+    ref && eligible.some((r) => r.subject === subject && r.reference === reference)
+      ? { ...ref, release: bank.release }
+      : ref;
+  return ok({
+    ...doc,
+    design: doc.design && { ...doc.design, bank: update('design', 'design', doc.design.bank) },
+    threats: doc.threats.map((t) => ({ ...t, bank: update(t.id, 'threat', t.bank) })),
+    metrics: doc.metrics.map((m) => ({
+      ...m,
+      bank: update(m.id, 'metric', m.bank),
+      protocolBank: update(m.id, 'protocol', m.protocolBank),
+    })),
+    datasets: doc.datasets.map((d) => ({ ...d, benchmark: update(d.id, 'benchmark', d.benchmark) })),
   });
-  return ok(changed ? { ...doc, design, threats } : doc);
 }
