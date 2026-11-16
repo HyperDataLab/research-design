@@ -18,7 +18,7 @@ The UI is in Vietnamese. Plan content, extracted facts, code, identifiers and co
 | --------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | PaperLab                    | Imports its `paper-model.json`, one per paper, including the facts it extracted. This app extracts nothing. |
 | Writing Bank                | Reads designs, threats, claim types, metrics, protocols and benchmarks from a pinned snapshot.              |
-| Paper Fetch Hub             | Fetches documents and runs searches. This app only asks it; it contacts no publisher or scholarly source.   |
+| Paper Fetch Hub             | No link. PaperLab is the system that calls the Hub (PRD D50).                                               |
 | Scientific Research Desktop | Reads the experiment plan package this app publishes.                                                       |
 
 ## Hard constraints
@@ -30,7 +30,7 @@ The UI is in Vietnamese. Plan content, extracted facts, code, identifiers and co
   stop when it shows another account. Creating cloud resources, setting secrets and deploying are the owner's
   actions unless the owner says otherwise.
 - **This app fetches no document and extracts nothing from papers.** Paper Fetch Hub and PaperLab do that, each
-  with a person in charge; this app sends requests and reads results (owner, 2026-11-16).
+  with a person in charge; this app reads PaperLab's results and never calls the Hub (owner, 2026-11-16 and 2026-11-17).
 - **The LLM is reached only through the Worker.** The key is a `wrangler secret`. The browser never holds it.
 - **Vendored contracts are read-only.** Files under `schemas/vendor/` change only by copying a new version from
   the system that owns them. A change this app needs is written into `docs/CONTRACTS.md` as a request.

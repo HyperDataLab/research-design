@@ -19,12 +19,12 @@ One slice per PR. A slice is done when its acceptance line holds in CI and, for 
 
 ## Next
 
-| Slice | What                                                                                            | Requirements          | Done when                                                      |
-| ----- | ----------------------------------------------------------------------------------------------- | --------------------- | -------------------------------------------------------------- |
-| S5    | Reader for experiment facts from the paper model (after PaperLab publishes them; see CONTRACTS) | FR-301, FR-302        | A fact whose sentence key is missing cannot be approved.       |
-| S6    | Bảng so sánh                                                                                    | FR-303                | Approve, edit, reject, bulk approve; history kept.             |
-| S11   | Requests to Paper Fetch Hub: search and PDF queue (after the Hub offers them; see CONTRACTS)    | FR-203, FR-204        | This app calls no scholarly source or publisher.               |
-| S12   | Bank matching, counts, AI suggestions (runner stubs were built with S10)                        | FR-304, 305, 405, 507 | Suggestions cite their cells; stub grid equals `expectedRuns`. |
+| Slice | What                                                                                                                                                                           | Requirements          | Done when                                                      |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- | -------------------------------------------------------------- |
+| S5    | Reader for experiment facts from the paper model (after PaperLab publishes them; see CONTRACTS)                                                                                | FR-301, FR-302        | A fact whose sentence key is missing cannot be approved.       |
+| S6    | Bảng so sánh                                                                                                                                                                   | FR-303                | Approve, edit, reject, bulk approve; history kept.             |
+| S11   | Withdrawn (PRD D50): this app does not call Paper Fetch Hub; PaperLab does. "Tìm bài báo" becomes a choice among PaperLab's published papers, built with the client for API B. |                       |                                                                |
+| S12   | Bank matching, counts, AI suggestions (runner stubs were built with S10)                                                                                                       | FR-304, 305, 405, 507 | Suggestions cite their cells; stub grid equals `expectedRuns`. |
 
 ## Owner steps (not done by agents)
 
@@ -35,8 +35,8 @@ One slice per PR. A slice is done when its acceptance line holds in CI and, for 
 2. On the lab's Cloudflare account: decide the Worker name (suggested `researchdesign-worker`), bind the shared
    bucket `paper-fetch` with the prefix `researchdesign/`, set the LLM key with `wrangler secret put`.
 3. Send the requests in `docs/CONTRACTS.md` and the API descriptions in `docs/API_REQUESTS.md` to whoever owns
-   SRD, PaperLab, Paper Fetch Hub and Writing Bank, and choose how callers are identified between the systems
-   (`docs/API_REQUESTS.md`, "Who is calling"). S5, S6 and S11 wait for PaperLab and the Hub.
+   SRD, PaperLab and Writing Bank, and choose how callers are identified between the systems
+   (`docs/API_REQUESTS.md`, "Who is calling"). S5 and S6 wait for PaperLab.
 4. Say "Deploy now" when a version should go live.
 
 The Firebase project id and the Worker hostname in `firebase.json` (CSP) and `worker/wrangler.toml` are the suggested

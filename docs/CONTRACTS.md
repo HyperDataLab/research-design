@@ -81,14 +81,8 @@ As an API: `docs/API_REQUESTS.md`, section B.
 
 ## Paper Fetch Hub
 
-This app fetches nothing itself (PRD D23). PDFs reach PaperLab through the Hub; this app only needs to ask.
-
-### Requests to Paper Fetch Hub (not yet sent)
-
-1. A way for a signed-in lab member of another lab app to add a DOI to the Hub's queue and read its state.
-2. A search by topic or from seed papers, run by the Hub with the lab's sources, returning metadata with DOIs.
-
-As an API: `docs/API_REQUESTS.md`, section C.
+This app has no link to the Hub (PRD D50). PaperLab calls the Hub; this app reads PaperLab's published paper
+models. The two requests once listed here (a DOI queue for other apps, a search) are withdrawn and were never sent.
 
 ## Writing Bank
 
