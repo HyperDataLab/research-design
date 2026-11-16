@@ -183,12 +183,13 @@ export type PlanManifest = z.infer<typeof manifestSchema>;
 
 /**
  * MLflow run tags that carry the plan's ids into the runner. SRD reads MLflow through its SDK only, so tags
- * are the one place a run can say which cell of which plan it is.
+ * are the one place a run can say which cell of which plan it is. The prefix is `plan.`, not `rd.`, which
+ * Writing Bank uses for its design ids.
  */
 export const RUN_TAGS = {
-  planId: 'rd.plan_id',
-  planVersion: 'rd.plan_version',
-  condition: 'rd.condition_id',
-  dataset: 'rd.dataset_id',
-  seed: 'rd.seed',
+  planId: 'plan.id',
+  planVersion: 'plan.version',
+  condition: 'plan.condition_id',
+  dataset: 'plan.dataset_id',
+  seed: 'plan.seed',
 } as const;

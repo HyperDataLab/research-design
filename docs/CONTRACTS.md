@@ -8,7 +8,7 @@ Who owns what, where the files are, and what this app has asked of the other sys
   `schemas/experiment-plan-manifest-v1.schema.json`, and a valid example, `schemas/experiment-plan-v1.example.json`.
 - Package: a ZIP with `manifest.json` (file list with SHA-256), `plan.json`, and `plan.md` for people.
 - A consumer validates `plan.json`, refuses an unknown `schemaVersion`, and checks the hashes.
-- The gate a plan passed before it was frozen is `validatePlan` (PP-01..PP-09), described in `AGENTS.md`.
+- The gate a plan passed before it was frozen is `validatePlan` (PP-01..PP-10), described in `AGENTS.md`.
 
 How it maps onto SRD's objects:
 
@@ -21,8 +21,8 @@ How it maps onto SRD's objects:
 | `analyses[]`                   | `AnalysisSpecification`: method, variables, parameters, assumptions, missing_policy |
 | `RUN_TAGS` on each run         | `EvidenceLink.run_refs`, found by tag                                               |
 
-Run tags, set by the runner on every MLflow run of the plan: `rd.plan_id`, `rd.plan_version`,
-`rd.condition_id`, `rd.dataset_id`, `rd.seed`.
+Run tags, set by the runner on every MLflow run of the plan: `plan.id`, `plan.version`,
+`plan.condition_id`, `plan.dataset_id`, `plan.seed`.
 
 ### Requests to SRD (not yet sent)
 
@@ -38,7 +38,7 @@ Run tags, set by the runner on every MLflow run of the plan: `rd.plan_id`, `rd.p
 | ------------------------------------------- | -------- | --------------------------------------------------- |
 | `schemas/vendor/paper-model-v1.schema.json` | PaperLab | Validating imported papers; sentence `key` anchors. |
 
-Copied from `paper-lab` on 2026-11-16. To update: copy the new file from PaperLab, never edit it here.
+Copied from `HyperDataLab/paper-lab` at commit `1a70680` (`main`) on 2026-11-16. To update: copy the new file from PaperLab, never edit it here.
 
 The paper model has sections, blocks, sentences, annotations and triples. It has no field for a paper's
 datasets, baselines, metrics or design; this app extracts those itself and anchors them to `sentences[].key`.
