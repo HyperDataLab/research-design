@@ -1,0 +1,213 @@
+{
+  "format": "paperlab-paper-model",
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-11T00:00:00.000Z",
+  "generator": {
+    "app": "PaperLab",
+    "segmenterVersion": "pl-seg-3",
+    "sentenceKeyVersion": "pl-skey-1",
+    "parserVersion": "paper-parser-2"
+  },
+  "document": {
+    "source": { "kind": "pdf", "sha256": "sha256:abc", "pageCount": 5 },
+    "metadata": {
+      "title": "Synthetic paper",
+      "authors": [],
+      "affiliations": [],
+      "doi": null,
+      "year": null,
+      "venue": null,
+      "volume": null,
+      "issue": null,
+      "pages": null,
+      "keywords": [],
+      "abstract": "We describe a synthetic method. It is evaluated on a toy task.",
+      "source": "parsed"
+    },
+    "sections": [
+      { "id": "abs", "parentId": null, "title": "Abstract", "level": 1, "role": "abstract", "page": 1 },
+      { "id": "met", "parentId": null, "title": "Methods", "level": 1, "role": "methods", "page": 2 },
+      { "id": "res", "parentId": null, "title": "Results", "level": 1, "role": "results", "page": 3 },
+      { "id": "ref", "parentId": null, "title": "References", "level": 1, "role": "references", "page": 5 }
+    ],
+    "blocks": [
+      {
+        "id": "a1",
+        "sectionId": "abs",
+        "kind": "body",
+        "page": 1,
+        "text": "We describe a synthetic method. It is evaluated on a toy task.",
+        "textHash": "sha256:0"
+      },
+      {
+        "id": "m1",
+        "sectionId": "met",
+        "kind": "body",
+        "page": 3,
+        "text": "Accuracy is the share of correct predictions over the whole test set.",
+        "textHash": "sha256:0"
+      },
+      {
+        "id": "t1",
+        "sectionId": "res",
+        "kind": "table",
+        "page": 3,
+        "text": "Model Accuracy (%)\nBaseline 0.123 ± 0.004",
+        "textHash": "sha256:0"
+      },
+      {
+        "id": "r1",
+        "sectionId": "res",
+        "kind": "body",
+        "page": 3,
+        "text": "The baseline is robust under client dropout in our tests.",
+        "textHash": "sha256:0"
+      },
+      {
+        "id": "x1",
+        "sectionId": "ref",
+        "kind": "reference",
+        "page": 5,
+        "text": "[1] A. Synthetic. A toy reference. J. Examples, 2020. doi:10.5555/example.1",
+        "textHash": "sha256:0"
+      }
+    ],
+    "references": [
+      {
+        "id": "ref1",
+        "text": "[1] A. Synthetic. A toy reference. J. Examples, 2020. doi:10.5555/example.1",
+        "year": 2020,
+        "doi": "10.5555/example.1"
+      }
+    ]
+  },
+  "sentences": [
+    {
+      "key": "311317b5002baaa3#1",
+      "displayId": "a1_s1",
+      "paragraphId": "a1",
+      "sectionId": "abs",
+      "page": 1,
+      "start": 0,
+      "end": 31,
+      "text": "We describe a synthetic method."
+    },
+    {
+      "key": "27e266468cdc695c#1",
+      "displayId": "a1_s2",
+      "paragraphId": "a1",
+      "sectionId": "abs",
+      "page": 1,
+      "start": 32,
+      "end": 62,
+      "text": "It is evaluated on a toy task."
+    },
+    {
+      "key": "f070f37a466398fb#1",
+      "displayId": "m1_s1",
+      "paragraphId": "m1",
+      "sectionId": "met",
+      "page": 3,
+      "start": 0,
+      "end": 69,
+      "text": "Accuracy is the share of correct predictions over the whole test set."
+    },
+    {
+      "key": "f4c65a738aaf4a5e#1",
+      "displayId": "r1_s1",
+      "paragraphId": "r1",
+      "sectionId": "res",
+      "page": 3,
+      "start": 0,
+      "end": 57,
+      "text": "The baseline is robust under client dropout in our tests."
+    }
+  ],
+  "annotations": [
+    {
+      "key": "311317b5002baaa3#1",
+      "attrs": { "itemId": "i1", "rationale": "States what the paper does." },
+      "span": { "start": 0, "end": 31 },
+      "text": "We describe a synthetic method.",
+      "origin": "ai",
+      "state": "confirmed",
+      "source": {
+        "runId": "00000000-0000-4000-8000-0000000000b1",
+        "model": "example-model",
+        "promptVersion": "example-rhetoric-1"
+      },
+      "second": null,
+      "scheme": "paperlab-rhetoric",
+      "label": "occupy"
+    },
+    {
+      "key": "f4c65a738aaf4a5e#1",
+      "attrs": { "itemId": "i2", "rationale": "Reports an outcome." },
+      "span": { "start": 0, "end": 43 },
+      "text": "The baseline is robust under client dropout",
+      "origin": "ai",
+      "state": "machine",
+      "source": {
+        "runId": "00000000-0000-4000-8000-0000000000b1",
+        "model": "example-model",
+        "promptVersion": "example-rhetoric-1"
+      },
+      "second": null,
+      "scheme": "paperlab-rhetoric",
+      "label": "result_statement"
+    },
+    {
+      "key": "f4c65a738aaf4a5e#1",
+      "attrs": { "itemId": "i3", "rationale": "Scope of the tests." },
+      "span": { "start": 44, "end": 56 },
+      "text": "in our tests",
+      "origin": "ai",
+      "state": "rejected",
+      "source": {
+        "runId": "00000000-0000-4000-8000-0000000000b1",
+        "model": "example-model",
+        "promptVersion": "example-rhetoric-1"
+      },
+      "second": null,
+      "scheme": "paperlab-rhetoric",
+      "label": "limitation"
+    },
+    {
+      "key": "f4c65a738aaf4a5e#1",
+      "attrs": { "itemId": "s1", "marker": "robust", "rationale": "Asserts strength without a hedge." },
+      "span": { "start": 16, "end": 22 },
+      "text": "robust",
+      "origin": "ai",
+      "state": "machine",
+      "source": {
+        "runId": "00000000-0000-4000-8000-0000000000b2",
+        "model": "example-model",
+        "promptVersion": "example-stance-1"
+      },
+      "second": null,
+      "scheme": "paperlab-stance",
+      "label": "boosters"
+    }
+  ],
+  "annotationRuns": [
+    {
+      "scheme": "paperlab-rhetoric",
+      "runId": "00000000-0000-4000-8000-0000000000b1",
+      "model": "example-model",
+      "promptVersion": "example-rhetoric-1",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "items": 3,
+      "skipped": 0
+    },
+    {
+      "scheme": "paperlab-stance",
+      "runId": "00000000-0000-4000-8000-0000000000b2",
+      "model": "example-model",
+      "promptVersion": "example-stance-1",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "items": 1,
+      "skipped": 0
+    }
+  ],
+  "knowledge": { "phrases": [], "triples": [] }
+}

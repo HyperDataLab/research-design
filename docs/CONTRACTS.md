@@ -38,7 +38,13 @@ Run tags, set by the runner on every MLflow run of the plan: `plan.id`, `plan.ve
 | ------------------------------------------- | -------- | --------------------------------------------------- |
 | `schemas/vendor/paper-model-v1.schema.json` | PaperLab | Validating imported papers; sentence `key` anchors. |
 
-Copied from `HyperDataLab/paper-lab` at commit `1a70680` (`main`) on 2026-11-16. To update: copy the new file from PaperLab, never edit it here.
+Copied from `HyperDataLab/paper-lab` at commit `1a70680` (`main`) on 2026-11-16.
+`schemas/vendor/paper-model-v1.example.json` is PaperLab's own synthetic example (`examples/paper-model.example.json`,
+same commit); it is the test fixture. This repo is public: no real paper model and no paper text is committed.
+
+The import validates a file with a validator built from the vendored JSON Schema itself
+(`src/core/papers/paperModel.ts`), so it checks exactly what PaperLab publishes. `document.source.sha256` is
+treated as an opaque string: it may be null and its format is PaperLab's. To update: copy the new file from PaperLab, never edit it here.
 
 The paper model has sections, blocks, sentences, annotations and triples. It has no field for a paper's
 datasets, baselines, metrics or design; this app extracts those itself and anchors them to `sentences[].key`.
@@ -56,3 +62,10 @@ Read from a pinned release: `designs`, `threats`, `metrics`, `protocols`, `bench
 
 1. A release identifier on every export (already planned there as C5).
 2. Accept this app's Firebase ID tokens on `/bank/v1` (planned there for "the writing project").
+
+## Known limits of the stored documents
+
+- The account and time in a project's decision log are written by the client. A member could write a false
+  entry; the Worker checks membership, not the content of a document.
+- Importing a paper model writes the item first and the paper list second. A failure in between leaves an item
+  no paper points to; it is overwritten by the next import for that paper and otherwise ignored.

@@ -141,9 +141,9 @@ export const contextSchema = z.strictObject({
     .strictObject({ name: text, assignment: z.enum(['random', 'non_random', 'none']), bank: bankRef })
     .nullable(),
   threats: z.array(z.strictObject({ name: text, mitigation: text, bank: bankRef })),
-  /** Papers the plan rests on, by the hash PaperLab's paper model carries. */
+  /** Papers the plan rests on. `sourceHash` is `document.source.sha256` of PaperLab's paper model, as it came. */
   sources: z.array(
-    z.strictObject({ title: text, doi: z.string().nullable(), paperModelSha256: sha256.nullable() }),
+    z.strictObject({ title: text, doi: z.string().nullable(), sourceHash: z.string().nullable() }),
   ),
 });
 

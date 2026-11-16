@@ -61,7 +61,7 @@ Working documents (`DOC_KINDS`), one per project: `papers` (metadata and include
 
 Item collections (`ITEM_COLLECTIONS`), many items per project, one object each: `paper-models` (one PaperLab
 paper model per paper) and `facts` (the extracted facts of one paper). An item key matches
-`^[a-z0-9][a-z0-9-]{0,79}$`; the app uses the paper's hash. Items exist so that one large paper does not have to
+`^[a-z0-9][a-z0-9-]{0,79}$`; the app uses the paper's id inside the project (`p-` and 12 hex characters), because a paper model's source hash may be missing. Items exist so that one large paper does not have to
 fit in a shared document and two members working on different papers never collide.
 
 The Worker does not interpret documents or items; the app parses them with its own Zod schemas.

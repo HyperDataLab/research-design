@@ -52,6 +52,22 @@ navigation and no icon rail: the labels are short and distinct.
   line "Chủ dự án · cập nhật <ngày>". Row actions are ghost buttons: Đổi tên, Lưu trữ (Khôi phục for an archived
   one). The page's one primary button is "Tạo dự án", which opens a Dialog with one TextField. Archived projects
   are hidden behind a Chip filter "Đã lưu trữ" with its count and are labelled with a Badge.
+- **Inside a project.** Every screen under `/p/<projectId>/…` shows the project's title as a quiet text link
+  above the page header ("‹ Reranker study"), leading to the project page. In the sidebar, the screens of a
+  project are links only while a project is open; elsewhere they are plain text with the hint "Mở một dự án
+  trước". An archived project is read-only: its screens show a Badge "Đã lưu trữ · chỉ đọc" and no control that
+  writes.
+- **Tập bài báo** (papers of a project): tabs "Bài báo" and "Nhật ký". Bài báo: Chip filters with counts for the
+  decision (Tất cả, Chưa quyết định, Đã chọn, Đã loại); one row per paper with its title in the reading face,
+  a quiet line "tác giả · năm · nơi đăng", the DOI as a text link to doi.org, and Badges in words for the
+  decision and for "Có paper model". Row actions are ghost buttons: Chọn, Loại, Bỏ quyết định. "Loại" opens a
+  Dialog that requires a reason; the reason is shown under an excluded paper. The page's primary button is
+  "Thêm bài báo" (a Dialog: DOI, tên bài, tác giả, năm, nơi đăng); "Nhập paper model" is a secondary button that
+  takes a `.json` file. A refused file states the one reason in a sentence (not a paper model, an unsupported
+  version, or the first schema problems as a short list). Nhật ký: the decisions newest first, each as one
+  sentence with account and time ("a@… đã loại «Title»: lý do").
+- **Someone else changed it.** When a save meets a newer version, the app re-reads and re-applies the change
+  without asking. Only when the change no longer applies does it say so in a toast and show the current state.
 - **Signed-out screens** that need the account show an Empty state that says what signing in gives and holds the
   "Đăng nhập" button; they never render an empty list.
 - **Dev sign-in.** On the dev server without Firebase config, the account button reads "Đăng nhập (dev)" and a
