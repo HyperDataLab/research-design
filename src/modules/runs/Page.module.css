@@ -1,0 +1,37 @@
+.stack,
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+.mono {
+  font-family: var(--font-mono);
+}
+.monoInput input {
+  font-family: var(--font-mono);
+}
+.quiet {
+  color: var(--text-muted);
+}
+.reading {
+  font-family: var(--font-reading);
+  font-size: var(--text-reading);
+}
+.tableWrap {
+  overflow-x: auto;
+}
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+}
+.table th,
+.table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+.table th:first-child,
+.table td:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+}
