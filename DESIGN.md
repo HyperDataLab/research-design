@@ -114,7 +114,11 @@ navigation and no icon rail: the labels are short and distinct.
   saying that designs, threats and claim types come from a snapshot of Writing Bank, and the primary button
   "Nhập bản chụp" (takes a `.json` file). With one: the release in the mono face, "Nguồn" (the file's source
   line), who imported it and when, the count per collection as a sentence, and a secondary button "Thay bản
-  chụp". A refused file states the one reason in a sentence, as for a paper model. Replacing a snapshot asks for
+  chụp". A snapshot cut by the bank also shows "Ngày phát hành" and, when it contains unpublished entries, a
+  warning Badge "Có mục bản nháp" with the sentence "Bản phát hành này gồm cả các mục Writing Bank chưa xuất
+  bản." When the bank's address is configured, two more secondary buttons: "Kiểm tra bản mới" (says in a sentence
+  whether a newer release exists) and "Lấy bản mới" (fetches and stores it, with the same confirmation as
+  replacing). A refused file states the one reason in a sentence, as for a paper model. Replacing a snapshot asks for
   confirmation in a Dialog when the draft holds references to the current one.
 - **Câu hỏi và giả thuyết**: questions as Cards in one column, in id order. A question shows its id in the mono
   face, its text in the reading face, "Khoảng trống" (the gap, or the quiet line "Chưa ghi khoảng trống") and its
