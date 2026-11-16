@@ -1,9 +1,10 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { devApi } from './scripts/devApi';
 import { fileURLToPath, URL } from 'node:url';
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), devApi()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   test: {
     globals: true,
