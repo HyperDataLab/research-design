@@ -33,7 +33,7 @@ export const planned: ModuleDefinition[] = [
     'literature',
     1,
     'Tìm bài báo',
-    'Tìm theo chủ đề, mở rộng từ bài hạt giống, ghi lý do chọn và loại.',
+    'Chọn trong các bài PaperLab đã công bố, ghi lý do chọn và loại. Tìm và lấy bài mới thực hiện ở PaperLab.',
     Search,
   ),
   soon(
