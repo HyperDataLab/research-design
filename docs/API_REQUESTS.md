@@ -114,8 +114,7 @@ name in `collections` answers `400 bad_request` naming it.
   ignores the rest, so the bank can add fields freely.
 - `aliases` maps an id that was renamed to its new id. Re-pinning a reference follows it; an id that is neither in
   the release nor in `aliases` stays flagged for a person to resolve.
-- `includesDrafts` is true while the release contains entries the bank has not published. Today every entry of the
-  bank is a draft, and whether the API serves drafts at all is the owner's decision. This app shows the mark on
+- `includesDrafts` is true while the release contains entries the bank has not published. Today every entry of the bank is a draft; the owner decided on 2026-11-17 (in the Writing Bank chat, as that session reports) that the API serves drafts too. This app shows the mark on
   the Writing Bank screen and keeps showing each entry's `status`.
 - A person triggers the read ("Lấy bản mới"); the answer is stored as the project's `bank` document and every screen
   reads that copy. Nothing calls the bank per field or per keystroke.
