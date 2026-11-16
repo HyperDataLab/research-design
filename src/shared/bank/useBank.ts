@@ -31,19 +31,17 @@ export function useBank() {
   useEffect(() => {
     void Promise.resolve().then(reload);
   }, [reload]);
-  const importSnapshot = async (file: File, beforeWrite?: () => Promise<boolean>) => {
-    if (file.size > 2 * 1024 * 1024) return { ok: false as const, error: 'too_large' as const };
-    let bytes: ArrayBuffer;
-    let data: unknown;
-    try {
-      bytes = await file.arrayBuffer();
-      data = JSON.parse(new TextDecoder().decode(bytes)) as unknown;
-    } catch {
-      return { ok: false as const, error: 'not_json' as const };
-    }
+  const storeSnapshot = async (
+    data: unknown,
+    bytes: ArrayBuffer,
+    requireRelease: boolean,
+    beforeWrite?: () => Promise<boolean>,
+  ) => {
     try {
       const parsed = await snapshotRelease(data, bytes);
       if (!parsed.ok) return { ok: false as const, error: parsed.reason, issues: parsed.issues };
+      if (requireRelease && !parsed.file.release)
+        return { ok: false as const, error: 'invalid' as const, issues: ['release: Required'] };
       if (beforeWrite && !(await beforeWrite())) return { ok: false as const, error: 'cancelled' as const };
       const doc = toBankDoc(parsed.file, parsed.release, user?.email ?? '', new Date().toISOString());
       const next = await client.putDoc(project.id, 'bank', doc, etag);
@@ -58,5 +56,30 @@ export function useBank() {
       return { ok: false as const, error: 'network' as const };
     }
   };
-  return { bank, loading, error, reload, importSnapshot };
+  const importSnapshot = async (file: File, beforeWrite?: () => Promise<boolean>) => {
+    if (file.size > 2 * 1024 * 1024) return { ok: false as const, error: 'too_large' as const };
+    let bytes: ArrayBuffer;
+    let data: unknown;
+    try {
+      bytes = await file.arrayBuffer();
+      data = JSON.parse(new TextDecoder().decode(bytes)) as unknown;
+    } catch {
+      return { ok: false as const, error: 'not_json' as const };
+    }
+    return storeSnapshot(data, bytes, false, beforeWrite);
+  };
+  const fetchSnapshot = async (getSnapshot: () => Promise<unknown>, beforeWrite?: () => Promise<boolean>) => {
+    let data: unknown;
+    try {
+      data = await getSnapshot();
+    } catch (e) {
+      if (e instanceof ApiError && (e.status === 401 || e.status === 403))
+        return { ok: false as const, error: 'bank_auth' as const };
+      if (e instanceof ApiError && e.status === 429)
+        return { ok: false as const, error: 'rate_limit' as const };
+      return { ok: false as const, error: 'network' as const };
+    }
+    return storeSnapshot(data, new TextEncoder().encode(JSON.stringify(data)).buffer, true, beforeWrite);
+  };
+  return { bank, loading, error, reload, importSnapshot, fetchSnapshot };
 }

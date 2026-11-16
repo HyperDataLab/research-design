@@ -1,5 +1,9 @@
 import { useRef, useState } from 'react';
 import { useApi } from '@/shared/api/apiContext';
+import { ApiError } from '@/shared/api/client';
+import { useAuth } from '@/shared/auth/authContext';
+import { bankUrl } from '@/shared/auth/config';
+import { createBankClient } from '@/shared/bank/bankApi';
 import { draftSchema, emptyDraft } from '@/core/draft/schema';
 import { bankRefs } from '@/core/draft/bankRefs';
 import { useBank } from '@/shared/bank/useBank';
@@ -23,35 +27,75 @@ const reasons: Record<string, string> = {
   hash_mismatch: 'Tệp không khớp mã băm nội dung mà nó tự khai; hãy tải lại bản phát hành từ Writing Bank.',
   conflict: 'Bản chụp đã thay đổi; vui lòng thử lại.',
   network: 'Không thể nhập bản chụp. Vui lòng thử lại.',
+  bank_auth: 'Writing Bank chưa chấp nhận tài khoản của ứng dụng này.',
+  rate_limit: 'Writing Bank đang giới hạn số lần gọi; thử lại sau.',
 };
 export default function Page() {
   const { readOnly, project } = useProject();
   const client = useApi();
+  const { getIdToken } = useAuth();
   const bank = useBank();
   const draft = useDraft();
   const toast = useToast();
   const input = useRef<HTMLInputElement>(null);
   const [confirm, setConfirm] = useState<((answer: boolean) => void) | null>(null);
   const [refusal, setRefusal] = useState<{ error: string; issues?: string[] } | null>(null);
+  const [releaseMessage, setReleaseMessage] = useState('');
+  const [busy, setBusy] = useState(false);
   const choose = () => input.current?.click();
-  const importFile = async (file: File) => {
-    const result = await bank.importSnapshot(file, async () => {
-      if (!bank.bank) return true;
-      let needsConfirmation = true;
-      try {
-        const stored = await client.getDoc(project.id, 'draft');
-        const current = draftSchema.parse(stored?.data ?? emptyDraft());
-        needsConfirmation = bankRefs(current).length > 0;
-      } catch {
-        // An unreadable draft may contain references, so require confirmation.
-      }
-      return needsConfirmation ? new Promise<boolean>((resolve) => setConfirm(() => resolve)) : true;
-    });
+  const beforeWrite = async () => {
+    if (!bank.bank) return true;
+    let needsConfirmation = true;
+    try {
+      const stored = await client.getDoc(project.id, 'draft');
+      const current = draftSchema.parse(stored?.data ?? emptyDraft());
+      needsConfirmation = bankRefs(current).length > 0;
+    } catch {
+      // An unreadable draft may contain references, so require confirmation.
+    }
+    return needsConfirmation ? new Promise<boolean>((resolve) => setConfirm(() => resolve)) : true;
+  };
+  const finish = (result: { ok: true } | { ok: false; error: string; issues?: string[] }) => {
     if (result.ok) {
       setRefusal(null);
       toast('Đã nhập bản chụp Writing Bank.');
     } else if (result.error !== 'cancelled')
       setRefusal({ error: result.error, issues: 'issues' in result ? result.issues : undefined });
+  };
+  const importFile = async (file: File) => finish(await bank.importSnapshot(file, beforeWrite));
+  const checkRelease = async () => {
+    setBusy(true);
+    setRefusal(null);
+    setReleaseMessage('');
+    try {
+      const latest = await createBankClient({ baseUrl: bankUrl, getToken: getIdToken }).getRelease();
+      setReleaseMessage(
+        latest.release === bank.bank?.release
+          ? `Dự án đang dùng bản mới nhất (${latest.release}).`
+          : `Writing Bank có bản ${latest.release}, phát hành ${latest.date}.`,
+      );
+    } catch (e) {
+      setRefusal({
+        error:
+          e instanceof ApiError && (e.status === 401 || e.status === 403)
+            ? 'bank_auth'
+            : e instanceof ApiError && e.status === 429
+              ? 'rate_limit'
+              : 'network',
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+  const fetchLatest = async () => {
+    setBusy(true);
+    setRefusal(null);
+    const api = createBankClient({ baseUrl: bankUrl, getToken: getIdToken });
+    try {
+      finish(await bank.fetchSnapshot(api.getSnapshot, beforeWrite));
+    } finally {
+      setBusy(false);
+    }
   };
   return (
     <>
@@ -116,6 +160,19 @@ export default function Page() {
                 protocol, {bank.bank.collections.benchmarks.length} benchmark.
               </p>
               {!readOnly && <Button onClick={choose}>Thay bản chụp</Button>}
+            </>
+          )}
+          {bankUrl && (
+            <>
+              <Button disabled={busy} onClick={() => void checkRelease()}>
+                Kiểm tra bản mới
+              </Button>
+              {!readOnly && (
+                <Button disabled={busy} onClick={() => void fetchLatest()}>
+                  Lấy bản mới
+                </Button>
+              )}
+              {releaseMessage && <p>{releaseMessage}</p>}
             </>
           )}
         </Card>
