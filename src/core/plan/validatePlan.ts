@@ -1,7 +1,7 @@
 import { RUN_TAGS, SRD_P0_METHODS, type ExperimentPlan } from './schema';
 
 /** Methods that compare exactly two conditions. */
-const TWO_SAMPLE: readonly string[] = [
+export const TWO_SAMPLE: readonly string[] = [
   'ttest_independent',
   'ttest_paired',
   'ttest_welch',

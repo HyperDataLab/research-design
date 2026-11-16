@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import {
+  analysisId,
+  analysisMethod,
+  analysisSchema,
   bankRef,
   conditionId,
   conditionSchema,
@@ -126,6 +129,49 @@ export const draftConditionSchema = z.strictObject({
   params: conditionSchema.shape.params,
 });
 
+/**
+ * Phân tích thống kê and Ma trận chạy (S9). Methods, missing-data policies, corrections and the bounds of alpha
+ * are the plan's own. `conditions` of an analysis is ordered: the plan compares them in that order.
+ */
+export const draftAnalysisSchema = z.strictObject({
+  id: analysisId.and(numbered('a')),
+  /** Null for an analysis that tests no hypothesis (a descriptive summary, say). */
+  hypothesis: hypothesisId.nullable(),
+  /** Null until chosen. */
+  method: analysisMethod.nullable(),
+  variables: z.array(variableId),
+  conditions: z.array(conditionId),
+  parameters: analysisSchema.shape.parameters,
+  assumptions: z.array(text),
+  missingPolicy: analysisSchema.shape.missingPolicy,
+  alpha: analysisSchema.shape.alpha,
+  correction: analysisSchema.shape.correction,
+});
+
+/** The most seeds a grid may list. A confirmatory grid is written out; this is not a search. */
+export const MAX_SEEDS = 200;
+
+/**
+ * The confirmatory grid: every listed condition on every listed dataset with every seed. The number of runs is
+ * always computed from the three lists (`runCount`) and is not stored, so it cannot disagree with them.
+ */
+export const draftRunMatrixSchema = z.strictObject({
+  mlflowExperiment: z.string().trim(),
+  conditions: z.array(conditionId),
+  datasets: z.array(datasetId),
+  seeds: z.array(z.number().int().nonnegative()).max(MAX_SEEDS),
+  sampleSizeJustification: z.string().trim(),
+});
+export const emptyRunMatrix = (): z.infer<typeof draftRunMatrixSchema> => ({
+  mlflowExperiment: '',
+  conditions: [],
+  datasets: [],
+  seeds: [],
+  sampleSizeJustification: '',
+});
+export const runCount = (matrix: z.infer<typeof draftRunMatrixSchema>): number =>
+  matrix.conditions.length * matrix.datasets.length * matrix.seeds.length;
+
 const counter = z.number().int().positive();
 
 export const draftSchema = z.strictObject({
@@ -140,6 +186,8 @@ export const draftSchema = z.strictObject({
     m: counter.default(1),
     d: counter.default(1),
     c: counter.default(1),
+    // Added with Phân tích thống kê (S9).
+    a: counter.default(1),
   }),
   questions: z.array(draftQuestionSchema),
   hypotheses: z.array(draftHypothesisSchema),
@@ -149,6 +197,8 @@ export const draftSchema = z.strictObject({
   metrics: z.array(draftMetricSchema).default([]),
   datasets: z.array(draftDatasetSchema).default([]),
   conditions: z.array(draftConditionSchema).default([]),
+  analyses: z.array(draftAnalysisSchema).default([]),
+  runMatrix: draftRunMatrixSchema.default(emptyRunMatrix),
 });
 export type Draft = z.infer<typeof draftSchema>;
 export type DraftQuestion = Draft['questions'][number];
@@ -159,10 +209,12 @@ export type DraftVariable = Draft['variables'][number];
 export type DraftMetric = Draft['metrics'][number];
 export type DraftDataset = Draft['datasets'][number];
 export type DraftCondition = Draft['conditions'][number];
+export type DraftAnalysis = Draft['analyses'][number];
+export type DraftRunMatrix = Draft['runMatrix'];
 
 export const emptyDraft = (): Draft => ({
   schemaVersion: DRAFT_SCHEMA_VERSION,
-  next: { q: 1, h: 1, t: 1, v: 1, m: 1, d: 1, c: 1 },
+  next: { q: 1, h: 1, t: 1, v: 1, m: 1, d: 1, c: 1, a: 1 },
   questions: [],
   hypotheses: [],
   design: null,
@@ -171,4 +223,6 @@ export const emptyDraft = (): Draft => ({
   metrics: [],
   datasets: [],
   conditions: [],
+  analyses: [],
+  runMatrix: emptyRunMatrix(),
 });
