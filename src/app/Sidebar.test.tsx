@@ -2,11 +2,8 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, it } from 'vitest';
 import { SidebarItem } from './SidebarItem';
-import { planned } from '@/modules/planned';
+import item from '@/modules/corpus';
 it('PA-17 links ready project screens only inside a project', () => {
-  const plannedItem = planned.find((item) => item.id === 'corpus');
-  if (!plannedItem) throw new Error();
-  const item = { ...plannedItem, status: 'ready' as const };
   render(
     <MemoryRouter initialEntries={['/p/123']}>
       <SidebarItem item={item} />

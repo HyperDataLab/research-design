@@ -4,27 +4,27 @@ One slice per PR. A slice is done when its acceptance line holds in CI and, for 
 
 ## Done
 
-| Slice | What                                                                                                                                                                                                                     |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| S0    | Repo, tooling, shell with the planned screens, plan contract v1 with its gate and tests, docs.                                                                                                                           |
-| S1    | Worker: auth, projects, documents, items and frozen plans on R2 (`docs/WORKER_API.md`), tests WK-01..WK-12. Not deployed; never run in the Workers runtime.                                                              |
-| S2    | Sign-in (Google, lab domain; dev sign-in on the dev server), Dự án list with create, rename, archive, and the project page at `/p/<id>`. Tests PJ-01..PJ-15. Real Google sign-in not exercised: no Firebase project yet. |
+| Slice | What                                                                                                                                                                                                                                                                   |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S0    | Repo, tooling, shell with the planned screens, plan contract v1 with its gate and tests, docs.                                                                                                                                                                         |
+| S1    | Worker: auth, projects, documents, items and frozen plans on R2 (`docs/WORKER_API.md`), tests WK-01..WK-12. Not deployed; never run in the Workers runtime.                                                                                                            |
+| S2    | Sign-in (Google, lab domain; dev sign-in on the dev server), Dự án list with create, rename, archive, and the project page at `/p/<id>`. Tests PJ-01..PJ-15. Real Google sign-in not exercised: no Firebase project yet.                                               |
+| S3    | Tập bài báo at `/p/<id>/corpus`: add papers, include / exclude with a reason, decision log, import of a PaperLab paper model validated against the vendored schema; project layout route; saves that re-apply on a version conflict. Tests PA-01..PA-17, CO-01..CO-15. |
 
 ## Next
 
-| Slice | What                                                            | Requirements           | Done when                                                       |
-| ----- | --------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------- |
-| S2b   | Members of a project: add and remove by email (owner only)      | FR-102                 | A removed member no longer sees the project.                    |
-| S3    | Tập bài báo: paper-model import, decisions log                  | FR-201, FR-202         | A v1 model imports; another version is refused with its reason. |
-| S4    | Worker LLM proxy, consent, ledger, budget                       | FR-601..604            | A call over budget is refused; the ledger shows it.             |
-| S5    | Fact extraction and anchoring (core) with fixtures              | FR-301, FR-302, FR-605 | Unanchored facts cannot be approved; cache hit makes no call.   |
-| S6    | Bảng so sánh                                                    | FR-303                 | Approve, edit, reject, bulk approve; history kept.              |
-| S7    | Câu hỏi và giả thuyết; Thiết kế nghiên cứu with a bank snapshot | FR-401..403            | A hypothesis the design cannot support is flagged.              |
-| S8    | Đo lường; the chain view                                        | FR-404                 | A broken link is named on the object.                           |
-| S9    | Phân tích thống kê; Ma trận chạy                                | FR-501, FR-502         | Run count shown; P1 methods marked.                             |
-| S10   | Gói kế hoạch: gate, freeze, export, new version                 | FR-503..506            | ZIP hashes match; frozen version is read-only.                  |
-| S11   | Search and seed expansion; Paper Fetch Hub request              | FR-203, FR-204         | Deduplicated results with their source.                         |
-| S12   | Bank matching, counts, AI suggestions, runner stubs             | FR-304, 305, 405, 507  | Suggestions cite their cells; stub grid equals `expectedRuns`.  |
+| Slice | What                                                            | Requirements           | Done when                                                      |
+| ----- | --------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------- |
+| S2b   | Members of a project: add and remove by email (owner only)      | FR-102                 | A removed member no longer sees the project.                   |
+| S4    | Worker LLM proxy, consent, ledger, budget                       | FR-601..604            | A call over budget is refused; the ledger shows it.            |
+| S5    | Fact extraction and anchoring (core) with fixtures              | FR-301, FR-302, FR-605 | Unanchored facts cannot be approved; cache hit makes no call.  |
+| S6    | Bảng so sánh                                                    | FR-303                 | Approve, edit, reject, bulk approve; history kept.             |
+| S7    | Câu hỏi và giả thuyết; Thiết kế nghiên cứu with a bank snapshot | FR-401..403            | A hypothesis the design cannot support is flagged.             |
+| S8    | Đo lường; the chain view                                        | FR-404                 | A broken link is named on the object.                          |
+| S9    | Phân tích thống kê; Ma trận chạy                                | FR-501, FR-502         | Run count shown; P1 methods marked.                            |
+| S10   | Gói kế hoạch: gate, freeze, export, new version                 | FR-503..506            | ZIP hashes match; frozen version is read-only.                 |
+| S11   | Search and seed expansion; Paper Fetch Hub request              | FR-203, FR-204         | Deduplicated results with their source.                        |
+| S12   | Bank matching, counts, AI suggestions, runner stubs             | FR-304, 305, 405, 507  | Suggestions cite their cells; stub grid equals `expectedRuns`. |
 
 ## Owner steps (not done by agents)
 
