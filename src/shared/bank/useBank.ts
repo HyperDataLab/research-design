@@ -30,7 +30,7 @@ export function useBank() {
   useEffect(() => {
     void Promise.resolve().then(reload);
   }, [reload]);
-  const importSnapshot = async (file: File) => {
+  const importSnapshot = async (file: File, beforeWrite?: () => Promise<boolean>) => {
     if (file.size > 2 * 1024 * 1024) return { ok: false as const, error: 'too_large' as const };
     let bytes: ArrayBuffer;
     let data: unknown;
@@ -42,6 +42,7 @@ export function useBank() {
     }
     const parsed = readSnapshot(data);
     if (!parsed.ok) return { ok: false as const, error: parsed.reason, issues: parsed.issues };
+    if (beforeWrite && !(await beforeWrite())) return { ok: false as const, error: 'cancelled' as const };
     try {
       const hash = await crypto.subtle.digest('SHA-256', bytes);
       const release =

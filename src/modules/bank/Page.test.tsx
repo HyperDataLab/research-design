@@ -1,4 +1,4 @@
-import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, renderHook, screen, waitFor, within } from '@testing-library/react';
 import { expect, it, vi } from 'vitest';
 import { snapshot } from '@/core/bank/testSupport';
 import { emptyDraft } from '@/core/draft/schema';
@@ -105,13 +105,33 @@ it('BK-08 confirms replacement when referenced', async () => {
       },
     },
   });
-  render(
+  const { container } = render(
     <context.wrapper>
       <Page />
     </context.wrapper>,
   );
-  fireEvent.click(await screen.findByRole('button', { name: 'Thay bản chụp' }));
-  expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+  await screen.findByRole('button', { name: 'Thay bản chụp' });
+  expect(
+    screen.getByText(new RegExp(new Date('2026-01-01T00:00:00Z').toLocaleString('vi-VN'))),
+  ).toBeInTheDocument();
+  fireEvent.change(container.querySelector('input[type=file]')!, { target: { files: [file('{')] } });
+  await screen.findByText('Tệp không phải JSON.');
+  expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  fireEvent.change(container.querySelector('input[type=file]')!, {
+    target: { files: [file(JSON.stringify(snapshot))] },
+  });
+  const dialog = await screen.findByRole('alertdialog');
+  expect(dialog).toHaveTextContent('Bản nháp đang tham chiếu bản chụp hiện tại. Thay bản chụp?');
+  expect(context.api.putDoc).not.toHaveBeenCalled();
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Hủy' }));
+  expect(context.api.putDoc).not.toHaveBeenCalled();
+  fireEvent.change(container.querySelector('input[type=file]')!, {
+    target: { files: [file(JSON.stringify(snapshot))] },
+  });
+  fireEvent.click(
+    within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Thay bản chụp' }),
+  );
+  await waitFor(() => expect(context.api.putDoc).toHaveBeenCalledTimes(1));
 });
 
 it('DR-05 writes draft changes and reports network errors', async () => {
@@ -130,4 +150,32 @@ it('DR-05 writes draft changes and reports network errors', async () => {
       await result.current.change((d) => addQuestion(d, { text: 'Another', gap: '', papers: [] })),
     ).toMatchObject({ error: 'network' });
   });
+});
+
+it('BK-09 asks before replacement when draft cannot be loaded', async () => {
+  const context = setupClient();
+  context.docs.set(`${context.project.id}/bank`, {
+    etag: '1',
+    data: {
+      schemaVersion: 1,
+      release: 'sha256:0123456789abcdef',
+      source: 'Synthetic',
+      importedBy: 'test',
+      importedAt: '2026-01-01T00:00:00Z',
+      collections: snapshot.collections,
+    },
+  });
+  context.docs.set(`${context.project.id}/draft`, { etag: '2', data: { invalid: true } });
+  const { container } = render(
+    <context.wrapper>
+      <Page />
+    </context.wrapper>,
+  );
+  await screen.findByRole('button', { name: 'Thay bản chụp' });
+  fireEvent.change(container.querySelector('input[type=file]')!, {
+    target: { files: [file(JSON.stringify(snapshot))] },
+  });
+  expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
+  expect(context.api.putDoc).not.toHaveBeenCalled();
+  fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Hủy' }));
 });

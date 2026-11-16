@@ -55,6 +55,18 @@ it('DS-05 reports missing snapshots, entries and releases and suppresses DS-01 w
   expect(checkDesign(changed, bank).some((x) => x.rule === 'DS-01')).toBe(false);
   changed.design!.bank!.release = 'sha256:aaaaaaaaaaaaaaaa';
   expect(checkDesign(changed, bank)).toContainEqual(
-    expect.objectContaining({ rule: 'DS-05', reason: 'other_release' }),
+    expect.objectContaining({ rule: 'DS-05', subject: 'design', reason: 'missing' }),
   );
+});
+
+it('DS-05 orders subjects numerically and checks existence before release', () => {
+  const d: Draft = {
+    ...draft,
+    design: { ...draft.design!, bank: { id: 'rd.test-benchmark', release: 'old' } },
+    hypotheses: [10, 2].map((n) => ({ ...draft.hypotheses[0]!, id: `h-${n}`, claim: 'ct.missing' })),
+    threats: [{ id: 't-2', name: 'Missing', mitigation: 'Done', bank: { id: 'vt.missing', release: 'old' } }],
+  };
+  const flags = checkDesign(d, bank).filter((f) => f.rule === 'DS-05');
+  expect(flags.map((f) => f.subject)).toEqual(['design', 'h-2', 'h-10', 't-2']);
+  expect(flags.map((f) => f.reason)).toEqual(['other_release', 'missing', 'missing', 'missing']);
 });

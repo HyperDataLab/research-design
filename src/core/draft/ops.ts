@@ -1,4 +1,5 @@
-import type { BankDesign } from '../bank/snapshot';
+import { findDesign, findThreat } from '../bank/readSnapshot';
+import type { BankDoc, BankDesign } from '../bank/snapshot';
 import type { Draft, DraftDesign, DraftHypothesis, DraftQuestion, DraftThreat } from './schema';
 
 export type DraftError =
@@ -110,4 +111,19 @@ export function editThreat(doc: Draft, id: string, input: Pick<T, 'name' | 'miti
 export function removeThreat(doc: Draft, id: string): DraftResult {
   if (!doc.threats.some((x) => x.id === id)) return fail('unknown_threat');
   return ok({ ...doc, threats: doc.threats.filter((x) => x.id !== id) });
+}
+
+export function repin(doc: Draft, bank: BankDoc): DraftResult {
+  const ref = doc.design?.bank;
+  const design =
+    ref && ref.release !== bank.release && findDesign(bank, ref.id)
+      ? { ...doc.design!, bank: { ...ref, release: bank.release } }
+      : doc.design;
+  let changed = design !== doc.design;
+  const threats = doc.threats.map((t) => {
+    if (!t.bank || t.bank.release === bank.release || !findThreat(bank, t.bank.id)) return t;
+    changed = true;
+    return { ...t, bank: { ...t.bank, release: bank.release } };
+  });
+  return ok(changed ? { ...doc, design, threats } : doc);
 }

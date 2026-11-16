@@ -34,10 +34,10 @@ export function checkDesign(draft: Draft, bank: BankDoc | null): DesignFlag[] {
   if (ref) {
     const reason = !bank
       ? 'no_snapshot'
-      : ref.release !== bank.release
-        ? 'other_release'
-        : !design
-          ? 'missing'
+      : !design
+        ? 'missing'
+        : ref.release !== bank.release
+          ? 'other_release'
           : null;
     if (reason) flags.push({ rule: 'DS-05', subject: 'design', reference: 'design', id: ref.id, reason });
   }
@@ -46,13 +46,23 @@ export function checkDesign(draft: Draft, bank: BankDoc | null): DesignFlag[] {
     if (t.bank) {
       const reason = !bank
         ? 'no_snapshot'
-        : t.bank.release !== bank.release
-          ? 'other_release'
-          : !findThreat(bank, t.bank.id)
-            ? 'missing'
+        : !findThreat(bank, t.bank.id)
+          ? 'missing'
+          : t.bank.release !== bank.release
+            ? 'other_release'
             : null;
       if (reason) flags.push({ rule: 'DS-05', subject: t.id, reference: 'threat', id: t.bank.id, reason });
     }
   }
-  return flags.sort((a, b) => a.rule.localeCompare(b.rule) || a.subject.localeCompare(b.subject));
+  return flags.sort(
+    (a, b) =>
+      a.rule.localeCompare(b.rule) ||
+      (a.subject === b.subject
+        ? 0
+        : a.subject === 'design'
+          ? -1
+          : b.subject === 'design'
+            ? 1
+            : a.subject.localeCompare(b.subject, 'en', { numeric: true })),
+  );
 }

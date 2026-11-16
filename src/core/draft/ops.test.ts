@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { draftSchema, emptyDraft } from './schema';
 import * as ops from './ops';
-import { readSnapshot } from '../bank/readSnapshot';
+import { readSnapshot, toBankDoc } from '../bank/readSnapshot';
 import { snapshot } from '../bank/testSupport';
 
 const q = { text: ' Question ', gap: '', papers: [] };
@@ -58,4 +58,24 @@ describe('draft edits', () => {
     expect(d.threats[0]?.id).toBe('t-1');
     expect(doc(ops.removeThreat(d, 't-1')).threats).toHaveLength(0);
   });
+});
+
+it('DR-06 repins existing references and leaves missing references and no-ops intact', () => {
+  const parsed = readSnapshot(snapshot);
+  if (!parsed.ok) throw Error();
+  const bank = toBankDoc(parsed.file, 'sha256:0123456789abcdef', 'test', '2026-01-01T00:00:00Z');
+  const d = emptyDraft();
+  d.design = { name: 'Test', assignment: null, bank: { id: 'rd.test-benchmark', release: 'old' } };
+  d.threats = [
+    { id: 't-1', name: 'One', mitigation: '', bank: { id: 'vt.test-confound', release: 'old' } },
+    { id: 't-2', name: 'Missing', mitigation: '', bank: { id: 'vt.missing', release: 'old' } },
+  ];
+  const result = ops.repin(d, bank);
+  if (!result.ok) throw Error();
+  expect(result.doc.design?.bank?.release).toBe(bank.release);
+  expect(result.doc.threats.map((t) => t.bank?.release)).toEqual([bank.release, 'old']);
+  expect(ops.repin(result.doc, bank)).toEqual({ ok: true, doc: result.doc });
+  const again = ops.repin(result.doc, bank);
+  if (!again.ok) throw Error();
+  expect(again.doc).toBe(result.doc);
 });

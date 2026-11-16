@@ -1,4 +1,6 @@
 import { useRef, useState } from 'react';
+import { useApi } from '@/shared/api/apiContext';
+import { draftSchema, emptyDraft } from '@/core/draft/schema';
 import { useBank } from '@/shared/bank/useBank';
 import { useDraft } from '@/shared/draft/useDraft';
 import { useProject } from '@/shared/project/projectContext';
@@ -21,23 +23,33 @@ const reasons: Record<string, string> = {
   network: 'Không thể nhập bản chụp. Vui lòng thử lại.',
 };
 export default function Page() {
-  const { readOnly } = useProject();
+  const { readOnly, project } = useProject();
+  const client = useApi();
   const bank = useBank();
   const draft = useDraft();
   const toast = useToast();
   const input = useRef<HTMLInputElement>(null);
-  const [confirm, setConfirm] = useState(false);
+  const [confirm, setConfirm] = useState<((answer: boolean) => void) | null>(null);
   const [refusal, setRefusal] = useState<{ error: string; issues?: string[] } | null>(null);
-  const choose = () => {
-    if (bank.bank && (draft.draft.design?.bank || draft.draft.threats.some((t) => t.bank))) setConfirm(true);
-    else input.current?.click();
-  };
+  const choose = () => input.current?.click();
   const importFile = async (file: File) => {
-    const result = await bank.importSnapshot(file);
+    const result = await bank.importSnapshot(file, async () => {
+      if (!bank.bank) return true;
+      let needsConfirmation = true;
+      try {
+        const stored = await client.getDoc(project.id, 'draft');
+        const current = draftSchema.parse(stored?.data ?? emptyDraft());
+        needsConfirmation = !!current.design?.bank || current.threats.some((t) => !!t.bank);
+      } catch {
+        // An unreadable draft may contain references, so require confirmation.
+      }
+      return needsConfirmation ? new Promise<boolean>((resolve) => setConfirm(() => resolve)) : true;
+    });
     if (result.ok) {
       setRefusal(null);
       toast('Đã nhập bản chụp Writing Bank.');
-    } else setRefusal({ error: result.error, issues: 'issues' in result ? result.issues : undefined });
+    } else if (result.error !== 'cancelled')
+      setRefusal({ error: result.error, issues: 'issues' in result ? result.issues : undefined });
   };
   return (
     <>
@@ -57,7 +69,7 @@ export default function Page() {
       )}
       {bank.loading || draft.loading ? (
         <Loading />
-      ) : bank.error || draft.error ? (
+      ) : bank.error ? (
         <Empty title="Không tải được bản chụp.">
           <Button
             onClick={() => {
@@ -86,7 +98,7 @@ export default function Page() {
               <p className={styles.release}>{bank.bank.release}</p>
               <p>Nguồn: {bank.bank.source}</p>
               <p>
-                Người nhập: {bank.bank.importedBy} · {bank.bank.importedAt}
+                Người nhập: {bank.bank.importedBy} · {new Date(bank.bank.importedAt).toLocaleString('vi-VN')}
               </p>
               <p>
                 {bank.bank.collections.designs.length} thiết kế, {bank.bank.collections.threats.length} mối đe
@@ -115,18 +127,28 @@ export default function Page() {
       {confirm && (
         <Dialog
           title="Thay bản chụp"
-          description="Bản thảo có tham chiếu đến bản chụp hiện tại. Thay bản chụp có thể làm các tham chiếu cần xem lại."
-          onClose={() => setConfirm(false)}
+          description="Bản nháp đang tham chiếu bản chụp hiện tại. Thay bản chụp?"
+          onClose={() => {
+            confirm(false);
+            setConfirm(null);
+          }}
         >
-          <Button onClick={() => setConfirm(false)}>Hủy</Button>
+          <Button
+            onClick={() => {
+              confirm(false);
+              setConfirm(null);
+            }}
+          >
+            Hủy
+          </Button>
           <Button
             variant="primary"
             onClick={() => {
-              setConfirm(false);
-              input.current?.click();
+              confirm(true);
+              setConfirm(null);
             }}
           >
-            Tiếp tục
+            Thay bản chụp
           </Button>
         </Dialog>
       )}

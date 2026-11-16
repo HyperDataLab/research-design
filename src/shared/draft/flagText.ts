@@ -14,13 +14,19 @@ export function flagText(flag: DesignFlag, draft: Draft, bank: BankDoc | null): 
     case 'DS-04':
       return `${flag.subject} «${draft.threats.find((t) => t.id === flag.subject)?.name ?? ''}» chưa ghi cách giảm.`;
     case 'DS-05': {
+      const object =
+        flag.reference === 'design'
+          ? `Thiết kế «${draft.design?.name ?? flag.id}» (${flag.id})`
+          : flag.reference === 'threat'
+            ? `${flag.subject} «${draft.threats.find((t) => t.id === flag.subject)?.name ?? ''}»: mục ${flag.id}`
+            : `${flag.subject}: loại nhận định ${flag.id}`;
       const reason =
         flag.reason === 'no_snapshot'
-          ? 'không có bản chụp để đối chiếu'
+          ? 'chưa đối chiếu được vì dự án chưa có bản chụp Writing Bank'
           : flag.reason === 'other_release'
-            ? 'thuộc bản chụp khác'
+            ? 'thuộc bản chụp cũ'
             : 'không còn trong bản chụp hiện tại';
-      return `${flag.subject}: tham chiếu ${flag.id} ${reason}.`;
+      return `${object} ${reason}.`;
     }
   }
 }

@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { findClaimType, findDesign, findThreat } from '@/core/bank/readSnapshot';
 import { checkDesign, type DesignFlag } from '@/core/draft/checkDesign';
 import {
   addThreat,
   editThreat,
   removeThreat,
+  repin,
   setAssignment,
   setDesign,
   type DraftResult,
@@ -44,11 +46,14 @@ export default function Page() {
   };
   const flags = checkDesign(draft, bank);
   const design = draft.design?.bank && findDesign(bank, draft.design.bank.id);
+  const offered =
+    design?.threats
+      .map((id) => findThreat(bank, id))
+      .filter((t) => t && !draft.threats.some((x) => x.bank?.id === t.id)) ?? [];
+  const oldReferences = flags.some((f) => f.rule === 'DS-05' && f.reason === 'other_release');
   const warning = (flag: DesignFlag) => (
     <p className={styles.warning} key={`${flag.rule}-${flag.subject}`}>
-      <Badge tone="warning">Cần xem lại</Badge>{' '}
-      {flag.rule === 'DS-05' && flag.reason === 'missing' && 'Không còn trong bản chụp hiện tại. '}
-      {flagText(flag, draft, bank)}
+      <Badge tone="warning">Cần xem lại</Badge> {flagText(flag, draft, bank)}
     </p>
   );
   return (
@@ -73,6 +78,21 @@ export default function Page() {
         </Empty>
       ) : (
         <div className={styles.stack}>
+          {oldReferences && (
+            <Card>
+              <p>Một số tham chiếu thuộc bản chụp cũ nhưng vẫn có trong bản chụp hiện tại.</p>
+              {!readOnly && bank && (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    void change((d) => repin(d, bank));
+                  }}
+                >
+                  Ghim lại theo bản chụp hiện tại
+                </Button>
+              )}
+            </Card>
+          )}
           <Card>
             <h2>Thiết kế</h2>
             {!draft.design ? (
@@ -87,13 +107,16 @@ export default function Page() {
               <>
                 <p className={styles.reading}>{draft.design.name}</p>
                 {design?.status === 'draft' && <Badge>Bản nháp của bank</Badge>}
-                {flags.filter((f) => f.rule === 'DS-05' && f.subject === 'design').map(warning)}
+                {flags
+                  .filter((f) => f.rule === 'DS-05' && f.reason !== 'other_release' && f.subject === 'design')
+                  .map(warning)}
                 <p>Cách phân nhóm</p>
                 {readOnly ? (
                   <p>{draft.design.assignment ? word('assignment', draft.design.assignment) : 'Chưa chọn'}</p>
                 ) : (
-                  <fieldset className={styles.fixed} disabled={!!design && design.assignment !== 'either'}>
+                  <>
                     <SegmentedControl
+                      disabled={!!design && design.assignment !== 'either'}
                       label="Cách phân nhóm"
                       value={draft.design.assignment ?? ''}
                       options={assignments}
@@ -101,7 +124,7 @@ export default function Page() {
                         void change((d) => setAssignment(d, v as NonNullable<Draft['design']>['assignment']));
                       }}
                     />
-                  </fieldset>
+                  </>
                 )}
                 {design && design.assignment !== 'either' && (
                   <p className={styles.quiet}>Writing Bank quy định cách phân nhóm của thiết kế này.</p>
@@ -152,7 +175,7 @@ export default function Page() {
                     .filter((f) => f.rule === 'DS-01')
                     .map((f) => (
                       <div key={f.subject}>
-                        <a href={`/p/${project.id}/questions`}>{f.subject}</a>
+                        <Link to={`/p/${project.id}/questions`}>{f.subject}</Link>
                         {warning(f)}
                       </div>
                     ))
@@ -171,10 +194,12 @@ export default function Page() {
             )}
             {draft.threats.map((t) => (
               <div className={styles.row} key={t.id}>
-                <span className={styles.mono}>{t.id}</span> <span className={styles.reading}>{t.name}</span>
-                {t.bank && findThreat(bank, t.bank.id)?.status === 'draft' && (
-                  <Badge>Bản nháp của bank</Badge>
-                )}
+                <div className={styles.threatHeading}>
+                  <span className={styles.mono}>{t.id}</span> <span className={styles.reading}>{t.name}</span>
+                  {t.bank && findThreat(bank, t.bank.id)?.status === 'draft' && (
+                    <Badge>Bản nháp của bank</Badge>
+                  )}
+                </div>
                 {t.mitigation ? (
                   <p>Cách giảm trong nghiên cứu này: {t.mitigation}</p>
                 ) : (
@@ -182,7 +207,9 @@ export default function Page() {
                     <Badge tone="warning">Cần xem lại</Badge> Chưa ghi cách giảm
                   </p>
                 )}
-                {flags.filter((f) => f.rule === 'DS-05' && f.subject === t.id).map(warning)}
+                {flags
+                  .filter((f) => f.rule === 'DS-05' && f.reason !== 'other_release' && f.subject === t.id)
+                  .map(warning)}
                 {!readOnly && (
                   <div className={styles.actions}>
                     <Button variant="ghost" onClick={() => setEditing(t)}>
@@ -195,38 +222,38 @@ export default function Page() {
                 )}
               </div>
             ))}
-            <h3>Gợi ý từ thiết kế</h3>
-            {design?.threats
-              .map((id) => findThreat(bank, id))
-              .filter((t) => t && !draft.threats.some((x) => x.bank?.id === t.id))
-              .map(
-                (t) =>
-                  t && (
-                    <div className={styles.row} key={t.id}>
-                      <strong>{t.name}</strong> {t.status === 'draft' && <Badge>Bản nháp của bank</Badge>}
-                      <p>
-                        {word('validity', t.type)} · {t.mechanism}
-                      </p>
-                      <p className={styles.quiet}>Gợi ý chung của bank: {t.mitigation}</p>
-                      {!readOnly && bank && (
-                        <Button
-                          variant="ghost"
-                          onClick={() => {
-                            void change((d) =>
-                              addThreat(d, {
-                                name: t.name,
-                                mitigation: '',
-                                bank: { id: t.id, release: bank.release },
-                              }),
-                            );
-                          }}
-                        >
-                          Thêm vào danh sách
-                        </Button>
-                      )}
-                    </div>
-                  ),
-              )}
+            {offered.length > 0 && <h3>Gợi ý từ thiết kế</h3>}
+            {design && design.threats.length > 0 && offered.length === 0 && (
+              <p className={styles.quiet}>Đã thêm mọi mối đe doạ mà thiết kế này gợi ý.</p>
+            )}
+            {offered.map(
+              (t) =>
+                t && (
+                  <div className={styles.row} key={t.id}>
+                    <strong>{t.name}</strong> {t.status === 'draft' && <Badge>Bản nháp của bank</Badge>}
+                    <p>
+                      {word('validity', t.type)} · {t.mechanism}
+                    </p>
+                    <p className={styles.quiet}>Gợi ý chung của bank: {t.mitigation}</p>
+                    {!readOnly && bank && (
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          void change((d) =>
+                            addThreat(d, {
+                              name: t.name,
+                              mitigation: '',
+                              bank: { id: t.id, release: bank.release },
+                            }),
+                          );
+                        }}
+                      >
+                        Thêm vào danh sách
+                      </Button>
+                    )}
+                  </div>
+                ),
+            )}
             {!readOnly && <Button onClick={() => setEditing('new')}>Thêm mối đe doạ</Button>}
           </Card>
         </div>

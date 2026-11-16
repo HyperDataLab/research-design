@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { BankDoc } from '@/core/bank/snapshot';
 import { designFromBank } from '@/core/draft/ops';
 import type { DraftDesign } from '@/core/draft/schema';
@@ -28,7 +29,7 @@ export function DesignDrawer({
       <h2>Chọn thiết kế</h2>
       {!bank && (
         <p>
-          Chưa có bản chụp. <a href={`/p/${projectId}/bank`}>Writing Bank</a>
+          Chưa có bản chụp. <Link to={`/p/${projectId}/bank`}>Writing Bank</Link>
         </p>
       )}
       {bank?.collections.designs.map((d) => (
