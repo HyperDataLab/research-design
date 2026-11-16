@@ -678,22 +678,17 @@
                       "null"
                     ]
                   },
-                  "paperModelSha256": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^[0-9a-f]{64}$"
-                      },
-                      {
-                        "type": "null"
-                      }
+                  "sourceHash": {
+                    "type": [
+                      "string",
+                      "null"
                     ]
                   }
                 },
                 "required": [
                   "title",
                   "doi",
-                  "paperModelSha256"
+                  "sourceHash"
                 ],
                 "additionalProperties": false
               }

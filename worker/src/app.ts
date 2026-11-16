@@ -3,6 +3,7 @@ import { document, itemList } from './documents';
 import { error, json, method, missing, read } from './http';
 import { plans } from './plans';
 import { patchProject, projectKey, projects, type Project } from './projects';
+import { DOC_KINDS, ITEM_COLLECTIONS } from '../../src/core/project/storage';
 
 export interface Bucket {
   get(key: string): Promise<{ text(): Promise<string>; httpEtag: string } | null>;
@@ -25,8 +26,6 @@ export interface Deps {
   now: () => Date;
 }
 export const PREFIX = 'researchdesign/';
-export const DOC_KINDS = ['papers', 'draft', 'bank'] as const;
-export const ITEM_COLLECTIONS = ['paper-models', 'facts'] as const;
 
 async function route(deps: Deps, request: Request, caller: Caller): Promise<Response> {
   const path = new URL(request.url).pathname.split('/');

@@ -4,7 +4,6 @@ import {
   FlaskConical,
   Grid3x3,
   HelpCircle,
-  Library,
   PackageCheck,
   Ruler,
   Search,
@@ -27,7 +26,18 @@ const soon = (
   label: string,
   summary: string,
   icon: LucideIcon,
-): ModuleDefinition => ({ id, group, order, label, summary, icon, path: `/${id}`, status: 'soon', page });
+): ModuleDefinition => ({
+  id,
+  group,
+  order,
+  label,
+  summary,
+  icon,
+  path: group === 'system' ? `/${id}` : id,
+  ...(group === 'system' ? {} : { scope: 'project' }),
+  status: 'soon',
+  page,
+});
 
 export const planned: ModuleDefinition[] = [
   soon(
@@ -37,14 +47,6 @@ export const planned: ModuleDefinition[] = [
     'Tìm bài báo',
     'Tìm theo chủ đề, mở rộng từ bài hạt giống, ghi lý do chọn và loại.',
     Search,
-  ),
-  soon(
-    'corpus',
-    'literature',
-    2,
-    'Tập bài báo',
-    'Các bài đã chọn, kèm paper model nhập từ PaperLab.',
-    Library,
   ),
   soon(
     'evidence',
