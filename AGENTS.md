@@ -64,7 +64,7 @@ worker/                  (not built yet) auth, storage on R2, LLM proxy with the
 3. **Reported numbers stay with their paper.** A result extracted from a paper is that paper's claim. It is
    never merged into a leaderboard or shown without its source.
 4. **A frozen plan is immutable.** A change is a new `planVersion` with a `deviation` note (PP-09).
-5. **The freeze gate is `core/plan/validatePlan.ts`** (rules PP-01..PP-09). Blocking issues stop the freeze;
+5. **The freeze gate is `core/plan/validatePlan.ts`** (rules PP-01..PP-10). Blocking issues stop the freeze;
    warnings are shown and may be accepted.
 6. **Ids are stable.** Hypothesis, variable, metric, dataset, condition and analysis ids do not change between
    versions of a plan; SRD's results are traced back through them and through the MLflow run tags (`RUN_TAGS`).

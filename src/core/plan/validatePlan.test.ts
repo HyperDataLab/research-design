@@ -90,13 +90,23 @@ describe('ExperimentPlanPackage v1', () => {
     expect(rules({ ...examplePlan(), deviation: 'x' }, 'blocking')).toEqual(['PP-09']);
   });
 
+  it('PP-10: compared conditions are in the run matrix, two for a two-sample test', () => {
+    const outside = examplePlan();
+    outside.runMatrix.conditions = ['c-bm25', 'c-dense'];
+    outside.runMatrix.expectedRuns = 20;
+    expect(rules(outside, 'blocking')).toEqual(['PP-10']);
+    const three = examplePlan();
+    three.analyses[0]!.conditions.push('c-dense');
+    expect(rules(three, 'blocking')).toEqual(['PP-10']);
+  });
+
   it('run tags carry the plan id, version and grid cell', () => {
     expect(runTags(examplePlan(), { condition: 'c-bm25', dataset: 'd-main', seed: 3 })).toEqual({
-      'rd.plan_id': 'retrieval-reranker',
-      'rd.plan_version': '1',
-      'rd.condition_id': 'c-bm25',
-      'rd.dataset_id': 'd-main',
-      'rd.seed': '3',
+      'plan.id': 'retrieval-reranker',
+      'plan.version': '1',
+      'plan.condition_id': 'c-bm25',
+      'plan.dataset_id': 'd-main',
+      'plan.seed': '3',
     });
   });
 });

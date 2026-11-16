@@ -1,5 +1,14 @@
 import { RUN_TAGS, SRD_P0_METHODS, type ExperimentPlan } from './schema';
 
+/** Methods that compare exactly two conditions. */
+const TWO_SAMPLE: readonly string[] = [
+  'ttest_independent',
+  'ttest_paired',
+  'ttest_welch',
+  'mann_whitney',
+  'wilcoxon_signed_rank',
+];
+
 /** The freeze gate. A plan with a blocking issue cannot be frozen; a warning is shown and can be accepted. */
 export interface PlanIssue {
   rule: string;
@@ -113,6 +122,19 @@ export function validatePlan(plan: ExperimentPlan): PlanIssue[] {
     block('PP-09', `Version ${plan.planVersion} must state its deviation from the previous version.`);
   if (plan.planVersion === 1 && plan.deviation)
     block('PP-09', 'Version 1 has no previous version to deviate from.');
+
+  // PP-10: an analysis compares conditions that are actually run, and as many as its method takes.
+  for (const analysis of plan.analyses) {
+    for (const id of analysis.conditions)
+      if (ids.condition.has(id) && !plan.runMatrix.conditions.includes(id))
+        block('PP-10', `${analysis.id} compares ${id}, which is not in the run matrix.`, analysis.id);
+    if (TWO_SAMPLE.includes(analysis.method) && analysis.conditions.length !== 2)
+      block(
+        'PP-10',
+        `${analysis.id} uses ${analysis.method}, which compares exactly two conditions.`,
+        analysis.id,
+      );
+  }
 
   return issues;
 }

@@ -34,7 +34,7 @@ navigation and no icon rail: the labels are short and distinct.
 - **The chain**: wherever a hypothesis, variable, metric or analysis is shown, the objects it links to are text
   links on one line ("H1 → Độ chính xác → test/accuracy → Welch t-test"). An object with a missing link says
   which link is missing.
-- **Gate checklist** (Gói kế hoạch): the rules PP-01..PP-09 as a list; each line states the rule in words, its
+- **Gate checklist** (Gói kế hoạch): the rules PP-01..PP-10 as a list; each line states the rule in words, its
   result in words (Đạt, Chặn, Cảnh báo) and links to the object at fault. Freezing is the page's one primary
   button and is disabled while a blocking issue remains, with the reason beside it.
 - **Frozen content** is read-only and labelled with its version and date. "Tạo phiên bản mới" asks for the
