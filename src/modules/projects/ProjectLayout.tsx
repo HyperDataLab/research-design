@@ -54,7 +54,7 @@ export default function ProjectLayout() {
     );
   if (!project || project.id !== projectId) return <Loading />;
   return (
-    <ProjectContext.Provider value={{ project, readOnly: project.archived }}>
+    <ProjectContext.Provider value={{ project, readOnly: project.archived, setProject }}>
       {location.pathname.replace(/\/$/, '') !== `/p/${projectId}` && (
         <Link to={`/p/${projectId}`}>‹ {project.title}</Link>
       )}

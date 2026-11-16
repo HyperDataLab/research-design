@@ -52,6 +52,13 @@ navigation and no icon rail: the labels are short and distinct.
   line "Chủ dự án · cập nhật <ngày>". Row actions are ghost buttons: Đổi tên, Lưu trữ (Khôi phục for an archived
   one). The page's one primary button is "Tạo dự án", which opens a Dialog with one TextField. Archived projects
   are hidden behind a Chip filter "Đã lưu trữ" with its count and are labelled with a Badge.
+- **Thành viên** (a Card on the project page, below the screens of the project): the members as rows, each an
+  email with the quiet label "Chủ dự án" on the owner's row, sorted with the owner first. The owner sees a
+  TextField "Email thành viên" with the secondary button "Thêm" beside it, and a ghost button "Gỡ" on every row
+  but their own; "Gỡ" asks for confirmation in a Dialog ("Gỡ a@… khỏi dự án? Người này sẽ không còn thấy dự
+  án."). A member who is not the owner sees the list and the quiet line "Chỉ chủ dự án thêm hoặc gỡ thành
+  viên." An email outside the lab's domain, a malformed one or one already in the list is refused under the
+  field in one sentence before anything is sent. An archived project shows the list only.
 - **Inside a project.** Every screen under `/p/<projectId>/…` shows the project's title as a quiet text link
   above the page header ("‹ Reranker study"), leading to the project page. In the sidebar, the screens of a
   project are links only while a project is open; elsewhere they are plain text with the hint "Mở một dự án
