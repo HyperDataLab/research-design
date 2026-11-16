@@ -1,0 +1,32 @@
+.stack {
+  display: grid;
+  gap: var(--space-4);
+}
+.row {
+  border-top: 1px solid var(--border);
+  padding: var(--space-4) 0;
+}
+.quiet {
+  color: var(--text-muted);
+}
+.warning {
+  color: var(--warning);
+}
+.reading {
+  font-family: var(--font-reading);
+  font-size: var(--text-reading);
+}
+.mono {
+  font-family: var(--font-mono);
+}
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.threatHeading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}

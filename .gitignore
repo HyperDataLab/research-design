@@ -15,3 +15,6 @@ firebase-debug.log*
 *.pdf
 .dev.vars
 .dev.vars.*
+
+# Writing Bank snapshots hold the content of a private repository
+*.local.json

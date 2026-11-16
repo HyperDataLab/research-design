@@ -6,15 +6,21 @@ export function SegmentedControl({
   value,
   options,
   onChange,
+  disabled = false,
 }: {
   label: string;
   value: string;
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
+  disabled?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   function keyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key) || options.length === 0)
+    if (
+      disabled ||
+      !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key) ||
+      options.length === 0
+    )
       return;
     event.preventDefault();
     const direction = event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 1;
@@ -31,6 +37,7 @@ export function SegmentedControl({
       {options.map((option) => (
         <Button
           key={option.value}
+          disabled={disabled}
           role="radio"
           aria-checked={value === option.value}
           tabIndex={value === option.value ? 0 : -1}

@@ -1,16 +1,5 @@
 import { lazy } from 'react';
-import {
-  Boxes,
-  FlaskConical,
-  Grid3x3,
-  HelpCircle,
-  PackageCheck,
-  Ruler,
-  Search,
-  Sigma,
-  Table2,
-  type LucideIcon,
-} from 'lucide-react';
+import { Grid3x3, PackageCheck, Ruler, Search, Sigma, Table2, type LucideIcon } from 'lucide-react';
 import type { ModuleDefinition } from '@/app/moduleTypes';
 
 /**
@@ -56,22 +45,6 @@ export const planned: ModuleDefinition[] = [
     Table2,
   ),
   soon(
-    'questions',
-    'design',
-    1,
-    'Câu hỏi và giả thuyết',
-    'Câu hỏi nghiên cứu và giả thuyết có mã ổn định, nối với khoảng trống tìm được.',
-    HelpCircle,
-  ),
-  soon(
-    'design',
-    'design',
-    2,
-    'Thiết kế nghiên cứu',
-    'Chọn thiết kế, xem nó cho phép kết luận gì, ghi mối đe doạ và cách giảm.',
-    FlaskConical,
-  ),
-  soon(
     'measurement',
     'design',
     3,
@@ -102,13 +75,5 @@ export const planned: ModuleDefinition[] = [
     'Gói kế hoạch',
     'Kiểm tra, đóng băng và xuất gói cho Scientific Research Desktop.',
     PackageCheck,
-  ),
-  soon(
-    'bank',
-    'system',
-    1,
-    'Writing Bank',
-    'Phiên bản bank đang ghim: thiết kế, metric, benchmark, mối đe doạ.',
-    Boxes,
   ),
 ];

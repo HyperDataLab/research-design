@@ -121,6 +121,26 @@ describe('shared UI', () => {
     expect(screen.getByRole('radio', { name: 'Other' })).toHaveAttribute('aria-checked', 'true');
     expect(screen.getByRole('radio', { name: 'Other' })).toHaveFocus();
   });
+  it('UI-01 disables segmented control clicks and arrow keys', () => {
+    const onChange = vi.fn();
+    render(
+      <SegmentedControl
+        label="Filter"
+        value="a"
+        disabled
+        onChange={onChange}
+        options={[
+          { value: 'a', label: 'All' },
+          { value: 'b', label: 'Other' },
+        ]}
+      />,
+    );
+    const first = screen.getByRole('radio', { name: 'All' });
+    expect(first).toBeDisabled();
+    fireEvent.click(screen.getByRole('radio', { name: 'Other' }));
+    fireEvent.keyDown(first, { key: 'ArrowRight' });
+    expect(onChange).not.toHaveBeenCalled();
+  });
   it('announces and dismisses a toast', () => {
     vi.useFakeTimers();
     function Example() {

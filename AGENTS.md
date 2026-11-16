@@ -17,7 +17,7 @@ The UI is in Vietnamese. Plan content, extracted facts, code, identifiers and co
 | System                      | What this app does with it                                                                                  |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | PaperLab                    | Imports its `paper-model.json`, one per paper, including the facts it extracted. This app extracts nothing. |
-| Writing Bank                | Reads designs, threats, metrics, protocols and benchmarks from a pinned release.                            |
+| Writing Bank                | Reads designs, threats, claim types, metrics, protocols and benchmarks from a pinned snapshot.              |
 | Paper Fetch Hub             | Fetches documents and runs searches. This app only asks it; it contacts no publisher or scholarly source.   |
 | Scientific Research Desktop | Reads the experiment plan package this app publishes.                                                       |
 
