@@ -163,6 +163,10 @@ navigation and no icon rail: the labels are short and distinct.
   the first 20 cells (Điều kiện, Dataset, Seed, and the tags `plan.condition_id`, `plan.dataset_id`,
   `plan.seed` in the mono face), the first column staying in view when the table scrolls sideways, with the
   quiet line "plan.id và plan.version được gán khi đóng băng." and, past 20, "… và n ô nữa".
+- **What the screens add to the two patterns above.** A method's name starts with a capital where it opens a row
+  or an option ("Kiểm định t Welch") and is lower-case inside a sentence. In "Các ô đầu tiên" a cell shows the
+  id and the name ("c-1 Base") under a header that names the tag carrying the id. A read-only project shows the
+  saved grid as text. The top bar shows the project's title on the project page.
 - **In-use refusal.** Deleting anything that an analysis or the run grid refers to is refused like any other
   object in use, with the sentence that names what refers to it.
 - **Design flag.** A check of the draft against the snapshot (DS-01..DS-05) is shown on the object it is about
@@ -191,7 +195,7 @@ navigation and no icon rail: the labels are short and distinct.
 - **Contrast is measured, not judged by eye.** All text, including `--text-faint` labels and placeholders, is at
   least 4.5:1 on every surface it sits on, in both themes. The border of anything operated (inputs, buttons,
   radios, checkboxes) uses `--control-border`, at least 3:1; `--border` and `--border-strong` are for dividers.
-- **Links to other entries are text links**, underlined, never pills. A list of them reads as a sentence
+- **Links to other entries are text links** in the accent colour, underlined on hover and focus, never pills. A list of them reads as a sentence
   ("H1, H2, H3"). Status words
   (Bắt buộc, Tuỳ chọn) are a quiet second line, not grey tags.
 - Semantic colours include `--danger`, `--success`, `--warning` with `--danger-soft` and `--warning-soft` surfaces,

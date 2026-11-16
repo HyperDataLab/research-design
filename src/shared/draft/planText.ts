@@ -3,12 +3,18 @@ import type { Draft } from '@/core/draft/schema';
 
 const methods: Record<string, [string, string]> = {
   descriptive: ['thống kê mô tả', 'Tóm tắt các biến được chọn.'],
-  ttest_independent: ['kiểm định t độc lập', 'So sánh trung bình của hai nhóm độc lập.'],
+  ttest_independent: [
+    'kiểm định t độc lập',
+    'So sánh trung bình của hai nhóm độc lập, giả định phương sai bằng nhau.',
+  ],
   ttest_paired: ['kiểm định t cặp', 'So sánh trung bình của hai nhóm ghép cặp.'],
-  ttest_welch: ['kiểm định t Welch', 'So sánh trung bình của hai nhóm độc lập.'],
+  ttest_welch: [
+    'kiểm định t Welch',
+    'So sánh trung bình của hai nhóm độc lập, không giả định phương sai bằng nhau.',
+  ],
   correlation_pearson: ['tương quan Pearson', 'Đo tương quan tuyến tính giữa các biến.'],
   correlation_spearman: ['tương quan Spearman', 'Đo tương quan thứ hạng giữa các biến.'],
-  anova_oneway: ['ANOVA một nhân tố', 'So sánh trung bình giữa các nhóm.'],
+  anova_oneway: ['ANOVA một nhân tố', 'So sánh trung bình của ba nhóm độc lập trở lên.'],
   anova_repeated: ['ANOVA đo lặp', 'So sánh trung bình giữa các phép đo lặp.'],
   mann_whitney: ['Mann–Whitney', 'So sánh hai nhóm độc lập theo thứ hạng.'],
   wilcoxon_signed_rank: ['Wilcoxon dấu hạng', 'So sánh hai nhóm ghép cặp theo thứ hạng.'],
