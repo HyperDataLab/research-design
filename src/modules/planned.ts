@@ -1,13 +1,5 @@
 import { lazy } from 'react';
-import {
-  Grid3x3,
-  PackageCheck,
-  Ruler,
-  Search,
-  Sigma,
-  Table2,
-  type LucideIcon,
-} from 'lucide-react';
+import { Grid3x3, PackageCheck, Ruler, Search, Sigma, Table2, type LucideIcon } from 'lucide-react';
 import type { ModuleDefinition } from '@/app/moduleTypes';
 
 /**
