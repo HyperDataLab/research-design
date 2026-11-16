@@ -15,7 +15,8 @@ where a plan becomes frozen. The LLM proxy and the usage ledger are slice S4 and
 - **Bodies** are JSON, at most 2 MiB for a document and 8 MiB for an item (`413` beyond). Malformed JSON or a wrong shape: `400`.
 - **Errors** are `{ "error": "<code>", "message": "<English sentence>" }` with the status. Codes:
   `unauthenticated`, `forbidden`, `not_found`, `bad_request`, `too_large`, `conflict`, `precondition_failed`,
-  `plan_invalid`, `method_not_allowed`.
+  `plan_invalid`, `method_not_allowed`, `internal`. An unexpected failure is `500 internal` with the usual CORS
+  headers and no detail of the failure.
 - **Membership.** A project is visible only to its members. A caller who is not a member gets `404`, the same
   answer as for a project that does not exist, so ids cannot be probed.
 - **The bucket interface** (`Bucket` in `worker/src/app.ts`) is the part of R2 the Worker uses: `get` (text and
@@ -90,8 +91,9 @@ Details that are easy to get wrong:
   Markers are added for new members and deleted for removed ones.
 - **Archived projects** are read-only: `PUT` on docs and plans and `PATCH` of anything but `archived` give `409`.
 - **Document and item writes use optimistic concurrency.** The `ETag` is the stored object's R2 `httpEtag`,
-  opaque to the client. An update sends `If-Match: <etag>` and is written with R2's conditional put
-  (`onlyIf: { etagMatches }`), so the comparison and the write are one step; when R2 refuses, the answer is
+  opaque to the client. An update sends `If-Match: <etag>`, exactly as received (one quoted value; a weak, unquoted or
+  listed value is `412`), and is written with R2's conditional put (`onlyIf: { etagMatches }`, which takes the
+  etag without its quotes), so the comparison and the write are one step; when R2 refuses, the answer is
   `412 precondition_failed`. A first save sends no `If-Match`; a `PUT` without `If-Match` when the object already
   exists is also `412`. `If-Match: *` is not supported. This stops two tabs from silently overwriting each other.
 - **Known limit.** Creating an object that must not exist yet (a first save, a frozen plan version) is a read
@@ -128,4 +130,5 @@ Details that are easy to get wrong:
 - `WK-09` freeze refusals: schema failure 422, blocking gate issue 422 (with the rule id in `issues`), version
   mismatch 400, existing version 409, skipped version 409, different `planId` 409.
 - `WK-10` a plan with only warnings (PP-07, PP-08) freezes.
+- `WK-12` an unexpected error is a 500 with CORS headers.
 - `WK-11` ids, kinds, collections and item keys from the URL that do not match their pattern never reach the bucket.

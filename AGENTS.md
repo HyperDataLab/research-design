@@ -45,7 +45,8 @@ src/
     plan/                the experiment plan: Zod schema, freeze gate, run tags
   shared/
     ui/                  design-system primitives (see DESIGN.md)
-worker/                  (not built yet) auth, storage on R2, LLM proxy with the usage ledger
+worker/                  auth, projects, documents and frozen plans on R2 (docs/WORKER_API.md); the LLM proxy
+                         with the usage ledger is slice S4
 ```
 
 - **Dependency direction:** `app -> modules -> shared -> core`. ESLint enforces it for `core` and `shared`.
