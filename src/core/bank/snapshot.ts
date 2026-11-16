@@ -4,9 +4,7 @@ import { z } from 'zod';
  * A snapshot of the Writing Bank collections this app reads, pinned to a project as the `bank` document.
  *
  * Writing Bank owns these models. This file restates none of them: it reads the few fields the screens use and
- * ignores the rest, so a field the bank adds does not break an import. The bank has no release identifier and no
- * `/bank/v1` yet (docs/CONTRACTS.md), so a snapshot is a file made from a checkout of the bank
- * (`scripts/make-bank-snapshot.mjs`) and its release is the hash of that file.
+ * ignores the rest, so a field the bank adds does not break an import.
  */
 export const SNAPSHOT_FORMAT = 'writing-bank-snapshot';
 export const SNAPSHOT_FORMAT_VERSION = 1;
@@ -100,14 +98,30 @@ export const snapshotFileSchema = z.object({
   formatVersion: z.literal(SNAPSHOT_FORMAT_VERSION),
   /** Where the file was made from, for people: the bank's commit and date. Not trusted and not a release. */
   source: z.string().default(''),
+  release: z
+    .string()
+    .regex(/^\d{4}\.\d{2}\.[1-9]\d*$/)
+    .optional(),
+  date: z.iso.datetime().optional(),
+  notes: z.string().optional(),
+  contentHash: z.unknown().optional(),
+  includesDrafts: z.boolean().optional(),
+  aliases: z.record(z.string(), z.string()).optional(),
   collections: collectionsSchema,
 });
 
 /** The `bank` document of a project. */
 export const bankDocSchema = z.strictObject({
   schemaVersion: z.literal(1),
-  /** `sha256:` and the first 16 hex digits of the hash of the imported file's bytes. */
-  release: z.string().regex(/^sha256:[0-9a-f]{16}$/),
+  release: z.string().regex(/^(?:sha256:[0-9a-f]{16}|\d{4}\.\d{2}\.[1-9]\d*)$/),
+  releaseDate: z.iso.datetime().nullable().default(null),
+  contentHash: z
+    .string()
+    .regex(/^[0-9a-f]{64}$/)
+    .nullable()
+    .default(null),
+  includesDrafts: z.boolean().default(false),
+  aliases: z.record(z.string(), z.string()).default({}),
   source: z.string(),
   importedBy: z.string(),
   importedAt: z.iso.datetime(),

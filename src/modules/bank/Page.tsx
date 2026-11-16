@@ -20,6 +20,7 @@ const reasons: Record<string, string> = {
   not_a_snapshot: 'Tệp không phải bản chụp Writing Bank.',
   unsupported_version: 'Phiên bản bản chụp không được hỗ trợ.',
   invalid: 'Bản chụp không hợp lệ.',
+  hash_mismatch: 'Tệp không khớp mã băm nội dung mà nó tự khai; hãy tải lại bản phát hành từ Writing Bank.',
   conflict: 'Bản chụp đã thay đổi; vui lòng thử lại.',
   network: 'Không thể nhập bản chụp. Vui lòng thử lại.',
 };
@@ -97,6 +98,13 @@ export default function Page() {
           ) : (
             <>
               <p className={styles.release}>{bank.bank.release}</p>
+              {bank.bank.releaseDate && <p>Ngày phát hành: {bank.bank.releaseDate}</p>}
+              {bank.bank.includesDrafts && (
+                <p>
+                  <Badge tone="warning">Có mục bản nháp</Badge> Bản phát hành này gồm cả các mục Writing Bank
+                  chưa xuất bản.
+                </p>
+              )}
               <p>Nguồn: {bank.bank.source}</p>
               <p>
                 Người nhập: {bank.bank.importedBy} · {new Date(bank.bank.importedAt).toLocaleString('vi-VN')}

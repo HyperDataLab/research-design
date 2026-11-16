@@ -9,6 +9,7 @@ import { addQuestion } from '@/core/draft/ops';
 import { ProjectContext } from '@/shared/project/projectContext';
 import { setupClient } from '../corpus/testSupport';
 import Page from './Page';
+import { contentHash } from '@/core/bank/release';
 
 function file(text: string, size?: number) {
   const f = new File([text], 'test.json');
@@ -178,4 +179,63 @@ it('BK-09 asks before replacement when draft cannot be loaded', async () => {
   expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
   expect(context.api.putDoc).not.toHaveBeenCalled();
   fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Hủy' }));
+});
+
+it('D51 imports a verified bank release and displays its date and draft warning', async () => {
+  const context = setupClient();
+  const raw = {
+    ...snapshot,
+    release: '2031.02.1',
+    date: '2031-02-01T00:00:00Z',
+    notes: 'Test',
+    includesDrafts: true,
+    aliases: { 'rd.alpha': 'rd.beta' },
+  };
+  const cut = { ...raw, contentHash: await contentHash(raw) };
+  const { container } = render(
+    <context.wrapper>
+      <Page />
+    </context.wrapper>,
+  );
+  await screen.findByText('Chưa có bản chụp');
+  fireEvent.change(container.querySelector('input[type=file]')!, {
+    target: { files: [file(JSON.stringify(cut))] },
+  });
+  expect(await screen.findByText('2031.02.1')).toBeInTheDocument();
+  expect(screen.getByText('Ngày phát hành: 2031-02-01T00:00:00Z')).toBeInTheDocument();
+  expect(screen.getByText('Có mục bản nháp')).toBeInTheDocument();
+  expect(screen.getByText(/Bản phát hành này gồm cả các mục Writing Bank chưa xuất bản/)).toBeInTheDocument();
+  expect(context.api.putDoc).toHaveBeenCalledWith(
+    context.project.id,
+    'bank',
+    expect.objectContaining({
+      release: raw.release,
+      releaseDate: raw.date,
+      contentHash: cut.contentHash,
+      includesDrafts: true,
+      aliases: raw.aliases,
+    }),
+    null,
+  );
+});
+
+it('D51 shows the hash refusal and does not write the snapshot', async () => {
+  const context = setupClient();
+  const { container } = render(
+    <context.wrapper>
+      <Page />
+    </context.wrapper>,
+  );
+  await screen.findByText('Chưa có bản chụp');
+  fireEvent.change(container.querySelector('input[type=file]')!, {
+    target: {
+      files: [file(JSON.stringify({ ...snapshot, release: '2031.02.1', contentHash: '0'.repeat(64) }))],
+    },
+  });
+  expect(
+    await screen.findByText(
+      'Tệp không khớp mã băm nội dung mà nó tự khai; hãy tải lại bản phát hành từ Writing Bank.',
+    ),
+  ).toBeInTheDocument();
+  expect(context.api.putDoc).not.toHaveBeenCalled();
 });

@@ -90,3 +90,47 @@ it('DR-06 repins existing references and leaves missing references and no-ops in
   if (!again.ok) throw Error();
   expect(again.doc).toBe(result.doc);
 });
+
+it('D51 follows aliases for references and claims, stopping at missing targets and cycles', () => {
+  const parsed = readSnapshot(snapshot);
+  if (!parsed.ok) throw Error();
+  const bank = {
+    ...toBankDoc(parsed.file, '2031.02.1', 'test', '2031-02-01T00:00:00Z'),
+    aliases: {
+      'rd.alpha': 'rd.beta',
+      'rd.beta': 'rd.test-benchmark',
+      'rd.test-benchmark': 'rd.test-experiment',
+      'vt.alpha': 'vt.test-confound',
+      'vt.missing': 'vt.absent',
+      'vt.cycle': 'vt.loop',
+      'vt.loop': 'vt.cycle',
+      'ct.gamma': 'ct.causal',
+    },
+  };
+  const draft = emptyDraft();
+  draft.design = { name: 'Test', assignment: null, bank: { id: 'rd.alpha', release: 'old' } };
+  draft.threats = ['vt.alpha', 'vt.missing', 'vt.cycle'].map((id, i) => ({
+    id: `t-${i + 1}`,
+    name: id,
+    mitigation: '',
+    bank: { id, release: 'old' },
+  }));
+  draft.hypotheses = [{ ...h, id: 'h-1', claim: 'ct.gamma', independent: [], dependent: [] }];
+  const updated = doc(ops.repin(draft, bank));
+  expect(updated.design?.bank).toEqual({ id: 'rd.test-benchmark', release: bank.release });
+  expect(updated.threats.map((t) => t.bank)).toEqual([
+    { id: 'vt.test-confound', release: bank.release },
+    { id: 'vt.missing', release: 'old' },
+    { id: 'vt.cycle', release: 'old' },
+  ]);
+  expect(updated.hypotheses[0]?.claim).toBe('ct.causal');
+  expect(doc(ops.repin(updated, bank)).design?.bank?.id).toBe('rd.test-benchmark');
+  const long = {
+    ...bank,
+    aliases: Object.fromEntries(
+      Array.from({ length: 11 }, (_, i) => [`rd.${i}`, i === 10 ? 'rd.test-benchmark' : `rd.${i + 1}`]),
+    ),
+  };
+  draft.design.bank = { id: 'rd.0', release: 'old' };
+  expect(doc(ops.repin(draft, long)).design?.bank).toEqual(draft.design.bank);
+});
