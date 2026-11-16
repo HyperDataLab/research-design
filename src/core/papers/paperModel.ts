@@ -22,6 +22,7 @@ export interface PaperModelView {
       venue: string | null;
     };
     sections: { id: string; parentId: string | null; title: string; level: number; role: string }[];
+    blocks: { id: string; sectionId: string; kind: string; page: number | null; text: string }[];
   };
   sentences: { key: string; displayId: string; sectionId: string; page: number | null; text: string }[];
 }

@@ -7,7 +7,10 @@ describe('reading a PaperLab paper model', () => {
   it('FR-201: the vendored example is accepted', () => {
     const result = readPaperModel(copy());
     expect(result.ok).toBe(true);
-    if (result.ok) expect(result.model.sentences[0]?.key).toMatch(/^[0-9a-f]{16}#\d+$/);
+    if (result.ok) {
+      expect(result.model.sentences[0]?.key).toMatch(/^[0-9a-f]{16}#\d+$/);
+      expect(result.model.document.blocks).toEqual(example.document.blocks);
+    }
   });
 
   it('FR-201: another format or version is refused in one sentence', () => {
