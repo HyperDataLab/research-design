@@ -6,6 +6,7 @@ import questions from '@/modules/questions';
 import design from '@/modules/design';
 import measurement from '@/modules/measurement';
 import analyses from '@/modules/analyses';
+import runs from '@/modules/runs';
 import settings from '@/modules/settings';
 import { planned } from '@/modules/planned';
 import { GROUP_ORDER } from './groups';
@@ -19,6 +20,7 @@ export const modules = [
   design,
   measurement,
   analyses,
+  runs,
   settings,
   ...planned,
 ].sort((a, b) => GROUP_ORDER.indexOf(a.group) - GROUP_ORDER.indexOf(b.group) || a.order - b.order);
