@@ -111,6 +111,26 @@ navigation and no icon rail: the labels are short and distinct.
   warning line "Chưa ghi cách giảm"), then "Gợi ý từ thiết kế": the design's threats not yet in the register,
   each with its mechanism, the bank's general advice as a quiet line, and a ghost button "Thêm vào danh sách".
   "Thêm mối đe doạ" (secondary) adds one written by the person.
+- **Đo lường**: Tabs "Chuỗi", "Biến", "Metric", "Dataset", "Điều kiện", each tab's label followed by its count.
+  Chuỗi: one row per hypothesis showing the chain (below) and, for a person who can write, a ghost button "Gắn
+  biến" that opens a Dialog with two groups of Checkboxes (biến độc lập, biến phụ thuộc; only variables of the
+  matching role are offered). The other tabs are lists of rows with Sửa and Xoá as ghost buttons and one
+  "Thêm …" button per tab (primary; it is the view's one primary button). A row shows the id in the mono face,
+  the name, the object's own fields as a quiet line (a metric: `key` in the mono face · unit · goal in words ·
+  aggregation in words; a dataset: source · version · split; a condition: a Badge "Baseline" and its params as
+  `name = value` in the mono face), and its chain flags. Adding a metric or a dataset opens a Drawer: the
+  snapshot's entries with a text filter and Chips for the metric family (with counts), each entry with its
+  definition, unit, direction in words, "Không hỗ trợ" sentences and a button "Dùng", plus a last entry to
+  describe one by hand. Choosing a bank entry opens the same Dialog as editing, pre-filled with what the bank
+  gives; the MLflow key, aggregation and protocol are always empty for the person to write. A bank protocol is
+  shown beside the protocol field as a hint ("Gợi ý từ bank") and can be marked as followed; its text is never
+  copied in. A benchmark shows its lifecycle in words and its known flaws. Deleting something that is still
+  referred to is refused in the Dialog with a sentence naming what refers to it.
+- **Chain line** (shared component, used on Đo lường and on each hypothesis row of Câu hỏi và giả thuyết): one
+  line per dependent variable, "h-1 → v-2 Accuracy → m-1 `test/accuracy`", ids in the mono face, each object a
+  text link to its tab. A missing link is said in place of the object, in `--warning` text with the Badge "Cần
+  xem lại": "chưa gắn biến phụ thuộc", "chưa có metric", "metric chưa có key". Independent variables follow on a
+  quiet second line with their levels ("Biến độc lập: v-1 Reranker (A, B)").
 - **Design flag.** A check of the draft against the snapshot (DS-01..DS-05) is shown on the object it is about
   as a warning Badge "Cần xem lại" followed by one sentence that names both sides, for example "H2 là nhận định
   nhân quả; thiết kế «Test benchmark» không hỗ trợ loại nhận định này." A flag never blocks saving. A

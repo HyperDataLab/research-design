@@ -77,6 +77,8 @@ document.
   the bank's seed. A member imports it on the project's Writing Bank screen. This app never fetches the bank.
 - **The release** is `sha256:` plus the first 16 hex digits of the hash of the file's bytes. Every bank reference
   in a draft or a plan names it. `source` (the bank's commit and date) is for people and is not trusted.
+- **Online use.** The snapshot is the only way bank content reaches a screen (PRD D31). Once `/bank/v1` is live
+  the snapshot is fetched through it on a person's action and stored; nothing calls the bank per field.
 - **Reading.** `src/core/bank/snapshot.ts` reads only the fields the screens use and ignores the rest; `metrics`,
   `protocols` and `benchmarks` are kept whole for Đo lường. The bank's schemas are not restated here.
 - **Private content.** Writing Bank is a private repository and this one is public. A snapshot file is git-ignored

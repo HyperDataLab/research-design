@@ -52,6 +52,48 @@ const collectionsSchema = z.object({
   benchmarks: keptWhole,
 });
 
+/**
+ * Views over the entries kept whole. An entry that does not fit its view is skipped by the reader, not refused:
+ * the stored document was accepted when it was imported.
+ */
+export const bankMetricSchema = z.object({
+  id: z.string().regex(/^met\./),
+  status,
+  name: text,
+  aliases: z.array(z.string()).default([]),
+  family: z.string(),
+  definition: z.string(),
+  unit: z.string().nullable().default(null),
+  direction: z.enum(['higher_better', 'lower_better', 'target_value', 'descriptive']),
+  /** The strongest statement the metric supports alone. Shown as text; it is not the `ct.*` vocabulary. */
+  maxClaim: z.string().default(''),
+  doesNotSupport: z.array(z.string()).default([]),
+  requiredReporting: z.array(z.string()).default([]),
+});
+export const bankProtocolSchema = z.object({
+  id: z.string().regex(/^mp\./),
+  status,
+  name: text,
+  purpose: z.string(),
+  procedure: z.array(z.string()).default([]),
+  report: z.array(z.string()).default([]),
+  metrics: z.array(z.string()).default([]),
+});
+export const bankBenchmarkSchema = z.object({
+  id: z.string().regex(/^bm\./),
+  status,
+  name: text,
+  task: z.string(),
+  metrics: z.array(z.string()).default([]),
+  protocol: z.string().default(''),
+  lifecycle: z.string().default('unknown'),
+  knownFlaws: z.array(z.string()).default([]),
+  url: z.string().optional(),
+});
+export type BankMetric = z.infer<typeof bankMetricSchema>;
+export type BankProtocol = z.infer<typeof bankProtocolSchema>;
+export type BankBenchmark = z.infer<typeof bankBenchmarkSchema>;
+
 /** The file a person imports. */
 export const snapshotFileSchema = z.object({
   format: z.literal(SNAPSHOT_FORMAT),
