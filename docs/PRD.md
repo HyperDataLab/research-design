@@ -173,6 +173,8 @@ Hyperparameter search.
 | D9  | Cross-paper comparison lives here.                                                    | PaperLab analyses one paper at a time by the owner's decision.                                      |
 | D10 | Power calculation, PRISMA figure and per-design forms are deferred.                   | A justification field is enough to freeze a first plan.                                             |
 | D11 | Extraction follows the paper model as it is now; the importer rejects other versions. | The owner said the paper model is close to stable; a version bump is then one visible change.       |
+| D12 | The Worker runs the schema and the gate when a plan is frozen.                        | The freeze is the one step that must not depend on the client being honest or up to date.           |
+| D13 | Paper models and facts are stored one object per paper.                               | A paper model is large, and members working on different papers must not collide.                   |
 
 ## 10. Open questions
 
