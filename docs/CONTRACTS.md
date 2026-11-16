@@ -68,13 +68,29 @@ This app fetches nothing itself (PRD D23). PDFs reach PaperLab through the Hub; 
 
 ## Writing Bank
 
-Read from a pinned release: `designs`, `threats`, `metrics`, `protocols`, `benchmarks`. Until the bank's
-`/bank/v1` API is live, a release is a snapshot of those collections stored with the project.
+Read from a pinned release: `designs`, `threats`, `claim-types`, `metrics`, `protocols`, `benchmarks`. Until the
+bank's `/bank/v1` API is live, a release is a snapshot of those collections stored with the project as its `bank`
+document.
+
+- **The file.** `node scripts/make-bank-snapshot.mjs <writing-bank checkout> [out]` writes
+  `{ format: "writing-bank-snapshot", formatVersion: 1, source, collections }`, the entries copied unchanged from
+  the bank's seed. A member imports it on the project's Writing Bank screen. This app never fetches the bank.
+- **The release** is `sha256:` plus the first 16 hex digits of the hash of the file's bytes. Every bank reference
+  in a draft or a plan names it. `source` (the bank's commit and date) is for people and is not trusted.
+- **Reading.** `src/core/bank/snapshot.ts` reads only the fields the screens use and ignores the rest; `metrics`,
+  `protocols` and `benchmarks` are kept whole for Đo lường. The bank's schemas are not restated here.
+- **Private content.** Writing Bank is a private repository and this one is public. A snapshot file is git-ignored
+  (`*.local.json`); tests, fixtures and the dev server use invented entries only.
+- **What the design check uses.** `designs[].supports` (claim type ids), `cannotSupport` (text, shown only),
+  `assignment`, `causalLicence`, `threats` (ids into `threats`). Designs with `assignment: "either"` leave the
+  choice to the person.
 
 ### Requests to Writing Bank
 
 1. A release identifier on every export (already planned there as C5).
 2. Accept this app's Firebase ID tokens on `/bank/v1` (planned there for "the writing project").
+3. An official snapshot export of the six collections above, carrying the release identifier, to replace
+   `scripts/make-bank-snapshot.mjs`.
 
 ## Known limits of the stored documents
 

@@ -83,6 +83,38 @@ navigation and no icon rail: the labels are short and distinct.
 - **Consent gate.** A screen that needs AI and finds no current consent shows, in place of its AI action, the
   sentence "Cần đồng ý gửi dữ liệu cho AI trước khi dùng tính năng này." with a text link to Cài đặt. Over
   budget: "Đã hết hạn mức token hôm nay." with the same link.
+- **Writing Bank** (a project screen, last in the "Thiết kế" group): one Card. With no snapshot: an Empty state
+  saying that designs, threats and claim types come from a snapshot of Writing Bank, and the primary button
+  "Nhập bản chụp" (takes a `.json` file). With one: the release in the mono face, "Nguồn" (the file's source
+  line), who imported it and when, the count per collection as a sentence, and a secondary button "Thay bản
+  chụp". A refused file states the one reason in a sentence, as for a paper model. Replacing a snapshot asks for
+  confirmation in a Dialog when the draft holds references to the current one.
+- **Câu hỏi và giả thuyết**: questions as Cards in one column, in id order. A question shows its id in the mono
+  face, its text in the reading face, "Khoảng trống" (the gap, or the quiet line "Chưa ghi khoảng trống") and its
+  papers as text links to Tập bài báo. Under it, its hypotheses as rows: id, statement in the reading face, a
+  Badge for the kind in words (Có hướng, Không hướng, Tương đương, Thăm dò), the claim type's name or the quiet
+  line "Chưa phân loại nhận định", and the design flag when there is one (below). Hypotheses with no question
+  sit in a last Card "Chưa gắn câu hỏi". The page's primary button is "Thêm câu hỏi"; "Thêm giả thuyết" is a
+  ghost button on each question. Adding and editing happen in a Dialog; Sửa and Xoá are ghost buttons on the
+  row. A question that still has hypotheses cannot be deleted and the Dialog says why. An id is never shown as
+  editable.
+- **Thiết kế nghiên cứu**: three Cards in one column.
+  "Thiết kế": with none chosen, an Empty state and the primary button "Chọn thiết kế", which opens a Drawer
+  listing the snapshot's designs (name, family, causal licence in words, the first sentence of the definition)
+  and a last entry "Tự mô tả thiết kế" (name and assignment). With no snapshot the Drawer offers only that entry
+  and a text link to the Writing Bank screen. Once chosen: the name in the reading face, a SegmentedControl for
+  the assignment (Ngẫu nhiên, Không ngẫu nhiên, Không phân nhóm), fixed and explained in a quiet line when the
+  bank fixes it, and a ghost button "Đổi thiết kế".
+  "Thiết kế này cho phép kết luận gì": two lists, "Hỗ trợ" (the names of the claim types) and "Không hỗ trợ"
+  (the bank's sentences, unchanged), then "Giả thuyết cần xem lại": one line per flagged hypothesis.
+  "Mối đe doạ": the register as rows (id, name, "Cách giảm trong nghiên cứu này" as an editable text, or the
+  warning line "Chưa ghi cách giảm"), then "Gợi ý từ thiết kế": the design's threats not yet in the register,
+  each with its mechanism, the bank's general advice as a quiet line, and a ghost button "Thêm vào danh sách".
+  "Thêm mối đe doạ" (secondary) adds one written by the person.
+- **Design flag.** A check of the draft against the snapshot (DS-01..DS-05) is shown on the object it is about
+  as a warning Badge "Cần xem lại" followed by one sentence that names both sides, for example "H2 là nhận định
+  nhân quả; thiết kế «Benchmark evaluation» không hỗ trợ loại nhận định này." A flag never blocks saving. A
+  reference to an entry that the current snapshot no longer has says "Không còn trong bản chụp hiện tại".
 - **Signed-out screens** that need the account show an Empty state that says what signing in gives and holds the
   "Đăng nhập" button; they never render an empty list.
 - **Dev sign-in.** On the dev server without Firebase config, the account button reads "Đăng nhập (dev)" and a

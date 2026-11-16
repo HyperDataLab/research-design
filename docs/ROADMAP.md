@@ -19,7 +19,7 @@ One slice per PR. A slice is done when its acceptance line holds in CI and, for 
 | S2b   | Members of a project: add and remove by email (owner only)                                      | FR-102                | A removed member no longer sees the project.                   |
 | S5    | Reader for experiment facts from the paper model (after PaperLab publishes them; see CONTRACTS) | FR-301, FR-302        | A fact whose sentence key is missing cannot be approved.       |
 | S6    | Bảng so sánh                                                                                    | FR-303                | Approve, edit, reject, bulk approve; history kept.             |
-| S7    | Câu hỏi và giả thuyết; Thiết kế nghiên cứu with a bank snapshot                                 | FR-401..403           | A hypothesis the design cannot support is flagged.             |
+| S7    | Câu hỏi và giả thuyết; Thiết kế nghiên cứu; Writing Bank snapshot                               | FR-401..403           | A hypothesis the design cannot support is flagged.             |
 | S8    | Đo lường; the chain view                                                                        | FR-404                | A broken link is named on the object.                          |
 | S9    | Phân tích thống kê; Ma trận chạy                                                                | FR-501, FR-502        | Run count shown; P1 methods marked.                            |
 | S10   | Gói kế hoạch: gate, freeze, export, new version                                                 | FR-503..506           | ZIP hashes match; frozen version is read-only.                 |
