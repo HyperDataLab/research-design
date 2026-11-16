@@ -8,16 +8,16 @@ import { z } from 'zod';
 /** Bump when the consent text changes in substance; every account is then asked again. */
 export const CONSENT_VERSION = 1;
 
-/** What a call is for. The ledger groups usage by it; a new feature is added here first. */
-export const LLM_FEATURES = [
-  'connection_test',
-  'fact_extraction',
-  'bank_matching',
-  'plan_suggestion',
-] as const;
+/**
+ * What a call is for. Extracting facts from papers is not in this list on purpose: extraction belongs to
+ * PaperLab, which has its own person in charge (owner, 2026-11-16). This app calls a model only for its own
+ * planning help.
+ *
+ * The ledger groups usage by it; a new feature is added here first. */
+export const LLM_FEATURES = ['connection_test', 'bank_matching', 'plan_suggestion'] as const;
 export type LlmFeature = (typeof LLM_FEATURES)[number];
 
-/** `<name>@<n>`, e.g. `fact_extraction@1`. Prompts are versioned; the ledger records which one was used. */
+/** `<name>@<n>`, e.g. `plan_suggestion@1`. Prompts are versioned; the ledger records which one was used. */
 export const promptVersionSchema = z.string().regex(/^[a-z][a-z0-9_]{0,39}@[1-9][0-9]{0,3}$/);
 
 export const LLM_LIMITS = {

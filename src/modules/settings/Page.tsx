@@ -19,7 +19,6 @@ import styles from './Page.module.css';
 
 const labels: Record<LlmFeature, string> = {
   connection_test: 'Kiểm tra kết nối',
-  fact_extraction: 'Trích dữ kiện',
   bank_matching: 'Khớp với Writing Bank',
   plan_suggestion: 'Gợi ý kế hoạch',
 };

@@ -14,12 +14,12 @@ The UI is in Vietnamese. Plan content, extracted facts, code, identifiers and co
 
 ## Systems around it
 
-| System                      | What this app does with it                                                             |
-| --------------------------- | -------------------------------------------------------------------------------------- |
-| PaperLab                    | Imports its `paper-model.json`, one per paper. Read-only; no call into PaperLab's app. |
-| Writing Bank                | Reads designs, threats, metrics, protocols and benchmarks from a pinned release.       |
-| Paper Fetch Hub             | Source of PDFs (shared R2 bucket). This app never fetches publisher sites itself.      |
-| Scientific Research Desktop | Reads the experiment plan package this app publishes.                                  |
+| System                      | What this app does with it                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| PaperLab                    | Imports its `paper-model.json`, one per paper, including the facts it extracted. This app extracts nothing. |
+| Writing Bank                | Reads designs, threats, metrics, protocols and benchmarks from a pinned release.                            |
+| Paper Fetch Hub             | Fetches documents and runs searches. This app only asks it; it contacts no publisher or scholarly source.   |
+| Scientific Research Desktop | Reads the experiment plan package this app publishes.                                                       |
 
 ## Hard constraints
 
@@ -29,6 +29,8 @@ The UI is in Vietnamese. Plan content, extracted facts, code, identifiers and co
   `phuong@hyperdatalab.org`. Before any `wrangler` command that changes something, run `npx wrangler whoami` and
   stop when it shows another account. Creating cloud resources, setting secrets and deploying are the owner's
   actions unless the owner says otherwise.
+- **This app fetches no document and extracts nothing from papers.** Paper Fetch Hub and PaperLab do that, each
+  with a person in charge; this app sends requests and reads results (owner, 2026-11-16).
 - **The LLM is reached only through the Worker.** The key is a `wrangler secret`. The browser never holds it.
 - **Vendored contracts are read-only.** Files under `schemas/vendor/` change only by copying a new version from
   the system that owns them. A change this app needs is written into `docs/CONTRACTS.md` as a request.
@@ -81,8 +83,7 @@ Three different things are called tokens here; each has one home.
 
 - **LLM tokens.** Every call goes through the Worker, which records account, feature, model, prompt version and
   input/output tokens, and refuses a call beyond the account's daily budget. The UI shows what a batch will
-  cost before it starts. Extraction runs per paper and is cached by paper hash and prompt version, so a paper
-  is not paid for twice.
+  cost before it starts. Calls are only for this app's own planning help; extraction from papers is PaperLab's.
 - **Agent tokens (building this repo).** Design, schemas and acceptance stay with the lead model. Implementation
   slices go to Codex. Searching, bulk content and mechanical edits go to the cheapest model that can do them.
   One slice per task, a brief that names files and tests, no fan-out without the owner asking.

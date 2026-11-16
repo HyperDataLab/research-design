@@ -51,7 +51,20 @@ datasets, baselines, metrics or design; this app extracts those itself and ancho
 
 ### Requests to PaperLab
 
-None. If the paper model later carries experiment facts, FR-301 reads them instead of extracting.
+1. **Experiment facts in the paper model** (not yet sent). This app does not extract from papers (PRD D23). It
+   needs, per paper, facts of these kinds: `task`, `dataset`, `baseline`, `metric`, `design`, `result`. Each fact:
+   the kind, a value as text, for a result also the number, unit, metric and dataset it belongs to, the sentence
+   `key` it rests on, and the annotation run that produced it. Suggested home: a new annotation scheme or a
+   `knowledge.experiment` block in a new schema version. Until PaperLab publishes it, Bảng so sánh has no data.
+
+## Paper Fetch Hub
+
+This app fetches nothing itself (PRD D23). PDFs reach PaperLab through the Hub; this app only needs to ask.
+
+### Requests to Paper Fetch Hub (not yet sent)
+
+1. A way for a signed-in lab member of another lab app to add a DOI to the Hub's queue and read its state.
+2. A search by topic or from seed papers, run by the Hub with the lab's sources, returning metadata with DOIs.
 
 ## Writing Bank
 

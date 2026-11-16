@@ -19,7 +19,7 @@ const usage = {
   dailyBudget: 100,
   today: { inputTokens: 50, outputTokens: 30, calls: 1, reservedTokens: 0, estimatedCalls: 1 },
   month: { inputTokens: 60, outputTokens: 40, calls: 2 },
-  byFeature: [{ feature: 'fact_extraction' as const, inputTokens: 50, outputTokens: 30, calls: 1 }],
+  byFeature: [{ feature: 'plan_suggestion' as const, inputTokens: 50, outputTokens: 30, calls: 1 }],
 };
 const project = {
   id: '0123456789abcdef',
@@ -105,7 +105,7 @@ describe('settings', () => {
     expect(await screen.findByText('80 / 100 token')).toBeInTheDocument();
     expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '80');
     expect(screen.getByRole('meter')).toHaveAttribute('data-tone', 'warning');
-    expect(screen.getByText('Trích dữ kiện')).toBeInTheDocument();
+    expect(screen.getByText('Gợi ý kế hoạch')).toBeInTheDocument();
     expect(screen.getByText('Có 1 lần gọi được ước lượng')).toBeInTheDocument();
   });
   it('LC-09 hides the estimate line when there are no estimates', async () => {

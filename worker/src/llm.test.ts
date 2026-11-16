@@ -50,8 +50,8 @@ function setup() {
   const accept = () => call('PUT', '/v1/consent', { version: CONSENT_VERSION, provider: 'test' });
   const input = {
     projectId,
-    feature: 'fact_extraction',
-    promptVersion: 'fact_extraction@1',
+    feature: 'plan_suggestion',
+    promptVersion: 'plan_suggestion@1',
     messages: [{ role: 'user', content: message }],
   };
   const chat = (data: unknown = input) => call('POST', '/v1/llm/chat', data);
@@ -225,8 +225,8 @@ describe('AI calls', () => {
       at: '2026-11-16T11:00:00Z',
       tokens: 5,
       projectId,
-      feature: 'fact_extraction',
-      promptVersion: 'fact_extraction@1',
+      feature: 'plan_suggestion',
+      promptVersion: 'plan_suggestion@1',
       model: 'model',
     });
     s.bucket.values.set(key, { value: JSON.stringify(day), etag: 'old' });
@@ -235,7 +235,7 @@ describe('AI calls', () => {
       dailyBudget: 100,
       today: { calls: 3, estimatedCalls: 1, reservedTokens: 0 },
       month: { calls: 3 },
-      byFeature: [{ feature: 'fact_extraction', calls: 3 }],
+      byFeature: [{ feature: 'plan_suggestion', calls: 3 }],
     });
   });
   it('LM-13 never stores message text in usage objects', async () => {

@@ -111,3 +111,57 @@ it('PA-13 item operations use etags', async () => {
     status: 412,
   });
 });
+
+it('LC-14 client and Worker agree on consent, a call and the usage summary', async () => {
+  const upstream: typeof fetch = async () =>
+    Response.json({
+      choices: [{ message: { content: 'OK' }, finish_reason: 'stop' }],
+      usage: { prompt_tokens: 7, completion_tokens: 1 },
+    });
+  const deps: Deps = {
+    llm: {
+      baseUrl: 'https://router.test/v1',
+      apiKey: 'k',
+      model: 'm',
+      provider: 'test',
+      dailyTokenBudget: 1000,
+      maxOutputTokens: 64,
+      fetch: upstream,
+      timeoutMs: 1000,
+    },
+    llmProvider: 'test',
+    bucket: new MemoryBucket(),
+    allowedOrigins: [],
+    allowedDomain: 'hyperdatalab.org',
+    now: () => new Date(),
+    verifyToken: async () => ({ uid: 'a', email: 'a@hyperdatalab.org', name: 'a' }),
+  };
+  const api = createApiClient({
+    baseUrl: 'https://worker.test',
+    getToken: async () => 'token',
+    fetch: (input, init) => handle(deps, new Request(input, init)),
+  });
+  const project = await api.createProject('First');
+  const request = {
+    projectId: project.id,
+    feature: 'connection_test' as const,
+    promptVersion: 'connection_test@1',
+    messages: [{ role: 'user' as const, content: 'ping' }],
+    maxOutputTokens: 16,
+  };
+  const before = await api.getConsent();
+  expect(before).toMatchObject({ accepted: null, configured: true });
+  await expect(api.chat(request)).rejects.toMatchObject({ status: 403, code: 'consent_required' });
+  const after = await api.acceptConsent(before.required.version, before.required.provider);
+  expect(after.accepted?.acceptedBy).toBe('a@hyperdatalab.org');
+  expect(await api.chat(request)).toMatchObject({
+    content: 'OK',
+    usage: { inputTokens: 7, outputTokens: 1 },
+  });
+  const usage = await api.getUsage();
+  expect(usage.dailyBudget).toBe(1000);
+  expect(usage.today).toMatchObject({ inputTokens: 7, outputTokens: 1, calls: 1, reservedTokens: 0 });
+  expect(usage.byFeature).toEqual([
+    { feature: 'connection_test', inputTokens: 7, outputTokens: 1, calls: 1 },
+  ]);
+});

@@ -3,10 +3,35 @@ import { Readable } from 'node:stream';
 import { handle, type Deps } from '../worker/src/app';
 import { emailAllowed } from '../worker/src/auth';
 import { MemoryBucket } from '../worker/src/memoryBucket';
+import { estimateTokens } from '../src/core/llm/contract';
+
+/**
+ * The dev server never reaches a real model. This stands in for the router: it answers every call with a
+ * fixed text and reports usage, so consent, the budget and the ledger can be exercised locally at no cost.
+ */
+const fakeRouter: typeof fetch = async (_input, init) => {
+  const body = JSON.parse(typeof init?.body === 'string' ? init.body : '{}') as {
+    messages?: { content: string }[];
+  };
+  const prompt = (body.messages ?? []).map((message) => message.content).join('');
+  return Response.json({
+    choices: [{ message: { role: 'assistant', content: 'OK' }, finish_reason: 'stop' }],
+    usage: { prompt_tokens: estimateTokens(prompt), completion_tokens: 1 },
+  });
+};
 export function devApi(): Plugin {
   const deps: Deps = {
-    llm: null,
-    llmProvider: 'dev',
+    llm: {
+      baseUrl: 'http://dev-router.invalid/v1',
+      apiKey: 'dev',
+      model: 'dev-fixed-answer',
+      provider: 'máy chủ dev (không gọi model thật)',
+      dailyTokenBudget: 20000,
+      maxOutputTokens: 4096,
+      fetch: fakeRouter,
+      timeoutMs: 5000,
+    },
+    llmProvider: 'máy chủ dev (không gọi model thật)',
     bucket: new MemoryBucket(),
     allowedOrigins: [],
     allowedDomain: 'hyperdatalab.org',
