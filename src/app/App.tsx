@@ -1,3 +1,7 @@
+import { AuthProvider } from '@/shared/auth/AuthProvider';
+import { ApiProvider } from '@/shared/api/ApiProvider';
+import { AccountButton } from './AccountButton';
+import ProjectHome from '@/modules/projects/ProjectHome';
 import { Menu, Monitor, Moon, Sun } from 'lucide-react';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
@@ -39,62 +43,68 @@ export function App() {
     }
   }, [theme]);
   return (
-    <ToastProvider>
-      <div className={styles.shell}>
-        <div className={styles.desktopSidebar}>
-          <Sidebar />
-        </div>
-        <Drawer open={drawer} onClose={closeDrawer}>
-          <Sidebar onNavigate={closeDrawer} />
-        </Drawer>
-        <div className={styles.main}>
-          <header className={styles.topbar}>
-            <div className={styles.mobileMenu}>
-              <IconButton label="Mở menu" onClick={() => setDrawer(true)}>
-                <Menu size={20} />
-              </IconButton>
+    <AuthProvider>
+      <ApiProvider>
+        <ToastProvider>
+          <div className={styles.shell}>
+            <div className={styles.desktopSidebar}>
+              <Sidebar />
             </div>
-            <span className={styles.mobileTitle} aria-hidden="true">
-              {current?.label ?? 'Không tìm thấy'}
-            </span>
-            <div className={styles.topActions}>
-              <IconButton
-                variant="ghost"
-                label={`Giao diện ${THEME_LABELS[theme]}. Bấm để đổi`}
-                onClick={() => setTheme(NEXT_THEME[theme])}
-              >
-                {theme === 'dark' ? (
-                  <Moon size={18} />
-                ) : theme === 'light' ? (
-                  <Sun size={18} />
-                ) : (
-                  <Monitor size={18} />
-                )}
-              </IconButton>
+            <Drawer open={drawer} onClose={closeDrawer}>
+              <Sidebar onNavigate={closeDrawer} />
+            </Drawer>
+            <div className={styles.main}>
+              <header className={styles.topbar}>
+                <div className={styles.mobileMenu}>
+                  <IconButton label="Mở menu" onClick={() => setDrawer(true)}>
+                    <Menu size={20} />
+                  </IconButton>
+                </div>
+                <span className={styles.mobileTitle} aria-hidden="true">
+                  {current?.label ?? 'Không tìm thấy'}
+                </span>
+                <div className={styles.topActions}>
+                  <AccountButton />
+                  <IconButton
+                    variant="ghost"
+                    label={`Giao diện ${THEME_LABELS[theme]}. Bấm để đổi`}
+                    onClick={() => setTheme(NEXT_THEME[theme])}
+                  >
+                    {theme === 'dark' ? (
+                      <Moon size={18} />
+                    ) : theme === 'light' ? (
+                      <Sun size={18} />
+                    ) : (
+                      <Monitor size={18} />
+                    )}
+                  </IconButton>
+                </div>
+              </header>
+              <main className={styles.content}>
+                <Suspense fallback={<Skeleton />}>
+                  <Routes>
+                    <Route path="/p/:projectId" element={<ProjectHome />} />
+                    {modules.map((item) => (
+                      <Route key={item.id} path={item.path} element={<item.page />} />
+                    ))}
+                    <Route
+                      path="*"
+                      element={
+                        <Empty
+                          title="Không tìm thấy trang"
+                          hint="Đường dẫn này không tồn tại. Chọn một màn hình ở thanh bên."
+                        >
+                          <Link to="/">Về Tổng quan</Link>
+                        </Empty>
+                      }
+                    />
+                  </Routes>
+                </Suspense>
+              </main>
             </div>
-          </header>
-          <main className={styles.content}>
-            <Suspense fallback={<Skeleton />}>
-              <Routes>
-                {modules.map((item) => (
-                  <Route key={item.id} path={item.path} element={<item.page />} />
-                ))}
-                <Route
-                  path="*"
-                  element={
-                    <Empty
-                      title="Không tìm thấy trang"
-                      hint="Đường dẫn này không tồn tại. Chọn một màn hình ở thanh bên."
-                    >
-                      <Link to="/">Về Tổng quan</Link>
-                    </Empty>
-                  }
-                />
-              </Routes>
-            </Suspense>
-          </main>
-        </div>
-      </div>
-    </ToastProvider>
+          </div>
+        </ToastProvider>
+      </ApiProvider>
+    </AuthProvider>
   );
 }

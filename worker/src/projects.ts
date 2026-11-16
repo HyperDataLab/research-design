@@ -1,17 +1,10 @@
+import type { Project } from '../../src/core/project/schema';
+export type { Project } from '../../src/core/project/schema';
 import { emailAllowed } from './auth';
 import type { Caller } from './auth';
 import { PREFIX, type Deps } from './app';
 import { bad, body, conflict, json, keys, method, object, read, save } from './http';
 
-export interface Project {
-  id: string;
-  title: string;
-  owner: string;
-  members: string[];
-  archived: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
 export const projectKey = (id: string) => `${PREFIX}projects/${id}/project.json`;
 const marker = (email: string, id: string) => `${PREFIX}members/${email}/${id}`;
 const titleValid = (value: unknown): value is string =>

@@ -160,21 +160,23 @@ Hyperparameter search.
 
 ## 9. Decisions
 
-| #   | Decision                                                                              | Reason                                                                                              |
-| --- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| D1  | Own repo, same shell and tokens as Writing Bank.                                      | The lab's apps stay alike; the shell is proven.                                                     |
-| D2  | Firebase Hosting + Auth, one Worker on the shared R2 bucket under `researchdesign/`.  | Same operations as the sibling apps.                                                                |
-| D3  | This app owns and publishes the plan contract; SRD vendors it.                        | The producer knows the plan; same pattern as PaperLab's paper model.                                |
-| D4  | The normative plan is small; reasons sit in an optional `context` block.              | SRD's spec is itself a proposal; a small contract is easier to agree on.                            |
-| D5  | Plan ids reach results through MLflow run tags.                                       | SRD reads MLflow only through its SDK; tags are the one channel that survives.                      |
-| D6  | The run matrix is an explicit grid. No search method, no early stopping.              | Confirmatory runs are pre-specified; tuning is a different activity.                                |
-| D7  | Bank references are optional and pinned to a release.                                 | Every bank entry is a draft and `/bank/v1` is not live.                                             |
-| D8  | The LLM is called through the Worker with a ledger and a daily budget.                | Cost is measured per account and the key never reaches a browser. Differs from PaperLab on purpose. |
-| D9  | Cross-paper comparison lives here.                                                    | PaperLab analyses one paper at a time by the owner's decision.                                      |
-| D10 | Power calculation, PRISMA figure and per-design forms are deferred.                   | A justification field is enough to freeze a first plan.                                             |
-| D11 | Extraction follows the paper model as it is now; the importer rejects other versions. | The owner said the paper model is close to stable; a version bump is then one visible change.       |
-| D12 | The Worker runs the schema and the gate when a plan is frozen.                        | The freeze is the one step that must not depend on the client being honest or up to date.           |
-| D13 | Paper models and facts are stored one object per paper.                               | A paper model is large, and members working on different papers must not collide.                   |
+| #   | Decision                                                                                       | Reason                                                                                                                           |
+| --- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Own repo, same shell and tokens as Writing Bank.                                               | The lab's apps stay alike; the shell is proven.                                                                                  |
+| D2  | Firebase Hosting + Auth, one Worker on the shared R2 bucket under `researchdesign/`.           | Same operations as the sibling apps.                                                                                             |
+| D3  | This app owns and publishes the plan contract; SRD vendors it.                                 | The producer knows the plan; same pattern as PaperLab's paper model.                                                             |
+| D4  | The normative plan is small; reasons sit in an optional `context` block.                       | SRD's spec is itself a proposal; a small contract is easier to agree on.                                                         |
+| D5  | Plan ids reach results through MLflow run tags.                                                | SRD reads MLflow only through its SDK; tags are the one channel that survives.                                                   |
+| D6  | The run matrix is an explicit grid. No search method, no early stopping.                       | Confirmatory runs are pre-specified; tuning is a different activity.                                                             |
+| D7  | Bank references are optional and pinned to a release.                                          | Every bank entry is a draft and `/bank/v1` is not live.                                                                          |
+| D8  | The LLM is called through the Worker with a ledger and a daily budget.                         | Cost is measured per account and the key never reaches a browser. Differs from PaperLab on purpose.                              |
+| D9  | Cross-paper comparison lives here.                                                             | PaperLab analyses one paper at a time by the owner's decision.                                                                   |
+| D10 | Power calculation, PRISMA figure and per-design forms are deferred.                            | A justification field is enough to freeze a first plan.                                                                          |
+| D11 | Extraction follows the paper model as it is now; the importer rejects other versions.          | The owner said the paper model is close to stable; a version bump is then one visible change.                                    |
+| D12 | The Worker runs the schema and the gate when a plan is frozen.                                 | The freeze is the one step that must not depend on the client being honest or up to date.                                        |
+| D14 | The project id is in the URL (`/p/<projectId>/…`); storage only remembers the last one.        | Links are shareable and two tabs can hold two projects.                                                                          |
+| D15 | Local development uses a dev-only sign-in and the Worker's handler inside the Vite dev server. | No Firebase project exists yet; the real client and the real handler are still exercised. It is excluded from production builds. |
+| D13 | Paper models and facts are stored one object per paper.                                        | A paper model is large, and members working on different papers must not collide.                                                |
 
 ## 10. Open questions
 

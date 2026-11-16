@@ -1,0 +1,26 @@
+.list {
+  display: grid;
+  gap: var(--space-4);
+}
+.row {
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-4) 0;
+}
+.title {
+  font-family: var(--font-reading);
+  font-size: var(--text-reading);
+}
+.meta {
+  color: var(--text-muted);
+}
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
