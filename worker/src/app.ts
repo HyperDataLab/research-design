@@ -1,3 +1,4 @@
+import { consent, chat, usage } from './llm';
 import { emailAllowed, NotAllowedError, type Caller } from './auth';
 import { document, itemList } from './documents';
 import { error, json, method, missing, read } from './http';
@@ -24,6 +25,17 @@ export interface Deps {
   allowedOrigins: string[];
   allowedDomain: string;
   now: () => Date;
+  llmProvider: string;
+  llm: {
+    baseUrl: string;
+    apiKey: string;
+    model: string;
+    provider: string;
+    dailyTokenBudget: number;
+    maxOutputTokens: number;
+    fetch: typeof fetch;
+    timeoutMs: number;
+  } | null;
 }
 export const PREFIX = 'researchdesign/';
 
@@ -31,6 +43,11 @@ async function route(deps: Deps, request: Request, caller: Caller): Promise<Resp
   const path = new URL(request.url).pathname.split('/');
   if (path.length === 3 && path[1] === 'v1' && path[2] === 'me')
     return request.method === 'GET' ? json(200, caller) : method();
+  if (path[1] === 'v1' && path.length === 3 && path[2] === 'consent') return consent(deps, request, caller);
+  if (path[1] === 'v1' && path.length === 4 && path[2] === 'llm') {
+    if (path[3] === 'usage') return usage(deps, request, caller);
+    if (path[3] === 'chat') return chat(deps, request, caller);
+  }
   if (path[1] !== 'v1' || path[2] !== 'projects') return missing();
   if (path.length === 3) return projects(deps, request, caller);
   const id = path[3];

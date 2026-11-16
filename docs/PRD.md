@@ -48,10 +48,10 @@ What none of them was found to do, and this app does:
 
 A researcher of the lab, signed in with a `@hyperdatalab.org` account, working on one **project**.
 
-1. **Tìm bài báo.** Search by topic, expand from seed papers, decide include or exclude with a reason.
+1. **Tìm bài báo.** Ask Paper Fetch Hub to search by topic or expand from seed papers; decide include or exclude with a reason.
 2. **Tập bài báo.** The included papers. Each gets its paper model from PaperLab and its PDF through Paper Fetch Hub.
-3. **Bảng so sánh.** AI proposes, per paper: task, dataset, baseline, metric, design, reported result. The
-   researcher approves cells; each approved cell is anchored to a sentence.
+3. **Bảng so sánh.** Per paper: task, dataset, baseline, metric, design, reported result, as extracted by
+   PaperLab. The researcher approves cells; each cell is anchored to a sentence.
 4. **Câu hỏi và giả thuyết.** Questions and hypotheses with stable ids, each linked to the gap it answers.
 5. **Thiết kế nghiên cứu.** A design from Writing Bank, what it supports and cannot support, threats and mitigations.
 6. **Đo lường.** Construct → variable → metric (key, unit, goal, aggregation) → protocol; datasets and benchmarks.
@@ -73,23 +73,23 @@ Priorities: P0 is the path to a frozen package; P1 makes it faster; P2 is later.
 
 ### M2 Literature
 
-| ID     | Requirement                                                      | Acceptance                                                     | P   |
-| ------ | ---------------------------------------------------------------- | -------------------------------------------------------------- | --- |
-| FR-201 | Import a `paper-model.json`; unknown `schemaVersion` is refused. | Validated against `schemas/vendor/paper-model-v1.schema.json`. | P0  |
-| FR-202 | Add a paper by DOI and record include / exclude with a reason.   | The log lists every decision with account and time.            | P0  |
-| FR-203 | Search scholarly sources by topic and expand from seed papers.   | Results deduplicated by DOI; source named per result.          | P1  |
-| FR-204 | Request a PDF through Paper Fetch Hub's queue.                   | No publisher site is contacted by this app.                    | P1  |
-| FR-205 | PRISMA-style flow figure from the decision log.                  | Counts equal the log.                                          | P2  |
+| ID     | Requirement                                                      | Acceptance                                                            | P   |
+| ------ | ---------------------------------------------------------------- | --------------------------------------------------------------------- | --- |
+| FR-201 | Import a `paper-model.json`; unknown `schemaVersion` is refused. | Validated against `schemas/vendor/paper-model-v1.schema.json`.        | P0  |
+| FR-202 | Add a paper by DOI and record include / exclude with a reason.   | The log lists every decision with account and time.                   | P0  |
+| FR-203 | Ask Paper Fetch Hub for a search by topic or from seed papers.   | This app calls no scholarly source itself; results name their source. | P1  |
+| FR-204 | Request a PDF through Paper Fetch Hub's queue.                   | No publisher site is contacted by this app.                           | P1  |
+| FR-205 | PRISMA-style flow figure from the decision log.                  | Counts equal the log.                                                 | P2  |
 
 ### M3 Comparison
 
-| ID     | Requirement                                                               | Acceptance                                                       | P   |
-| ------ | ------------------------------------------------------------------------- | ---------------------------------------------------------------- | --- |
-| FR-301 | AI extracts experiment facts per paper as candidates.                     | Each has prompt and model version; none is approved by the AI.   | P0  |
-| FR-302 | Each fact is anchored to a sentence `key` computed from its quote.        | An unanchored fact cannot be approved.                           | P0  |
-| FR-303 | Comparison table: papers × fact kinds, approve one or many, edit, reject. | Editing an approved cell keeps the earlier value in its history. | P0  |
-| FR-304 | Match an extracted metric or design to a Writing Bank entry.              | The match is a suggestion; the release is recorded.              | P1  |
-| FR-305 | "Used in N papers" counts for baselines, datasets and metrics.            | Counts use approved cells only.                                  | P1  |
+| ID     | Requirement                                                               | Acceptance                                                                  | P   |
+| ------ | ------------------------------------------------------------------------- | --------------------------------------------------------------------------- | --- |
+| FR-301 | Read the experiment facts PaperLab extracted for a paper.                 | This app runs no extraction; a fact keeps PaperLab's run and model version. | P0  |
+| FR-302 | Each fact is anchored to a sentence `key` of its paper model.             | A fact whose key is not in the model cannot be approved.                    | P0  |
+| FR-303 | Comparison table: papers × fact kinds, approve one or many, edit, reject. | Editing an approved cell keeps the earlier value in its history.            | P0  |
+| FR-304 | Match an extracted metric or design to a Writing Bank entry.              | The match is a suggestion; the release is recorded.                         | P1  |
+| FR-305 | "Used in N papers" counts for baselines, datasets and metrics.            | Counts use approved cells only.                                             | P1  |
 
 ### M4 Design
 
@@ -123,7 +123,7 @@ Priorities: P0 is the path to a frozen package; P1 makes it faster; P2 is later.
 | FR-602 | Privacy consent before the first call; asked again when provider changes. | No request leaves without a recorded consent.           | P0  |
 | FR-603 | Usage ledger: account, project, feature, model, prompt version, tokens.   | The Settings screen shows today's and this month's use. | P0  |
 | FR-604 | Daily budget per account; a batch shows its estimate before it starts.    | A call over budget is refused with a clear message.     | P0  |
-| FR-605 | Extraction cached by paper hash and prompt version.                       | Re-running an unchanged paper makes no LLM call.        | P0  |
+| FR-605 | AI calls are limited to this app's own planning help (`LLM_FEATURES`).    | A call for another purpose is refused by the Worker.    | P0  |
 
 ## 5. Data model
 
@@ -160,31 +160,36 @@ Hyperparameter search.
 
 ## 9. Decisions
 
-| #   | Decision                                                                                                       | Reason                                                                                                                           |
-| --- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | Own repo, same shell and tokens as Writing Bank.                                                               | The lab's apps stay alike; the shell is proven.                                                                                  |
-| D2  | Firebase Hosting + Auth, one Worker on the shared R2 bucket under `researchdesign/`.                           | Same operations as the sibling apps.                                                                                             |
-| D3  | This app owns and publishes the plan contract; SRD vendors it.                                                 | The producer knows the plan; same pattern as PaperLab's paper model.                                                             |
-| D4  | The normative plan is small; reasons sit in an optional `context` block.                                       | SRD's spec is itself a proposal; a small contract is easier to agree on.                                                         |
-| D5  | Plan ids reach results through MLflow run tags.                                                                | SRD reads MLflow only through its SDK; tags are the one channel that survives.                                                   |
-| D6  | The run matrix is an explicit grid. No search method, no early stopping.                                       | Confirmatory runs are pre-specified; tuning is a different activity.                                                             |
-| D7  | Bank references are optional and pinned to a release.                                                          | Every bank entry is a draft and `/bank/v1` is not live.                                                                          |
-| D8  | The LLM is called through the Worker with a ledger and a daily budget.                                         | Cost is measured per account and the key never reaches a browser. Differs from PaperLab on purpose.                              |
-| D9  | Cross-paper comparison lives here.                                                                             | PaperLab analyses one paper at a time by the owner's decision.                                                                   |
-| D10 | Power calculation, PRISMA figure and per-design forms are deferred.                                            | A justification field is enough to freeze a first plan.                                                                          |
-| D11 | Extraction follows the paper model as it is now; the importer rejects other versions.                          | The owner said the paper model is close to stable; a version bump is then one visible change.                                    |
-| D12 | The Worker runs the schema and the gate when a plan is frozen.                                                 | The freeze is the one step that must not depend on the client being honest or up to date.                                        |
-| D14 | The project id is in the URL (`/p/<projectId>/…`); storage only remembers the last one.                        | Links are shareable and two tabs can hold two projects.                                                                          |
-| D15 | Local development uses a dev-only sign-in and the Worker's handler inside the Vite dev server.                 | No Firebase project exists yet; the real client and the real handler are still exercised. It is excluded from production builds. |
-| D16 | A paper has an id local to its project; paper models and facts are stored under that id.                       | The source hash in a paper model may be null and its format is PaperLab's.                                                       |
-| D17 | A paper model is validated with a validator built from PaperLab's published JSON Schema.                       | The check is exactly the contract, with nothing restated here.                                                                   |
-| D18 | A change to a shared document is a pure function; on a version conflict the client re-reads and re-applies it. | Two people screening papers must not block each other.                                                                           |
-| D19 | Papers are never deleted from a project, only excluded with a reason.                                          | The decision log stays complete.                                                                                                 |
-| D13 | Paper models and facts are stored one object per paper.                                                        | A paper model is large, and members working on different papers must not collide.                                                |
+| #   | Decision                                                                                                                                                                           | Reason                                                                                                                           |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Own repo, same shell and tokens as Writing Bank.                                                                                                                                   | The lab's apps stay alike; the shell is proven.                                                                                  |
+| D2  | Firebase Hosting + Auth, one Worker on the shared R2 bucket under `researchdesign/`.                                                                                               | Same operations as the sibling apps.                                                                                             |
+| D3  | This app owns and publishes the plan contract; SRD vendors it.                                                                                                                     | The producer knows the plan; same pattern as PaperLab's paper model.                                                             |
+| D4  | The normative plan is small; reasons sit in an optional `context` block.                                                                                                           | SRD's spec is itself a proposal; a small contract is easier to agree on.                                                         |
+| D5  | Plan ids reach results through MLflow run tags.                                                                                                                                    | SRD reads MLflow only through its SDK; tags are the one channel that survives.                                                   |
+| D6  | The run matrix is an explicit grid. No search method, no early stopping.                                                                                                           | Confirmatory runs are pre-specified; tuning is a different activity.                                                             |
+| D7  | Bank references are optional and pinned to a release.                                                                                                                              | Every bank entry is a draft and `/bank/v1` is not live.                                                                          |
+| D8  | The LLM is called through the Worker with a ledger and a daily budget.                                                                                                             | Cost is measured per account and the key never reaches a browser. Differs from PaperLab on purpose.                              |
+| D9  | Cross-paper comparison lives here.                                                                                                                                                 | PaperLab analyses one paper at a time by the owner's decision.                                                                   |
+| D10 | Power calculation, PRISMA figure and per-design forms are deferred.                                                                                                                | A justification field is enough to freeze a first plan.                                                                          |
+| D11 | Extraction follows the paper model as it is now; the importer rejects other versions.                                                                                              | The owner said the paper model is close to stable; a version bump is then one visible change.                                    |
+| D12 | The Worker runs the schema and the gate when a plan is frozen.                                                                                                                     | The freeze is the one step that must not depend on the client being honest or up to date.                                        |
+| D14 | The project id is in the URL (`/p/<projectId>/…`); storage only remembers the last one.                                                                                            | Links are shareable and two tabs can hold two projects.                                                                          |
+| D15 | Local development uses a dev-only sign-in and the Worker's handler inside the Vite dev server.                                                                                     | No Firebase project exists yet; the real client and the real handler are still exercised. It is excluded from production builds. |
+| D16 | A paper has an id local to its project; paper models and facts are stored under that id.                                                                                           | The source hash in a paper model may be null and its format is PaperLab's.                                                       |
+| D17 | A paper model is validated with a validator built from PaperLab's published JSON Schema.                                                                                           | The check is exactly the contract, with nothing restated here.                                                                   |
+| D18 | A change to a shared document is a pure function; on a version conflict the client re-reads and re-applies it.                                                                     | Two people screening papers must not block each other.                                                                           |
+| D19 | Papers are never deleted from a project, only excluded with a reason.                                                                                                              | The decision log stays complete.                                                                                                 |
+| D20 | Budget is reserved before an AI call and settled after it.                                                                                                                         | Parallel calls must not all pass on the same stale total; a failed settle over-counts instead of missing a paid call.            |
+| D21 | The model, the router address and the key exist only in the Worker's environment; the client's request is strict.                                                                  | Nothing a browser sends can change what is called or what it costs beyond the cap. The repository is public.                     |
+| D22 | The token budget counts the UTC day, per account.                                                                                                                                  | One simple clock for a Worker; shown on Cài đặt.                                                                                 |
+| D23 | This app fetches no document and runs no extraction on papers. Paper Fetch Hub fetches; PaperLab extracts; each has a person in charge. This app sends requests and reads results. | Owner, 2026-11-16: projects must not call APIs and fetch documents freely.                                                       |
+| D24 | This app may call a model only for its own planning help, through the Worker, with consent, a ledger and a daily budget. Without the Worker's secrets no call is possible.         | Owner, 2026-11-16: allowed, with a budget. Whoever holds the secrets controls it.                                                |
+| D13 | Paper models and facts are stored one object per paper.                                                                                                                            | A paper model is large, and members working on different papers must not collide.                                                |
 
 ## 10. Open questions
 
 1. Is "Scientific Writing Web" in SRD's spec the Firebase project `paper-writing`?
 2. Will SRD accept the plan package and keep plan ids in its `StatisticalResult` and `EvidenceLink`?
-3. Which model and router serve the Worker's LLM proxy (9router, as in PaperLab, or another)?
+3. Which model and router serve the Worker's AI calls is set by whoever holds the Worker's secrets; without them no call is made.
 4. Cloudflare AI Gateway for the ledger instead of our own: not evaluated.

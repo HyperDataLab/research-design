@@ -35,6 +35,10 @@ export function setupClient() {
     return next;
   };
   const api: ApiClient = {
+    getConsent: vi.fn(),
+    acceptConsent: vi.fn(),
+    getUsage: vi.fn(),
+    chat: vi.fn(),
     getDoc: vi.fn(async (id, kind) => docs.get(`${id}/${kind}`) ?? null),
     putDoc: vi.fn(async (id, kind, data, etag) => put(docs, `${id}/${kind}`, data, etag)),
     getItem: vi.fn(async (id, collection, key) => items.get(`${id}/${collection}/${key}`) ?? null),

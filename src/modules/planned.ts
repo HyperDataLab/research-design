@@ -7,7 +7,6 @@ import {
   PackageCheck,
   Ruler,
   Search,
-  Settings,
   Sigma,
   Table2,
   type LucideIcon,
@@ -112,5 +111,4 @@ export const planned: ModuleDefinition[] = [
     'Phiên bản bank đang ghim: thiết kế, metric, benchmark, mối đe doạ.',
     Boxes,
   ),
-  soon('settings', 'system', 2, 'Cài đặt', 'Tài khoản, đồng ý gửi dữ liệu cho AI, hạn mức token.', Settings),
 ];

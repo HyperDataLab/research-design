@@ -132,3 +132,101 @@ Details that are easy to get wrong:
 - `WK-10` a plan with only warnings (PP-07, PP-08) freezes.
 - `WK-12` an unexpected error is a 500 with CORS headers.
 - `WK-11` ids, kinds, collections and item keys from the URL that do not match their pattern never reach the bucket.
+
+## AI calls (S4)
+
+The browser never talks to the model provider and never holds its key. The Worker builds the upstream request,
+enforces consent and the daily budget, and keeps the ledger. Shapes are in `src/core/llm/contract.ts`.
+
+### Configuration (Worker env)
+
+| Name                    | Kind   | Meaning                                                                                 |
+| ----------------------- | ------ | --------------------------------------------------------------------------------------- |
+| `LLM_BASE_URL`          | secret | OpenAI-compatible base URL (the Worker calls `<base>/chat/completions`). Not committed. |
+| `LLM_API_KEY`           | secret | Bearer key for that router.                                                             |
+| `LLM_MODEL`             | var    | The one model calls use. A client cannot choose a model.                                |
+| `LLM_PROVIDER`          | var    | Name shown in the consent text and stored with a consent. Changing it asks again.       |
+| `DAILY_TOKEN_BUDGET`    | var    | Tokens (input + output) one account may use per UTC day.                                |
+| `LLM_MAX_OUTPUT_TOKENS` | var    | Upper bound for one answer; never above `LLM_LIMITS.maxOutputTokens`.                   |
+
+Without `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` the Worker answers `503 llm_not_configured` to a call and
+`configured: false` in the consent state. This repository is public: the router's address is a secret like the
+key, and local values live in `worker/.dev.vars` (gitignored).
+
+### Storage
+
+```
+researchdesign/consent/<email>.json                 the account's consent record
+researchdesign/usage/<email>/<YYYY-MM-DD>.json      one UTC day: totals, per-feature totals, entries, reservations
+researchdesign/usage/<email>/<YYYY-MM>.json         the month's totals (kept so a summary is two reads)
+```
+
+A usage entry is `{ id, at, projectId, feature, promptVersion, model, inputTokens, outputTokens, estimated }`.
+**No prompt, no answer and no paper text is ever stored in the ledger or logged.**
+
+### Endpoints
+
+| Method | Path            | Does                                                                                                                    |
+| ------ | --------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/consent`   | `ConsentState`: what is required now, what this account accepted, whether a router is set.                              |
+| PUT    | `/v1/consent`   | Body `{ version, provider }`. Accepts only the current pair (`409 conflict` otherwise); returns the new `ConsentState`. |
+| GET    | `/v1/llm/usage` | `UsageSummary` for the caller: today, this month, per feature today, the budget.                                        |
+| POST   | `/v1/llm/chat`  | Body `ChatRequest`. Returns `ChatResponse`.                                                                             |
+
+New error codes: `consent_required` (403), `budget_exceeded` (429), `llm_not_configured` (503),
+`upstream_error` (502), `upstream_timeout` (504).
+
+### A call, step by step
+
+1. Body at most `LLM_LIMITS.maxRequestBytes` (`413`); parsed with `chatRequestSchema` (strict: an unknown field
+   such as `model`, `n`, `stream` or `tools` is `400`, never forwarded).
+2. Router configured, else `503`.
+3. The caller's stored consent equals the current `{ CONSENT_VERSION, LLM_PROVIDER }`, else `403 consent_required`.
+   The Worker writes `acceptedBy` and `acceptedAt` itself when a consent is saved.
+4. The caller is a member of `projectId` (`404` otherwise) and the project is not archived (`409`).
+5. **Reserve.** `reserve = estimateTokens(all message contents) + output cap`, where the output cap is
+   `min(maxOutputTokens ?? LLM_LIMITS.maxOutputTokens, LLM_MAX_OUTPUT_TOKENS)`. Read the day object; if
+   `used + reserved + reserve > DAILY_TOKEN_BUDGET`, answer `429 budget_exceeded` (body also carries `used`,
+   `reserved`, `dailyBudget`). Otherwise add a reservation `{ id, tokens, at }` and write the day object with the
+   conditional put; on a refused write re-read and decide again, up to 5 times (`503` if it never lands). Two
+   parallel calls at the edge of the budget therefore cannot both pass.
+6. **Call upstream** with a body built from an allowlist: `{ model: LLM_MODEL, messages, max_tokens: <output
+cap>, temperature: 0.1 }` plus `response_format: { type: 'json_schema', json_schema: { name: 'output',
+strict: true, schema } }` when `responseSchema` was sent. Nothing else from the client is forwarded. Time
+   limit 120 s (`504 upstream_timeout`). A network failure, a non-2xx status, or a body without
+   `choices[0].message.content` as a string is `502 upstream_error`. **The upstream's status text, headers and
+   body are never copied into the response**, because a router may echo the request or the key.
+7. **Settle.** Counts are the upstream's `usage.prompt_tokens` / `usage.completion_tokens` when both are
+   non-negative integers; otherwise `estimateTokens` of the request texts and of the answer, with
+   `estimated: true`. Replace the reservation by the entry and add to the day's and the month's totals
+   (conditional put with the same bounded retry). When the call failed (step 6), the reservation is removed and
+   nothing is counted.
+8. If settling fails after a successful call, the reservation is left in place: the day over-counts by the
+   difference rather than missing a paid call, and the response is still returned. A reservation older than
+   10 minutes whose call never settled is counted as used tokens of an unknown call when the day is next
+   written (it becomes an entry with `estimated: true` and feature as reserved).
+
+Known limits: the first write of a day or month is read-then-write (as everywhere in this Worker); the budget is
+per account, not per project; the day is the UTC day.
+
+### Tests
+
+`worker/src/llm.test.ts`, with the in-memory bucket and a fake upstream `fetch`:
+
+- `LM-01` consent: state before and after accepting; a stale version or another provider is `409`; the Worker
+  sets account and time.
+- `LM-02` a call without current consent is `403 consent_required` and reaches neither upstream nor ledger.
+- `LM-03` strict request: `model`, `n`, `stream`, `tools` in the body are `400`; the upstream body holds only
+  the allowlisted fields and the Worker's model.
+- `LM-04` non-member `404`, archived project `409`, router not configured `503`.
+- `LM-05` a successful call returns content, finish reason, model and usage, and the ledger holds one entry
+  with the reported counts and no reservation.
+- `LM-06` a router that reports no usage gives estimated counts marked `estimated`.
+- `LM-07` budget: a call that would pass the budget is `429` and does not reach upstream.
+- `LM-08` two parallel calls at the edge of the budget: exactly one reaches upstream.
+- `LM-09` upstream failure (network error, 500 with a body that echoes the key, malformed body) is `502`, the
+  response contains neither the key nor the upstream body, and the reservation is released.
+- `LM-10` timeout is `504` and the reservation is released.
+- `LM-11` when settling fails after a successful call, the answer is returned and the reservation still counts.
+- `LM-12` usage summary: today, month, per feature, budget; a stale reservation is counted.
+- `LM-13` the ledger objects contain no message content.
