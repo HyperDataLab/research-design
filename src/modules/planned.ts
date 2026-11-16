@@ -1,6 +1,5 @@
 import { lazy } from 'react';
 import {
-  FlaskConical,
   Grid3x3,
   HelpCircle,
   PackageCheck,
@@ -61,14 +60,6 @@ export const planned: ModuleDefinition[] = [
     'Câu hỏi và giả thuyết',
     'Câu hỏi nghiên cứu và giả thuyết có mã ổn định, nối với khoảng trống tìm được.',
     HelpCircle,
-  ),
-  soon(
-    'design',
-    'design',
-    2,
-    'Thiết kế nghiên cứu',
-    'Chọn thiết kế, xem nó cho phép kết luận gì, ghi mối đe doạ và cách giảm.',
-    FlaskConical,
   ),
   soon(
     'measurement',
