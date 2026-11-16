@@ -2,7 +2,6 @@ import { lazy } from 'react';
 import {
   FlaskConical,
   Grid3x3,
-  HelpCircle,
   PackageCheck,
   Ruler,
   Search,
@@ -53,14 +52,6 @@ export const planned: ModuleDefinition[] = [
     'Bảng so sánh',
     'Mỗi bài một hàng: task, dataset, baseline, metric, thiết kế, kết quả; mỗi ô dẫn về câu gốc.',
     Table2,
-  ),
-  soon(
-    'questions',
-    'design',
-    1,
-    'Câu hỏi và giả thuyết',
-    'Câu hỏi nghiên cứu và giả thuyết có mã ổn định, nối với khoảng trống tìm được.',
-    HelpCircle,
   ),
   soon(
     'design',
