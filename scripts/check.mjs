@@ -2,6 +2,9 @@ import { spawnSync } from 'node:child_process';
 
 const steps = [
   ['typecheck', ['run', 'typecheck']],
+  ['install worker dependencies', ['ci', '--prefix', 'worker']],
+  ['typecheck worker', ['run', 'typecheck:worker']],
+  ['test worker', ['run', 'test:worker']],
   ['lint', ['run', 'lint']],
   ['format check', ['run', 'format:check']],
   ['test with coverage', ['run', 'test:cov']],
