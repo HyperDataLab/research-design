@@ -70,8 +70,8 @@ navigation and no icon rail: the labels are short and distinct.
   without asking. Only when the change no longer applies does it say so in a toast and show the current state.
 - **Cài đặt** (top-level screen, in the sidebar footer): three Cards in one column.
   "Tài khoản": name, email, and the mode (Google or "Chế độ phát triển").
-  "Gửi dữ liệu cho AI": the consent text in the reading face — what is sent (text of the papers and the plan you
-  work on), to whom (the provider's name from the Worker), what is not kept (the ledger stores counts, never
+  "Gửi dữ liệu cho AI": the consent text in the reading face — what is sent (the content of the project you work on: approved facts, quoted
+  sentences, questions and the plan), to whom (the provider's name from the Worker), what is not kept (the ledger stores counts, never
   text) — then the state in words ("Đã đồng ý ngày …" or "Chưa đồng ý") and one button: "Đồng ý" (primary) when
   not accepted. When the Worker has no router: a warning Badge "AI chưa được cấu hình" and no button.
   "Hạn mức token": today's use against the daily budget as "12.300 / 300.000 token" with a meter (a bar on

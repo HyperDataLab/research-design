@@ -114,8 +114,9 @@ export default function Page() {
               consent.state && (
                 <>
                   <p className={styles.reading}>
-                    Văn bản bài báo và kế hoạch bạn đang làm sẽ được gửi cho {consent.state.required.provider}
-                    . Nhật ký sử dụng chỉ lưu số lượng, không lưu văn bản.
+                    Nội dung dự án bạn đang làm (dữ kiện đã duyệt, câu trích từ bài báo, câu hỏi và kế hoạch)
+                    sẽ được gửi cho {consent.state.required.provider}. Nhật ký sử dụng chỉ lưu số lượng, không
+                    lưu văn bản.
                   </p>
                   {!consent.state.configured ? (
                     <Badge tone="warning">AI chưa được cấu hình</Badge>
