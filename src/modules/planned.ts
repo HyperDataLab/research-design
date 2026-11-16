@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Grid3x3, PackageCheck, Ruler, Search, Sigma, Table2, type LucideIcon } from 'lucide-react';
+import { Grid3x3, PackageCheck, Search, Sigma, Table2, type LucideIcon } from 'lucide-react';
 import type { ModuleDefinition } from '@/app/moduleTypes';
 
 /**
@@ -43,14 +43,6 @@ export const planned: ModuleDefinition[] = [
     'Bảng so sánh',
     'Mỗi bài một hàng: task, dataset, baseline, metric, thiết kế, kết quả; mỗi ô dẫn về câu gốc.',
     Table2,
-  ),
-  soon(
-    'measurement',
-    'design',
-    3,
-    'Đo lường',
-    'Khái niệm, biến, metric, đơn vị, hướng tốt và quy trình đo.',
-    Ruler,
   ),
   soon(
     'analyses',

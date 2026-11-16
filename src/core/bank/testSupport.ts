@@ -42,7 +42,8 @@ export const snapshot = {
       {
         id: 'met.test-score',
         name: 'Test score',
-        family: 'test',
+        aliases: ['Invented alias'],
+        family: 'classification',
         definition: 'An invented metric.',
         unit: 'points',
         direction: 'higher_better',
@@ -50,7 +51,7 @@ export const snapshot = {
       {
         id: 'met.test-shape',
         name: 'Test shape',
-        family: 'test',
+        family: 'regression',
         definition: 'Another invented metric.',
         unit: null,
         direction: 'descriptive',
