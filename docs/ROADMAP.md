@@ -14,6 +14,7 @@ One slice per PR. A slice is done when its acceptance line holds in CI and, for 
 | Slice | What                                                            | Requirements           | Done when                                                       |
 | ----- | --------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------- |
 | S2    | Sign-in and project list                                        | FR-101, FR-102         | A member sees their projects after reload.                      |
+| S2b   | Members of a project: add and remove by email (owner only)      | FR-102                 | A removed member no longer sees the project.                    |
 | S3    | Tập bài báo: paper-model import, decisions log                  | FR-201, FR-202         | A v1 model imports; another version is refused with its reason. |
 | S4    | Worker LLM proxy, consent, ledger, budget                       | FR-601..604            | A call over budget is refused; the ledger shows it.             |
 | S5    | Fact extraction and anchoring (core) with fixtures              | FR-301, FR-302, FR-605 | Unanchored facts cannot be approved; cache hit makes no call.   |
@@ -36,3 +37,6 @@ One slice per PR. A slice is done when its acceptance line holds in CI and, for 
    bucket `paper-fetch` with the prefix `researchdesign/`, set the LLM key with `wrangler secret put`.
 3. Send the four requests in `docs/CONTRACTS.md` to whoever owns SRD.
 4. Say "Deploy now" when a version should go live.
+
+The Firebase project id and the Worker hostname in `firebase.json` (CSP) and `worker/wrangler.toml` are the suggested
+names; they are confirmed only when the owner creates the resources.
