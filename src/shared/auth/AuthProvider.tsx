@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { AuthContext, type AuthValue } from './authContext';
-import { authMode, firebaseConfig } from './config';
+import { allowedDomain, authMode, firebaseConfig } from './config';
 import { signInErrorMessage } from './signInError';
 let loading:
   Promise<{ auth: import('firebase/auth').Auth; module: typeof import('firebase/auth') }> | undefined;
@@ -12,7 +12,8 @@ function loadAuth() {
     }),
   ));
 }
-const allowed = (email: string | null) => !!email && /^[^@\s]+@hyperdatalab\.org$/i.test(email);
+const allowed = (email: string | null) =>
+  !!email && /^[^@\s]+@[^@\s]+$/.test(email) && email.split('@')[1]?.toLowerCase() === allowedDomain;
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthValue['user']>(() => {
     if (import.meta.env.DEV && authMode === 'dev') {
@@ -69,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { auth, module } = await loadAuth();
       const provider = new module.GoogleAuthProvider();
-      provider.setCustomParameters({ hd: 'hyperdatalab.org', prompt: 'select_account' });
+      provider.setCustomParameters({ hd: allowedDomain, prompt: 'select_account' });
       const result = await module.signInWithPopup(auth, provider);
       if (!allowed(result.user.email)) {
         await module.signOut(auth);
