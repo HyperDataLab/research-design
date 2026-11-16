@@ -10,7 +10,7 @@ export function DatasetsTab({ item, bank }: { item: DraftDataset; bank: BankDoc 
   return (
     <>
       <p className={styles.quiet}>
-        {item.source} · {item.version} · {item.split}
+        {[item.source || 'Chưa ghi nguồn', item.version, item.split].filter(Boolean).join(' · ')}
       </p>
       {benchmark && (
         <>

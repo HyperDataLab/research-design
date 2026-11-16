@@ -6,6 +6,7 @@ import { emptyDraft, type Draft } from '@/core/draft/schema';
 import { ProjectContext } from '@/shared/project/projectContext';
 import { setupClient } from '../corpus/testSupport';
 import Page from './Page';
+import { claimWord } from './words';
 
 function setup({ draft = emptyDraft(), bank = true, readOnly = false, url = '/' } = {}) {
   const context = setupClient();
@@ -187,4 +188,107 @@ it('ME-10 opens the tab named by the query', async () => {
   setup({ url: '/?tab=metrics' });
   expect(await screen.findByRole('tab', { name: 'Metric (0)', selected: true })).toBeInTheDocument();
   expect(screen.getByText('Chưa có metric nào.')).toBeInTheDocument();
+});
+
+function measurementDraft() {
+  const draft = emptyDraft();
+  draft.hypotheses.push({
+    id: 'h-1',
+    statement: 'Invented hypothesis',
+    kind: 'directional',
+    question: null,
+    claim: null,
+    independent: [],
+    dependent: [],
+  });
+  draft.variables.push(
+    {
+      id: 'v-1',
+      name: 'Invented factor',
+      role: 'independent',
+      construct: 'Invented concept',
+      metric: null,
+      levels: ['A', 'B'],
+    },
+    { id: 'v-2', name: 'Invented outcome', role: 'dependent', construct: '', metric: 'm-1', levels: [] },
+    { id: 'v-3', name: 'Invented covariate', role: 'covariate', construct: '', metric: null, levels: [] },
+  );
+  draft.metrics.push({
+    id: 'm-1',
+    name: 'Invented measure',
+    key: '',
+    unit: '',
+    goal: null,
+    aggregation: null,
+    protocol: '',
+    bank: null,
+    protocolBank: null,
+  });
+  draft.datasets.push({
+    id: 'd-1',
+    name: 'Invented data',
+    source: '',
+    version: null,
+    split: null,
+    sha256: null,
+    benchmark: null,
+  });
+  draft.conditions.push({ id: 'c-1', name: 'Invented condition', baseline: false, params: {} });
+  return draft;
+}
+it('ME-11 shows a missing chain link once', async () => {
+  setup({ draft: measurementDraft() });
+  expect(await screen.findByText('chưa gắn biến phụ thuộc')).toBeInTheDocument();
+  expect(screen.queryByText('h-1 chưa gắn biến phụ thuộc.')).not.toBeInTheDocument();
+});
+it('ME-12 explains empty metric and dataset fields', async () => {
+  setup({ draft: measurementDraft(), url: '/?tab=metrics' });
+  expect((await screen.findByText('chưa có key')).parentElement).toHaveTextContent(
+    'chưa có key · chưa có đơn vị · chưa chọn hướng tốt · chưa chọn cách gộp',
+  );
+  fireEvent.click(screen.getByRole('tab', { name: 'Dataset (1)' }));
+  expect(screen.getByText('Chưa ghi nguồn')).toBeInTheDocument();
+});
+it('ME-13 labels variable details and metric links', async () => {
+  setup({ draft: measurementDraft(), url: '/?tab=variables' });
+  expect(
+    await screen.findByText('Độc lập · Khái niệm: Invented concept · Các mức: A, B'),
+  ).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Metric: m-1 Invented measure' })).toHaveAttribute(
+    'href',
+    '/?tab=metrics',
+  );
+  expect(screen.getByText('Hiệp biến · chưa có metric')).toBeInTheDocument();
+});
+it('ME-14 describes the strongest supported claim', async () => {
+  setup();
+  fireEvent.click(await screen.findByRole('tab', { name: /Metric/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Thêm metric' }));
+  expect(screen.getAllByText(/Nhận định mạnh nhất mà metric tự nó hỗ trợ:/).length).toBeGreaterThan(0);
+  expect(['descriptive', 'comparative', 'inferential', 'invented'].map(claimWord)).toEqual([
+    'mô tả',
+    'so sánh',
+    'suy luận thống kê',
+    'invented',
+  ]);
+});
+it('ME-15 names each deletion and describes the item', async () => {
+  setup({ draft: measurementDraft(), url: '/?tab=datasets' });
+  for (const [tab, title, description] of [
+    ['Dataset (1)', 'Xoá dataset', 'Xoá d-1 «Invented data»?'],
+    ['Điều kiện (1)', 'Xoá điều kiện', 'Xoá c-1 «Invented condition»?'],
+    ['Biến (3)', 'Xoá biến', 'Xoá v-1 «Invented factor»?'],
+  ]) {
+    fireEvent.click(await screen.findByRole('tab', { name: tab }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Xoá' })[0]!);
+    const dialog = screen.getByRole('alertdialog', { name: title, description });
+    expect(within(dialog).getByRole('button', { name: 'Xoá' }).className).toMatch(/danger/);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Hủy' }));
+  }
+});
+it('ME-16 renders each tab label as one text node', async () => {
+  setup({ draft: measurementDraft() });
+  const tab = await screen.findByRole('tab', { name: 'Biến (3)' });
+  expect(tab.childNodes).toHaveLength(1);
+  expect(tab.firstChild?.nodeType).toBe(Node.TEXT_NODE);
 });

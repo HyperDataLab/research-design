@@ -9,8 +9,9 @@ export function MetricsTab({ item, bank }: { item: DraftMetric; bank: BankDoc | 
   return (
     <>
       <p className={styles.quiet}>
-        <span className={styles.mono}>{item.key}</span> · {item.unit} · {word(item.goal)} ·{' '}
-        {word(item.aggregation)}
+        <span className={styles.mono}>{item.key || 'chưa có key'}</span> · {item.unit || 'chưa có đơn vị'} ·{' '}
+        {item.goal ? word(item.goal) : 'chưa chọn hướng tốt'} ·{' '}
+        {item.aggregation ? word(item.aggregation) : 'chưa chọn cách gộp'}
       </p>
       {item.bank && findMetric(bank, item.bank.id)?.status === 'draft' && <Badge>Bản nháp của bank</Badge>}
     </>

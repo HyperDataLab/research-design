@@ -32,3 +32,11 @@ export const words: Record<string, string> = {
   unknown: 'Chưa biết',
 };
 export const word = (value: string | null) => (value ? (words[value] ?? value) : 'Chưa chọn');
+
+export const claimWord = (value: string) =>
+  (
+    ({ descriptive: 'mô tả', comparative: 'so sánh', inferential: 'suy luận thống kê' }) as Record<
+      string,
+      string
+    >
+  )[value] ?? value;

@@ -10,7 +10,7 @@ import { Chip } from '@/shared/ui/Chip';
 import { Drawer } from '@/shared/ui/Drawer';
 import { TextField } from '@/shared/ui/TextField';
 import type { MetricInput } from './MetricDialog';
-import { word } from './words';
+import { claimWord, word } from './words';
 import styles from './Page.module.css';
 
 const blankMetric = (): MetricInput => ({
@@ -90,7 +90,7 @@ export function Pickers({
                   {word(m.family)} · {m.unit || 'không có đơn vị'} · {word(m.direction)}
                 </p>
                 <p>{m.definition.match(/^.*?[.!?](?:\s|$)/)?.[0].trim() ?? m.definition}</p>
-                <p>{m.maxClaim}</p>
+                <p>Nhận định mạnh nhất mà metric tự nó hỗ trợ: {claimWord(m.maxClaim)}</p>
                 {m.doesNotSupport.map((s) => (
                   <p key={s}>Không hỗ trợ: {s}</p>
                 ))}

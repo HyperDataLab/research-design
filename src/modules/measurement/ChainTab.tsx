@@ -43,7 +43,12 @@ export function ChainTab({
         <div className={styles.row} key={h.id}>
           <ChainLine draft={draft} hypothesisId={h.id} projectId={projectId} />
           {checkChain(draft)
-            .filter((f) => f.subject === h.id)
+            .filter(
+              (f) =>
+                f.subject === h.id &&
+                f.rule !== 'CH-01' &&
+                !(f.rule === 'CH-03' && f.which === 'missing' && h.dependent.includes(f.variable)),
+            )
             .map((f, i) => (
               <p key={i}>
                 <Badge tone="warning">Cần xem lại</Badge> {chainFlagText(f, draft)}

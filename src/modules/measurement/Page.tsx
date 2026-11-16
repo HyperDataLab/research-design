@@ -30,7 +30,7 @@ import { Button } from '@/shared/ui/Button';
 import { Dialog } from '@/shared/ui/Dialog';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { Empty, Loading } from '@/shared/ui/StateNote';
-import { Tabs, TabCount } from '@/shared/ui/Tabs';
+import { Tabs } from '@/shared/ui/Tabs';
 import { useToast } from '@/shared/ui/toastContext';
 import { ChainTab } from './ChainTab';
 import { MetricDialog, type MetricInput } from './MetricDialog';
@@ -150,7 +150,7 @@ export default function Page() {
           <Tabs label="Đo lường">
             {(Object.keys(labels) as Tab[]).map((t) => (
               <Button key={t} role="tab" aria-selected={tab === t} onClick={() => setQuery({ tab: t })}>
-                {labels[t]} <TabCount value={counts[t]} />
+                {`${labels[t]} (${new Intl.NumberFormat('vi-VN').format(counts[t])})`}
               </Button>
             ))}
           </Tabs>
@@ -270,12 +270,15 @@ export default function Page() {
         />
       )}
       {deleting && (
-        <Dialog title="Xoá" description="Xác nhận thao tác xoá." onClose={() => setDeleting(null)}>
-          <p>
-            {users(draft, deleting.id).length
+        <Dialog
+          title={`Xoá ${labels[tab].toLocaleLowerCase()}`}
+          description={
+            users(draft, deleting.id).length
               ? `${deleting.id} đang được dùng bởi ${users(draft, deleting.id).join(', ')}. Gỡ liên kết trước khi xoá.`
-              : `Xoá «${deleting.name}»?`}
-          </p>
+              : `Xoá ${deleting.id} «${deleting.name}»?`
+          }
+          onClose={() => setDeleting(null)}
+        >
           <Button onClick={() => setDeleting(null)}>Hủy</Button>
           {!users(draft, deleting.id).length && (
             <Button
