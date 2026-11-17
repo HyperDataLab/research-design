@@ -31,5 +31,6 @@ export function comparisonRows(papers: Paper[], factsByPaperId: Record<string, F
   });
 }
 export function staleModel(doc: FactsDoc, heldModelEtag: string | null): boolean {
-  return heldModelEtag !== null && heldModelEtag !== doc.facts.modelEtag;
+  const normalise = (etag: string) => etag.replace(/^W\//, '').replace(/^"|"$/g, '');
+  return heldModelEtag !== null && normalise(heldModelEtag) !== normalise(doc.facts.modelEtag);
 }

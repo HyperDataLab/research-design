@@ -1,6 +1,7 @@
 import home from '@/modules/home';
 import projects from '@/modules/projects';
 import corpus from '@/modules/corpus';
+import evidence from '@/modules/evidence';
 import bank from '@/modules/bank';
 import questions from '@/modules/questions';
 import design from '@/modules/design';
@@ -16,6 +17,7 @@ export const modules = [
   home,
   projects,
   corpus,
+  evidence,
   bank,
   questions,
   design,

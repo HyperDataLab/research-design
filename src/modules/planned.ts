@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Search, Table2, type LucideIcon } from 'lucide-react';
+import { Search, type LucideIcon } from 'lucide-react';
 import type { ModuleDefinition } from '@/app/moduleTypes';
 
 /**
@@ -35,13 +35,5 @@ export const planned: ModuleDefinition[] = [
     'Tìm bài báo',
     'Chọn trong các bài PaperLab đã công bố, ghi lý do chọn và loại. Tìm và lấy bài mới thực hiện ở PaperLab.',
     Search,
-  ),
-  soon(
-    'evidence',
-    'literature',
-    3,
-    'Bảng so sánh',
-    'Mỗi bài một hàng: task, dataset, baseline, metric, thiết kế, kết quả; mỗi ô dẫn về câu gốc.',
-    Table2,
   ),
 ];
