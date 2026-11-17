@@ -44,3 +44,7 @@
 .table td:first-child {
   min-width: 12rem;
 }
+
+.mono {
+  font-family: var(--font-mono);
+}

@@ -3,6 +3,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import facts from '../../../schemas/vendor/experiment-facts-v1.example.json';
 import model from '../../../schemas/vendor/paper-model-v1.example.json';
+import { snapshot } from '@/core/bank/testSupport';
+import { readSnapshot, toBankDoc } from '@/core/bank/readSnapshot';
 import { addPaper, decide, emptyPapersDoc } from '@/core/papers/papers';
 import { setupClient } from '@/modules/corpus/testSupport';
 import { ApiError } from '@/shared/api/client';
@@ -18,7 +20,18 @@ const missingFacts = {
   ),
 };
 
-function setup(options: { missing?: boolean; second?: boolean; decided?: boolean } = {}) {
+function setup(
+  options: {
+    missing?: boolean;
+    second?: boolean;
+    decided?: boolean;
+    bank?: boolean;
+    matched?: boolean;
+    readOnly?: boolean;
+    counts?: boolean;
+    noOffer?: boolean;
+  } = {},
+) {
   const context = setupClient();
   let papers = emptyPapersDoc();
   for (const [index, id] of ids.entries()) {
@@ -40,19 +53,53 @@ function setup(options: { missing?: boolean; second?: boolean; decided?: boolean
         schemaVersion: 1,
         paperId: id,
         source: { paperlabId: 'p', etag: 'e', fetchedBy: 'person', fetchedAt: '2026-01-01T00:00:00Z' },
-        facts: options.missing && index === 0 ? missingFacts : facts,
+        facts: options.counts
+          ? { ...facts, facts: [...facts.facts, { ...facts.facts[0]!, id: 'fact-4' }] }
+          : options.missing && index === 0
+            ? missingFacts
+            : facts,
+        matches: options.matched
+          ? {
+              'fact-1': {
+                bank: { id: 'met.test-score', release: '2025.01.1' },
+                by: 'person',
+                at: '2026-01-01T00:00:00.000Z',
+              },
+            }
+          : {},
         decisions: options.decided
-          ? { 'fact-1': { decision: 'use', reason: null, by: 'person', at: '2026-01-01T00:00:00.000Z' } }
+          ? {
+              'fact-1': { decision: 'use', reason: null, by: 'person', at: '2026-01-01T00:00:00.000Z' },
+              ...(options.counts
+                ? {
+                    'fact-4': { decision: 'use', reason: null, by: 'person', at: '2026-01-01T00:00:00.000Z' },
+                  }
+                : {}),
+            }
           : {},
       },
     });
     context.items.set(`${context.project.id}/paper-models/${id}`, { etag: '1', data: model });
   }
   context.docs.set(`${context.project.id}/papers`, { data: papers, etag: '1' });
+  if (options.bank) {
+    const parsed = readSnapshot({
+      ...snapshot,
+      collections: {
+        ...snapshot.collections,
+        metrics: [{ ...snapshot.collections.metrics[0]!, aliases: options.noOffer ? [] : ['Accuracy'] }],
+      },
+    });
+    if (!parsed.ok) throw Error('Invalid bank');
+    context.docs.set(`${context.project.id}/bank`, {
+      data: toBankDoc(parsed.file, '2026.01.1', 'person', '2026-01-01T00:00:00.000Z'),
+      etag: '1',
+    });
+  }
   render(
     <MemoryRouter>
       <context.wrapper>
-        <ProjectContext.Provider value={{ project: context.project, readOnly: false }}>
+        <ProjectContext.Provider value={{ project: context.project, readOnly: options.readOnly ?? false }}>
           <ToastProvider>
             <Page />
           </ToastProvider>
@@ -210,4 +257,61 @@ it('lists included papers only', async () => {
   );
   expect(await screen.findByText('Paper 1')).toBeInTheDocument();
   expect(screen.queryByText('Paper 2')).toBeNull();
+});
+
+it('FR-304 offers a match, confirms it with attribution and preserves facts, then removes it', async () => {
+  const context = setup({ bank: true });
+  await openFact('Accuracy');
+  expect(await screen.findByText(/Khớp theo tên: Test score/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Xác nhận' }));
+  await screen.findByRole('button', { name: 'Bỏ khớp' });
+  const written = vi.mocked(context.api.putItem).mock.calls[0]![3] as {
+    facts: typeof facts;
+    matches: Record<string, { bank: { id: string; release: string }; by: string; at: string }>;
+  };
+  expect(written.facts).toEqual(facts);
+  expect(written.matches['fact-1']).toEqual({
+    bank: { id: 'met.test-score', release: '2026.01.1' },
+    by: context.auth.user!.email,
+    at: expect.any(String),
+  });
+  expect(new Date(written.matches['fact-1']!.at).toISOString()).toBe(written.matches['fact-1']!.at);
+  fireEvent.click(screen.getByRole('button', { name: 'Bỏ khớp' }));
+  await waitFor(() => expect(context.api.putItem).toHaveBeenCalledTimes(2));
+  expect(vi.mocked(context.api.putItem).mock.calls[1]![3]).toMatchObject({ matches: {} });
+});
+
+it('FR-304 shows the quiet line when no entry matches', async () => {
+  setup({ bank: true, noOffer: true });
+  await openFact('Accuracy');
+  expect(await screen.findByText('Không có mục trùng tên trong Writing Bank')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Xác nhận' })).not.toBeInTheDocument();
+});
+
+it('FR-304 flags another release and hides match controls for archived projects', async () => {
+  setup({ bank: true, matched: true, readOnly: true });
+  await openFact('Accuracy');
+  expect(await screen.findByText('Khác bản phát hành')).toBeInTheDocument();
+  expect(screen.getByText('met.test-score')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Bỏ khớp' })).not.toBeInTheDocument();
+});
+
+it('FR-304 hides Writing Bank without a snapshot', async () => {
+  setup();
+  await openFact('Accuracy');
+  expect(screen.queryByText('Writing Bank')).not.toBeInTheDocument();
+});
+
+it('FR-305 counts papers once per value and only decisions to use', async () => {
+  setup({ second: true, decided: true, counts: true });
+  const card = (await screen.findByText('Dùng trong nhiều bài')).closest('section')!;
+  expect(within(card).getByText('2 bài')).toBeInTheDocument();
+  expect(within(card).getByText(/Accuracy/)).toBeInTheDocument();
+  expect(within(card).queryByText('Baseline ·')).not.toBeInTheDocument();
+  expect(within(card).getAllByRole('listitem')).toHaveLength(1);
+});
+
+it('FR-305 shows an empty line when no facts are used', async () => {
+  setup();
+  expect(await screen.findByText('Chưa có dữ kiện nào được đặt Dùng')).toBeInTheDocument();
 });

@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { clearDecision, decide, factsDocSchema, type FactsDoc } from '@/core/facts/factsDoc';
+import {
+  clearDecision,
+  clearMatch,
+  confirmMatch,
+  decide,
+  factsDocSchema,
+  type FactsDoc,
+} from '@/core/facts/factsDoc';
+import type { BankDoc } from '@/core/bank/snapshot';
 import { emptyPapersDoc, papersDocSchema, type Paper } from '@/core/papers/papers';
 import { readPaperModel, type PaperModelView } from '@/core/papers/paperModel';
 import { ApiError } from '@/shared/api/client';
@@ -9,7 +17,7 @@ import { useProject } from '@/shared/project/projectContext';
 
 type Item = { doc: FactsDoc; etag: string };
 export type Selection = { paperId: string; factId: string };
-export function useEvidence() {
+export function useEvidence(bank: BankDoc | null) {
   const client = useApi();
   const { project, readOnly } = useProject();
   const { user } = useAuth();
@@ -51,6 +59,29 @@ export function useEvidence() {
     setModels((current) => ({ ...current, [paperId]: parsed.model }));
     return parsed.model;
   };
+  const write = async (
+    id: string,
+    initial: Item,
+    apply: (doc: FactsDoc) => { ok: true; doc: FactsDoc } | { ok: false; error: string },
+  ) => {
+    let item = initial;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const result = apply(item.doc);
+      if (!result.ok) return result;
+      try {
+        const etag = await client.putItem(project.id, 'facts', id, result.doc, item.etag);
+        setItems((current) => ({ ...current, [id]: { doc: result.doc, etag } }));
+        return { ok: true as const };
+      } catch (caught) {
+        if (!(caught instanceof ApiError) || caught.status !== 412) throw caught;
+        if (attempt === 1) return { ok: false as const, error: 'conflict' };
+        const fresh = await client.getItem(project.id, 'facts', id);
+        if (!fresh) return { ok: false as const, error: 'conflict' };
+        item = { doc: factsDocSchema.parse(fresh.data), etag: fresh.etag };
+      }
+    }
+    return { ok: false as const, error: 'conflict' };
+  };
   const change = async (
     selected: Selection[],
     action: 'use' | 'exclude' | 'clear',
@@ -75,30 +106,30 @@ export function useEvidence() {
         prepared.push({ id, ids, item, model });
       }
       for (const entry of prepared) {
-        let item = entry.item;
-        for (let attempt = 0; attempt < 2; attempt++) {
-          const result =
-            action === 'clear'
-              ? clearDecision(item.doc, entry.ids)
-              : decide(item.doc, entry.ids, action, reason, user?.email ?? '', at, entry.model);
-          if (!result.ok) return result;
-          try {
-            const etag = await client.putItem(project.id, 'facts', entry.id, result.doc, item.etag);
-            setItems((current) => ({ ...current, [entry.id]: { doc: result.doc, etag } }));
-            break;
-          } catch (caught) {
-            if (!(caught instanceof ApiError) || caught.status !== 412) throw caught;
-            if (attempt === 1) return { ok: false as const, error: 'conflict' };
-            const fresh = await client.getItem(project.id, 'facts', entry.id);
-            if (!fresh) return { ok: false as const, error: 'conflict' };
-            item = { doc: factsDocSchema.parse(fresh.data), etag: fresh.etag };
-          }
-        }
+        const result = await write(entry.id, entry.item, (doc) =>
+          action === 'clear'
+            ? clearDecision(doc, entry.ids)
+            : decide(doc, entry.ids, action, reason, user?.email ?? '', at, entry.model),
+        );
+        if (!result.ok) return result;
       }
       return { ok: true as const };
     } catch {
       return { ok: false as const, error: 'network' };
     }
   };
-  return { papers, items, models, loading, error, reload, loadModel, change };
+  const match = async (paperId: string, factId: string, bankId: string | null) => {
+    if (readOnly || !items[paperId]) return { ok: false as const, error: 'network' };
+    const at = new Date().toISOString();
+    try {
+      return await write(paperId, items[paperId], (doc) =>
+        bankId === null
+          ? { ok: true, doc: clearMatch(doc, factId) }
+          : confirmMatch(doc, factId, bankId, bank, user?.email ?? '', at),
+      );
+    } catch {
+      return { ok: false as const, error: 'network' };
+    }
+  };
+  return { papers, items, models, loading, error, reload, loadModel, change, match };
 }
