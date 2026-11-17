@@ -85,3 +85,20 @@ describe('paper list', () => {
     expect(read.model.document.metadata).toMatchObject(paperFromModel(read.model));
   });
 });
+
+it('PA-08 reads legacy models and records PaperLab provenance', () => {
+  const metadata = { sourceHash: null, sentences: 1, importedBy: 'a', importedAt: at };
+  const result = attachModel(added(), id, metadata, 'a', at);
+  if (!result.ok) throw Error();
+  const legacy = JSON.parse(JSON.stringify(result.doc)) as { papers: { model: { paperlab?: unknown } }[] };
+  delete legacy.papers[0]?.model.paperlab;
+  expect(papersDocSchema.parse(legacy).papers[0]?.model?.paperlab).toBeNull();
+  const linked = attachModel(
+    added(),
+    id,
+    { ...metadata, paperlab: { paperId: 'id', etag: '"tag"' } },
+    'a',
+    at,
+  );
+  expect(linked.ok && linked.doc.papers[0]?.model?.paperlab).toEqual({ paperId: 'id', etag: '"tag"' });
+});
