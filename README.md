@@ -1,5 +1,8 @@
 # Research Design
 
+> **Status, 2026-11-17:** the owner decided that these features move into PaperLab's Project. No new work starts
+> here. See [docs/HANDOFF.md](docs/HANDOFF.md).
+
 From a set of papers to a frozen experiment plan that Scientific Research Desktop can run.
 HyperDataLab internal. UI in Vietnamese.
 
