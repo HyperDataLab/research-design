@@ -34,5 +34,7 @@ it('FR-303 groups each paper by the fixed kind order, retaining status, source f
 it('FR-301 reports staleness only for a known different model etag', () => {
   expect(staleModel(doc, null)).toBe(false);
   expect(staleModel(doc, facts.modelEtag)).toBe(false);
+  expect(staleModel(doc, `"${facts.modelEtag}"`)).toBe(false);
+  expect(staleModel(doc, `W/"${facts.modelEtag}"`)).toBe(false);
   expect(staleModel(doc, 'different')).toBe(true);
 });
