@@ -1,3 +1,4 @@
+import { SuggestDrawer } from '@/shared/suggest/SuggestDrawer';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { checkChain } from '@/core/draft/checkChain';
@@ -59,6 +60,7 @@ const labels: Record<Tab, string> = {
 };
 export default function Page() {
   const { project, readOnly } = useProject();
+  const [suggestOpen, setSuggestOpen] = useState(false);
   const state = useDraft();
   const bankState = useBank();
   const toast = useToast();
@@ -123,6 +125,10 @@ export default function Page() {
   return (
     <>
       <PageHeader title="Đo lường" lead="Khái niệm, biến, metric, đơn vị, hướng tốt và quy trình đo." />
+      {!readOnly && <Button onClick={() => setSuggestOpen(true)}>Gợi ý từ bảng so sánh</Button>}
+      {suggestOpen && (
+        <SuggestDrawer target="metrics" draft={draft} change={change} close={() => setSuggestOpen(false)} />
+      )}
       {readOnly && <Badge>Đã lưu trữ · chỉ đọc</Badge>}
       {state.loading || bankState.loading ? (
         <Loading />
