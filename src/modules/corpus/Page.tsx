@@ -11,6 +11,7 @@ import { Tabs, TabCount } from '@/shared/ui/Tabs';
 import { TextField } from '@/shared/ui/TextField';
 import { useToast } from '@/shared/ui/toastContext';
 import { AddPaperDialog } from './AddPaperDialog';
+import { PaperLabDialog } from './PaperLabDialog';
 import { PaperRow } from './PaperRow';
 import { counts, decisionLabels, filterPapers, logSentences, type Filter } from './view';
 import { useCorpus } from './useCorpus';
@@ -30,6 +31,7 @@ export default function Page() {
   const toast = useToast();
   const [tab, setTab] = useState<'papers' | 'log'>('papers');
   const [filter, setFilter] = useState<Filter>('all');
+  const [paperlabOpen, setPaperlabOpen] = useState(false);
   const [adding, setAdding] = useState(false);
   const [excluded, setExcluded] = useState<Paper | null>(null);
   const [reason, setReason] = useState('');
@@ -69,6 +71,7 @@ export default function Page() {
             <Button variant="primary" onClick={() => setAdding(true)}>
               Thêm bài báo
             </Button>
+            {corpus.paperlab && <Button onClick={() => setPaperlabOpen(true)}>Thêm từ PaperLab</Button>}
             <Button onClick={() => fileInput.current?.click()}>Nhập paper model</Button>
             <input
               ref={fileInput}
@@ -141,6 +144,33 @@ export default function Page() {
                     key={paper.id}
                     paper={paper}
                     readOnly={readOnly}
+                    hasFacts={corpus.factsIds.includes(paper.id)}
+                    fetchFacts={
+                      corpus.paperlab
+                        ? () => {
+                            void corpus.fetchFacts(paper).then((result) => {
+                              if (result.ok)
+                                toast(
+                                  result.dropped
+                                    ? result.dropped + ' quyết định bị bỏ vì dữ kiện không còn.'
+                                    : 'Đã lấy dữ kiện.',
+                                );
+                              else
+                                toast(
+                                  result.error === 'not_found'
+                                    ? 'PaperLab chưa có dữ kiện cho bài này.'
+                                    : result.error === 'not_experiment_facts'
+                                      ? 'Dữ liệu không phải dữ kiện thí nghiệm.'
+                                      : result.error === 'unsupported_version'
+                                        ? 'Phiên bản dữ kiện không được hỗ trợ.'
+                                        : result.error === 'invalid'
+                                          ? 'Dữ kiện không hợp lệ.'
+                                          : 'Không thể lấy dữ kiện. Vui lòng thử lại.',
+                                );
+                            });
+                          }
+                        : undefined
+                    }
                     decide={(decision) => void changeDecision(paper, decision, null)}
                     exclude={() => {
                       setExcluded(paper);
@@ -161,6 +191,24 @@ export default function Page() {
             </ul>
           )}
         </>
+      )}
+      {paperlabOpen && corpus.paperlab && (
+        <PaperLabDialog
+          client={corpus.paperlab}
+          close={() => setPaperlabOpen(false)}
+          select={async (id) => {
+            const result = await corpus.importPaperLab(id);
+            if (result.ok) {
+              setPaperlabOpen(false);
+              toast('Đã nhập paper model cho «' + result.paper.title + '»');
+            } else
+              toast(
+                result.error === 'too_large'
+                  ? 'Paper model này vượt quá 8 MiB nên chưa lưu được vào dự án.'
+                  : (reasons[result.error] ?? 'Không thể nhập paper model.'),
+              );
+          }}
+        />
       )}
       {adding && <AddPaperDialog close={() => setAdding(false)} add={corpus.add} />}
       {excluded && (

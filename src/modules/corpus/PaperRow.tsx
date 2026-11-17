@@ -8,11 +8,15 @@ export function PaperRow({
   readOnly,
   decide,
   exclude,
+  fetchFacts,
+  hasFacts,
 }: {
   paper: Paper;
   readOnly: boolean;
   decide: (decision: Paper['decision']) => void;
   exclude: () => void;
+  fetchFacts?: () => void;
+  hasFacts?: boolean;
 }) {
   return (
     <div className={styles.row}>
@@ -34,6 +38,11 @@ export function PaperRow({
       {paper.reason && <div>Lý do: {paper.reason}</div>}
       {!readOnly && (
         <div className={styles.actions}>
+          {paper.model?.paperlab && fetchFacts && (
+            <Button variant="ghost" onClick={fetchFacts}>
+              {hasFacts ? 'Cập nhật dữ kiện' : 'Lấy dữ kiện'}
+            </Button>
+          )}
           {paper.decision !== 'included' && (
             <Button variant="ghost" onClick={() => decide('included')}>
               Chọn

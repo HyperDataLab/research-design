@@ -13,6 +13,7 @@ const timestamp = z.iso.datetime();
 const reason = z.string().trim().min(1).nullable();
 const decisionSchema = z.enum(['undecided', 'included', 'excluded']);
 const modelSchema = z.strictObject({
+  paperlab: z.strictObject({ paperId: z.string(), etag: z.string() }).nullable().default(null),
   sourceHash: z.string().nullable(),
   sentences: z.number().int().nonnegative(),
   importedBy: z.string(),
@@ -111,7 +112,9 @@ export function decide(
 export function attachModel(
   doc: PapersDoc,
   paperId: string,
-  model: NonNullable<Paper['model']>,
+  model: Omit<NonNullable<Paper['model']>, 'paperlab'> & {
+    paperlab?: NonNullable<Paper['model']>['paperlab'];
+  },
   who: string,
   at: string,
 ): Result {
@@ -120,7 +123,9 @@ export function attachModel(
     ok: true,
     doc: {
       ...doc,
-      papers: doc.papers.map((paper) => (paper.id === paperId ? { ...paper, model: { ...model } } : paper)),
+      papers: doc.papers.map((paper) =>
+        paper.id === paperId ? { ...paper, model: { ...model, paperlab: model.paperlab ?? null } } : paper,
+      ),
       log: [...doc.log, { at, by: who, paperId, action: 'model_imported', reason: null }],
     },
   };

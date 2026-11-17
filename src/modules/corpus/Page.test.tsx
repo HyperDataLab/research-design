@@ -35,6 +35,7 @@ describe('corpus page', () => {
   it('CO-10 lists papers and filters with counts', async () => {
     setup();
     expect(await screen.findByText('Synthetic paper')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /PaperLab/ })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Đã chọn/ }));
     expect(screen.queryByText('Synthetic paper')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Chưa quyết định/ }));
