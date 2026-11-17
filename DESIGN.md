@@ -29,10 +29,23 @@ navigation and no icon rail: the labels are short and distinct.
 - **Page header**: the screen's name and one line saying what it is for; at most one primary action.
 - **Workspace layout**: from 1100 px a screen with a list and a detail shows them side by side (2 : 3), each
   scrolling on its own. Below that the detail opens in a right drawer.
-- **Comparison table** (Bảng so sánh): one row per paper, one column per question (task, dataset, baseline,
-  metric, design, reported result). The first column stays in view. A cell shows the extracted value; opening it
-  shows the source sentence, its location and the review state. An empty cell says "Không tìm thấy", never a
-  guess.
+- **Comparison table** (Bảng so sánh): one row per included paper, one column per kind of fact in this order:
+  Task, Dataset, Baseline, Phương pháp, Metric, Thiết kế, Mẫu, Kết quả. The first column (the paper's title) stays
+  in view. A cell lists its facts as Chips showing the value as the paper states it; a Chip carries the project's
+  decision as a Badge ("Dùng", or "Loại" in the quiet tone) and facts PaperLab has not reviewed carry the quiet
+  Badge "Chưa duyệt". An empty cell says "Không có", never a guess; the columns Task, Thiết kế and Mẫu say "PaperLab
+  chưa cung cấp" in the header's second line. A paper with no facts shows one quiet line across the row, "Chưa có
+  dữ kiện từ PaperLab", with a text link to Tập bài báo. Facts read for an older paper model show the warning line
+  "Dữ kiện thuộc paper model cũ hơn bản dự án đang giữ." on the row.
+  Opening a Chip shows the fact in a Drawer: the value, then number, unit, uncertainty and condition when present,
+  the metric, dataset and system it belongs to by their values, PaperLab's status in words, and its anchors: each
+  sentence as a Source quote with its page, and a table cell as "Bảng, hàng r, cột c" with the header texts and
+  the table's text in a quiet block. An anchor that is not in the held paper model says "Không tìm thấy trong
+  paper model đang giữ". Under them the decision: who and when, and the buttons "Dùng", "Loại" (asks for a reason
+  in the same Drawer) and "Bỏ quyết định". A fact with no anchor found cannot be set to "Dùng"; the button is
+  disabled with that sentence beside it. Nothing here edits a value.
+  Several facts: a Checkbox on each Chip and an ActionBar "Đã chọn n" with "Dùng" and "Loại"; the action applies to
+  all or to none, and a refusal names the reason in one sentence.
 - **Source quote**: the paper's sentence in the reading face inside a quiet bordered block, followed by the paper
   and location as a text link. The quote is never edited.
 - **Candidate content**: anything the AI produced and nobody approved carries the badge "Đề xuất của AI" and sits
