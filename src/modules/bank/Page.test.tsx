@@ -1,5 +1,5 @@
 import { act, fireEvent, render, renderHook, screen, waitFor, within } from '@testing-library/react';
-import { expect, it, vi } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { snapshot } from '@/core/bank/testSupport';
 import { emptyDraft } from '@/core/draft/schema';
 import { ApiError } from '@/shared/api/client';
@@ -10,6 +10,18 @@ import { ProjectContext } from '@/shared/project/projectContext';
 import { setupClient } from '../corpus/testSupport';
 import Page from './Page';
 import { contentHash } from '@/core/bank/release';
+
+const config = vi.hoisted(() => ({ bankUrl: '' }));
+vi.mock('@/shared/auth/config', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/auth/config')>()),
+  get bankUrl() {
+    return config.bankUrl;
+  },
+}));
+afterEach(() => {
+  config.bankUrl = '';
+  vi.unstubAllGlobals();
+});
 
 function file(text: string, size?: number) {
   const f = new File([text], 'test.json');
@@ -237,5 +249,187 @@ it('D51 shows the hash refusal and does not write the snapshot', async () => {
       'Tệp không khớp mã băm nội dung mà nó tự khai; hãy tải lại bản phát hành từ Writing Bank.',
     ),
   ).toBeInTheDocument();
+  expect(context.api.putDoc).not.toHaveBeenCalled();
+});
+
+it('D53 hides API actions when unconfigured and makes no bank calls on open', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const context = setupClient();
+  render(
+    <context.wrapper>
+      <Page />
+    </context.wrapper>,
+  );
+  await screen.findByText('Chưa có bản chụp');
+  expect(screen.queryByRole('button', { name: 'Kiểm tra bản mới' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Lấy bản mới' })).not.toBeInTheDocument();
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('D31 checks a release only on request without storing it', async () => {
+  config.bankUrl = 'https://bank.example/bank/v1';
+  const response = { release: '2031.02.1', date: '2031-02-01T00:00:00Z', notes: '', includesDrafts: false };
+  const fetcher = vi.fn(async () => new Response(JSON.stringify(response)));
+  vi.stubGlobal('fetch', fetcher);
+  const context = setupClient();
+  vi.mocked(context.auth.getIdToken).mockResolvedValue('token');
+  render(
+    <context.wrapper>
+      <Page />
+    </context.wrapper>,
+  );
+  await screen.findByText('Chưa có bản chụp');
+  expect(fetcher).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: 'Kiểm tra bản mới' }));
+  await screen.findByText('Writing Bank có bản 2031.02.1, phát hành 2031-02-01T00:00:00Z.');
+  expect(context.api.putDoc).not.toHaveBeenCalled();
+});
+
+it('D31 reports when the stored release is current', async () => {
+  config.bankUrl = 'https://bank.example/bank/v1';
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            release: '2031.02.1',
+            date: '2031-02-01T00:00:00Z',
+            notes: '',
+            includesDrafts: false,
+          }),
+        ),
+    ),
+  );
+  const context = setupClient();
+  vi.mocked(context.auth.getIdToken).mockResolvedValue('token');
+  context.docs.set(`${context.project.id}/bank`, {
+    etag: '1',
+    data: {
+      schemaVersion: 1,
+      release: '2031.02.1',
+      source: 'Synthetic',
+      importedBy: 'test',
+      importedAt: '2031-02-01T00:00:00Z',
+      collections: snapshot.collections,
+    },
+  });
+  render(
+    <context.wrapper>
+      <Page />
+    </context.wrapper>,
+  );
+  await screen.findByText('2031.02.1');
+  fireEvent.click(screen.getByRole('button', { name: 'Kiểm tra bản mới' }));
+  await screen.findByText('Dự án đang dùng bản mới nhất (2031.02.1).');
+  expect(context.api.putDoc).not.toHaveBeenCalled();
+});
+
+it('D51 fetch validates a release, refuses missing release and hash mismatch, and handles conflict', async () => {
+  const context = setupClient();
+  const { result } = renderHook(() => useBank(), { wrapper: context.wrapper });
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  const raw = { ...snapshot, release: '2031.02.1' };
+  const valid = { ...raw, contentHash: await contentHash(raw) };
+  await act(async () => {
+    expect(await result.current.fetchSnapshot(async () => snapshot)).toMatchObject({ error: 'invalid' });
+    expect(
+      await result.current.fetchSnapshot(async () => ({ ...raw, contentHash: '0'.repeat(64) })),
+    ).toMatchObject({ error: 'hash_mismatch' });
+    expect(await result.current.fetchSnapshot(async () => ({ ...valid, formatVersion: 99 }))).toMatchObject({
+      error: 'unsupported_version',
+    });
+  });
+  expect(context.api.putDoc).not.toHaveBeenCalled();
+  vi.mocked(context.api.putDoc).mockRejectedValueOnce(new ApiError(412, 'conflict', 'conflict'));
+  await act(async () => {
+    expect(await result.current.fetchSnapshot(async () => valid)).toMatchObject({ error: 'conflict' });
+  });
+  expect(context.api.getDoc).toHaveBeenCalledTimes(2);
+  await act(async () => {
+    expect(await result.current.fetchSnapshot(async () => valid)).toEqual({ ok: true });
+  });
+  expect(result.current.bank?.release).toBe('2031.02.1');
+});
+
+it('D31 confirms a fetched replacement when the draft references the current snapshot', async () => {
+  config.bankUrl = 'https://bank.example/bank/v1';
+  const raw = { ...snapshot, release: '2031.02.1' };
+  const valid = { ...raw, contentHash: await contentHash(raw) };
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => new Response(JSON.stringify(valid))),
+  );
+  const context = setupClient();
+  vi.mocked(context.auth.getIdToken).mockResolvedValue('token');
+  context.docs.set(`${context.project.id}/bank`, {
+    etag: '1',
+    data: {
+      schemaVersion: 1,
+      release: 'sha256:0123456789abcdef',
+      source: 'Synthetic',
+      importedBy: 'test',
+      importedAt: '2031-02-01T00:00:00Z',
+      collections: snapshot.collections,
+    },
+  });
+  context.docs.set(`${context.project.id}/draft`, {
+    etag: '2',
+    data: {
+      ...emptyDraft(),
+      design: {
+        name: 'Test',
+        assignment: null,
+        bank: { id: 'rd.alpha-design', release: 'sha256:0123456789abcdef' },
+      },
+    },
+  });
+  render(
+    <context.wrapper>
+      <Page />
+    </context.wrapper>,
+  );
+  await screen.findByRole('button', { name: 'Lấy bản mới' });
+  fireEvent.click(screen.getByRole('button', { name: 'Lấy bản mới' }));
+  const dialog = await screen.findByRole('alertdialog');
+  expect(context.api.putDoc).not.toHaveBeenCalled();
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Thay bản chụp' }));
+  await waitFor(() =>
+    expect(context.api.putDoc).toHaveBeenCalledWith(
+      context.project.id,
+      'bank',
+      expect.objectContaining({ release: '2031.02.1' }),
+      '1',
+    ),
+  );
+});
+
+it.each([
+  [401, 'Writing Bank chưa chấp nhận tài khoản của ứng dụng này.'],
+  [403, 'Writing Bank chưa chấp nhận tài khoản của ứng dụng này.'],
+  [429, 'Writing Bank đang giới hạn số lần gọi; thử lại sau.'],
+  [0, 'Không thể nhập bản chụp. Vui lòng thử lại.'],
+])('D53 shows bank error %s for both actions', async (status, message) => {
+  config.bankUrl = 'https://bank.example/bank/v1';
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => {
+      if (!status) throw new Error('offline');
+      return new Response(JSON.stringify({ error: 'error', message: 'Error' }), { status });
+    }),
+  );
+  const context = setupClient();
+  vi.mocked(context.auth.getIdToken).mockResolvedValue('token');
+  render(
+    <context.wrapper>
+      <Page />
+    </context.wrapper>,
+  );
+  await screen.findByText('Chưa có bản chụp');
+  fireEvent.click(screen.getByRole('button', { name: 'Kiểm tra bản mới' }));
+  await screen.findByText(message);
+  fireEvent.click(screen.getByRole('button', { name: 'Lấy bản mới' }));
+  await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent(message));
   expect(context.api.putDoc).not.toHaveBeenCalled();
 });
