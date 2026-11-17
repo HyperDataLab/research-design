@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { findBenchmark, findMetric } from '@/core/bank/readSnapshot';
+import { usage } from '@/core/facts/usage';
+import { useBank } from '@/shared/bank/useBank';
+import { Card } from '@/shared/ui/Card';
 import { comparisonRows, staleModel } from '@/core/facts/view';
 import { useProject } from '@/shared/project/projectContext';
 import { Badge } from '@/shared/ui/Badge';
@@ -17,7 +21,8 @@ import styles from './Page.module.css';
 const labels = ['Task', 'Dataset', 'Baseline', 'Phương pháp', 'Metric', 'Thiết kế', 'Mẫu', 'Kết quả'];
 export default function Page() {
   const { project, readOnly } = useProject();
-  const state = useEvidence();
+  const { bank } = useBank();
+  const state = useEvidence(bank);
   const toast = useToast();
   const [opened, setOpened] = useState<Selection | null>(null);
   const [selected, setSelected] = useState<Selection[]>([]);
@@ -41,10 +46,9 @@ export default function Page() {
             : 'Không lưu được. Kiểm tra kết nối rồi thử lại.',
     );
   };
-  const rows = comparisonRows(
-    state.papers,
-    Object.fromEntries(Object.entries(state.items).map(([id, item]) => [id, item.doc])),
-  );
+  const docs = Object.fromEntries(Object.entries(state.items).map(([id, item]) => [id, item.doc]));
+  const rows = comparisonRows(state.papers, docs);
+  const counts = usage(state.papers, docs, bank);
   const paper = state.papers.find((entry) => entry.id === opened?.paperId);
   const doc = opened && state.items[opened.paperId]?.doc;
   const fact = doc?.facts.facts.find((entry) => entry.id === opened?.factId);
@@ -173,6 +177,31 @@ export default function Page() {
               </tbody>
             </table>
           </div>
+          <Card>
+            <div className={styles.stack}>
+              <h2>Dùng trong nhiều bài</h2>
+              {Object.values(counts).every((list) => list.length === 0) ? (
+                <p className={styles.quiet}>Chưa có dữ kiện nào được đặt Dùng</p>
+              ) : (
+                (['baseline', 'dataset', 'metric'] as const).map((kind) => (
+                  <div key={kind}>
+                    <h3>{kind === 'baseline' ? 'Baseline' : kind === 'dataset' ? 'Dataset' : 'Metric'}</h3>
+                    <ul>
+                      {counts[kind].map((row) => (
+                        <li key={row.key}>
+                          {row.label}{' '}
+                          {row.bankId &&
+                            (findMetric(bank, row.bankId) ?? findBenchmark(bank, row.bankId))?.status ===
+                              'draft' && <Badge>Bản nháp</Badge>}{' '}
+                          · <span className={styles.mono}>{row.papers.length} bài</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
         </div>
       )}
       {opened && paper && doc && fact && (
@@ -184,6 +213,17 @@ export default function Page() {
           model={state.models[paper.id]}
           projectId={project.id}
           readOnly={readOnly}
+          bank={bank}
+          match={(id) =>
+            void state.match(opened.paperId, opened.factId, id).then((result) => {
+              if (!result.ok)
+                toast(
+                  result.error === 'conflict'
+                    ? 'Dữ kiện vừa được người khác thay đổi; hãy thử lại.'
+                    : 'Không lưu được. Kiểm tra kết nối rồi thử lại.',
+                );
+            })
+          }
           close={() => setOpened(null)}
           change={(action, input) => void run([opened], action, input)}
         />
