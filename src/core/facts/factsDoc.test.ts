@@ -2,6 +2,8 @@ import example from '../../../schemas/vendor/experiment-facts-v1.example.json';
 import type { PaperModelView } from '../papers/paperModel';
 import type { ExperimentFactsView } from './experimentFacts';
 import { clearDecision, decide, factsDocSchema, replaceFacts, type FactsDoc } from './factsDoc';
+import { clearMatch, confirmMatch } from './factsDoc';
+import { bankDocSchema } from '../bank/snapshot';
 
 const facts = structuredClone(example) as ExperimentFactsView;
 const source = {
@@ -32,6 +34,51 @@ it('FR-303 validates a strict stored document and reason equivalence', () => {
     false,
   );
   expect(factsDocSchema.safeParse({ ...doc, facts: {} }).success).toBe(false);
+});
+
+it('FR-304 defaults legacy matches and confirms only offered entries without editing facts', () => {
+  expect(factsDocSchema.parse(doc).matches).toEqual({});
+  const synthetic = {
+    ...doc,
+    facts: { ...facts, facts: [{ ...facts.facts[0]!, kind: 'metric' as const, value: 'Alpha Score' }] },
+  };
+  const bank = bankDocSchema.parse({
+    schemaVersion: 1,
+    release: '2026.01.1',
+    source: '',
+    importedBy: 'person',
+    importedAt: at,
+    collections: {
+      designs: [],
+      threats: [],
+      'claim-types': [],
+      metrics: [
+        { id: 'met.alpha', name: 'Alpha Score', family: '', definition: '', direction: 'descriptive' },
+      ],
+    },
+  });
+  expect(confirmMatch(synthetic, 'absent', 'met.alpha', bank, 'person', at)).toEqual({
+    ok: false,
+    error: 'unknown_fact',
+  });
+  expect(confirmMatch(synthetic, synthetic.facts.facts[0]!.id, 'met.other', bank, 'person', at)).toEqual({
+    ok: false,
+    error: 'not_offered',
+  });
+  const result = confirmMatch(synthetic, synthetic.facts.facts[0]!.id, 'met.alpha', bank, 'person', at);
+  expect(result.ok).toBe(true);
+  if (!result.ok) return;
+  const id = synthetic.facts.facts[0]!.id;
+  expect(result.doc.matches?.[id]).toEqual({
+    bank: { id: 'met.alpha', release: bank.release },
+    by: 'person',
+    at,
+  });
+  expect(result.doc.facts).toBe(synthetic.facts);
+  expect(clearMatch(result.doc, id).matches).toEqual({});
+  const replaced = replaceFacts(result.doc, { ...synthetic.facts, facts: [] }, source);
+  expect(replaced.droppedMatches).toEqual([id]);
+  expect(replaced.doc.matches).toEqual({});
 });
 it('FR-302 and FR-303 reject a batch atomically for unknown, unanchored, or unexplained facts', () => {
   expect(decide(doc, ['fact-1', 'unknown'], 'use', null, 'person', at, model)).toEqual({

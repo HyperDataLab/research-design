@@ -2,6 +2,8 @@ import { z } from 'zod';
 import type { PaperModelView } from '../papers/paperModel';
 import { resolveAnchors } from './anchors';
 import { readExperimentFacts, type ExperimentFactsView } from './experimentFacts';
+import type { BankDoc } from '../bank/snapshot';
+import { offerMatches } from './match';
 
 const sourceSchema = z.strictObject({
   paperlabId: z.string(),
@@ -28,8 +30,18 @@ export const factsDocSchema = z.strictObject({
   source: sourceSchema,
   facts: factsSchema,
   decisions: z.record(z.string(), decisionSchema),
+  matches: z
+    .record(
+      z.string(),
+      z.strictObject({
+        bank: z.strictObject({ id: z.string(), release: z.string() }),
+        by: z.string(),
+        at: z.iso.datetime(),
+      }),
+    )
+    .default({}),
 });
-export type FactsDoc = z.infer<typeof factsDocSchema>;
+export type FactsDoc = z.input<typeof factsDocSchema>;
 export type FactsSource = z.infer<typeof sourceSchema>;
 type Result =
   { ok: true; doc: FactsDoc } | { ok: false; error: 'unknown_fact' | 'reason_required' | 'not_anchored' };
@@ -70,9 +82,38 @@ export function replaceFacts(
   doc: FactsDoc,
   facts: ExperimentFactsView,
   source: FactsSource,
-): { ok: true; doc: FactsDoc; dropped: string[] } {
+): { ok: true; doc: FactsDoc; dropped: string[]; droppedMatches: string[] } {
   const ids = new Set(facts.facts.map((fact) => fact.id));
   const dropped = Object.keys(doc.decisions).filter((id) => !ids.has(id));
   const decisions = Object.fromEntries(Object.entries(doc.decisions).filter(([id]) => ids.has(id)));
-  return { ok: true, doc: { ...doc, facts, source, decisions }, dropped };
+  const droppedMatches = Object.keys(doc.matches ?? {}).filter((id) => !ids.has(id));
+  const matches = Object.fromEntries(Object.entries(doc.matches ?? {}).filter(([id]) => ids.has(id)));
+  return { ok: true, doc: { ...doc, facts, source, decisions, matches }, dropped, droppedMatches };
+}
+
+export function confirmMatch(
+  doc: FactsDoc,
+  factId: string,
+  bankId: string,
+  bank: BankDoc | null,
+  who: string,
+  at: string,
+): { ok: true; doc: FactsDoc } | { ok: false; error: 'unknown_fact' | 'not_offered' } {
+  const fact = doc.facts.facts.find((item) => item.id === factId);
+  if (!fact) return { ok: false, error: 'unknown_fact' };
+  if (!bank || !offerMatches(fact, bank).some((offer) => offer.id === bankId))
+    return { ok: false, error: 'not_offered' };
+  return {
+    ok: true,
+    doc: {
+      ...doc,
+      matches: { ...doc.matches, [factId]: { bank: { id: bankId, release: bank.release }, by: who, at } },
+    },
+  };
+}
+
+export function clearMatch(doc: FactsDoc, factId: string): FactsDoc {
+  const matches = { ...doc.matches };
+  delete matches[factId];
+  return { ...doc, matches };
 }
