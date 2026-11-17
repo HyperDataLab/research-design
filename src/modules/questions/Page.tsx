@@ -1,3 +1,4 @@
+import { SuggestDrawer } from '@/shared/suggest/SuggestDrawer';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { checkDesign } from '@/core/draft/checkDesign';
@@ -59,6 +60,7 @@ type Deletion = { type: 'question' | 'hypothesis'; id: string };
 
 export default function Page() {
   const { project, readOnly } = useProject();
+  const [suggestOpen, setSuggestOpen] = useState(false);
   const client = useApi();
   const draft = useDraft();
   const bank = useBank();
@@ -145,6 +147,15 @@ export default function Page() {
             </Button>
           )}
       </PageHeader>
+      {!readOnly && <Button onClick={() => setSuggestOpen(true)}>Gợi ý từ bảng so sánh</Button>}
+      {suggestOpen && (
+        <SuggestDrawer
+          target="hypotheses"
+          draft={draft.draft}
+          change={change}
+          close={() => setSuggestOpen(false)}
+        />
+      )}
       {readOnly && <Badge>Đã lưu trữ · chỉ đọc</Badge>}
       {loading || draft.loading || bank.loading ? (
         <Loading />

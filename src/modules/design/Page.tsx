@@ -1,3 +1,4 @@
+import { SuggestDrawer } from '@/shared/suggest/SuggestDrawer';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { findClaimType, findDesign, findThreat } from '@/core/bank/readSnapshot';
@@ -32,6 +33,7 @@ import styles from './Page.module.css';
 
 export default function Page() {
   const { project, readOnly } = useProject();
+  const [suggestOpen, setSuggestOpen] = useState(false);
   const draftState = useDraft();
   const bankState = useBank();
   const { draft } = draftState;
@@ -62,6 +64,10 @@ export default function Page() {
         title="Thiết kế nghiên cứu"
         lead="Chọn thiết kế, xem nó cho phép kết luận gì, ghi mối đe doạ và cách giảm."
       />
+      {!readOnly && <Button onClick={() => setSuggestOpen(true)}>Gợi ý từ bảng so sánh</Button>}
+      {suggestOpen && (
+        <SuggestDrawer target="threats" draft={draft} change={change} close={() => setSuggestOpen(false)} />
+      )}
       {readOnly && <Badge>Đã lưu trữ · chỉ đọc</Badge>}
       {draftState.loading || bankState.loading ? (
         <Loading />

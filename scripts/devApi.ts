@@ -14,8 +14,26 @@ const fakeRouter: typeof fetch = async (_input, init) => {
     messages?: { content: string }[];
   };
   const prompt = (body.messages ?? []).map((message) => message.content).join('');
+  let content = 'OK';
+  const user = (body.messages ?? []).find(
+    (message) => message.content.includes('"facts"') && message.content.includes('"ref"'),
+  );
+  if (user) {
+    const parsed = JSON.parse(user.content) as { facts: { ref: string }[] };
+    const refs = parsed.facts.map((fact) => fact.ref);
+    if (refs[0])
+      content = JSON.stringify({
+        suggestions: [
+          { text: 'Consider this fact in the plan.', cites: [refs[0]] },
+          {
+            text: 'Consider another planning option.',
+            cites: [refs[1] ?? refs[0], 'p-ffffffffffff/unknown'],
+          },
+        ],
+      });
+  }
   return Response.json({
-    choices: [{ message: { role: 'assistant', content: 'OK' }, finish_reason: 'stop' }],
+    choices: [{ message: { role: 'assistant', content }, finish_reason: 'stop' }],
     usage: { prompt_tokens: estimateTokens(prompt), completion_tokens: 1 },
   });
 };
