@@ -141,7 +141,7 @@ file. PaperLab's Worker keeps PDFs and GROBID output, not paper models. So this 
 **PaperLab would keep a finished paper model on its server**, published by the person in charge of that paper.
 Until then this app keeps importing the file.
 
-State on 2026-11-17: B1 and B2 are merged in PaperLab (its Worker, and a "Công bố lên máy chủ lab" button in its app) and the `paperlab-experiment-facts` v1 contract is published and vendored here (`schemas/vendor/experiment-facts-v1.schema.json`). B3 is merged there too; B4 is deferred. PaperLab's Worker is not deployed; the bank's API is live but does not accept this app's tokens yet. Reading from this app waits for the owner's decision on callers and for PaperLab's deploy.
+State on 2026-11-17: B1 and B2 are merged in PaperLab (its Worker, and a "Công bố lên máy chủ lab" button in its app) and the `paperlab-experiment-facts` v1 contract is published and vendored here (`schemas/vendor/experiment-facts-v1.schema.json`). B3 is merged there too; B4 is deferred. Both APIs are live (the bank's and PaperLab's Worker), and neither accepts this app's tokens yet; PaperLab's store has no published paper. Reading from this app waits for the owner's decision on callers and for PaperLab's deploy.
 
 ### B1. `GET /v1/papers`
 

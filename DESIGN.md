@@ -44,8 +44,22 @@ navigation and no icon rail: the labels are short and distinct.
   paper model đang giữ". Under them the decision: who and when, and the buttons "Dùng", "Loại" (asks for a reason
   in the same Drawer) and "Bỏ quyết định". A fact with no anchor found cannot be set to "Dùng"; the button is
   disabled with that sentence beside it. Nothing here edits a value.
+  Bank match (metric and dataset facts, when the project has a bank snapshot): the Drawer shows "Writing Bank" with
+  either the confirmed entry (name, id in the mono face, release, and "Bỏ khớp"), or the entries offered by exact
+  name ("Khớp theo tên: …" with the button "Xác nhận"), or the quiet line "Không có mục trùng tên trong Writing Bank".
+  A match pinned to another release carries the warning Badge "Khác bản phát hành".
+  Under the table, a Card "Dùng trong nhiều bài" with three lists (Baseline, Dataset, Metric): each line is the value
+  (or the bank entry's name when matched) and "n bài" in the mono face, most papers first; only facts decided "Dùng"
+  count. With none: the quiet line "Chưa có dữ kiện nào được đặt Dùng".
   Several facts: a Checkbox on each Chip and an ActionBar "Đã chọn n" with "Dùng" and "Loại"; the action applies to
   all or to none, and a refusal names the reason in one sentence.
+- **AI suggestions** (Câu hỏi và giả thuyết, Đo lường, Thiết kế nghiên cứu): a secondary button "Gợi ý từ bảng so sánh"
+  opens a Drawer. Before any call it states "Sẽ gửi n dữ kiện đã đặt Dùng (loại, giá trị, tên bài) cùng câu hỏi và giả
+  thuyết của dự án. Không gửi câu trích hay nội dung Writing Bank." and the primary button "Gửi và nhận gợi ý"; with no
+  such fact the button is absent and the line reads "Chưa có dữ kiện nào được đặt Dùng." Without consent or over budget
+  the Consent gate sentences apply. Each suggestion is a Card: the text, the Badge "Gợi ý của AI", and the facts it
+  cites as Chips (value · paper title) that open the fact in Bảng so sánh. Buttons "Thêm vào bản nháp" and "Bỏ qua".
+  Suggestions are not stored; closing the Drawer discards them.
 - **Source quote**: the paper's sentence in the reading face inside a quiet bordered block, followed by the paper
   and location as a text link. The quote is never edited.
 - **Candidate content**: anything the AI produced and nobody approved carries the badge "Đề xuất của AI" and sits
