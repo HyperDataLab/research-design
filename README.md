@@ -1,7 +1,8 @@
 # Research Design
 
-> **Status, 2026-11-17:** the owner decided that these features move into PaperLab's Project. No new work starts
-> here. See [docs/HANDOFF.md](docs/HANDOFF.md).
+> **Moved, 2026-11-17:** these features now live in PaperLab Projects (repository `HyperDataLab/paper-lab`, plan and
+> status in its `docs/plans/RESEARCH_DESIGN_MIGRATION.md`). The owner decided this app is not built out on its own;
+> no new work starts here. What the port was told: [docs/HANDOFF.md](docs/HANDOFF.md).
 
 From a set of papers to a frozen experiment plan that Scientific Research Desktop can run.
 HyperDataLab internal. UI in Vietnamese.
